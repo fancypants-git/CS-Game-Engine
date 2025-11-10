@@ -9,46 +9,66 @@ public static class Debug
         Error,
         Fatal,
         Exit,
-        Launch
+        Launch,
+        Debug
     }
-    public static void LogAs(LogType type, params object[] messages)
+
+    public static bool PRINT_LOG_WARNINGS = true;
+
+    public static void LogPrefixed(string type, params object[] messages)
     {
-        string typeStr = "";
+        if (type.Length > 5 && PRINT_LOG_WARNINGS)
+            LogPrefixed("DEV",
+                "For readability, keep [type] of LogPrefixed(type, messages) shorter than 6 characters.");
 
-        switch (type)
-        {
-            case LogType.Info:
-                typeStr = "INFO";
-                break;
-            case LogType.Warning:
-                typeStr = "WARN";
-                break;
-            case LogType.Error:
-                typeStr = "ERROR";
-                break;
-            case LogType.Fatal:
-                typeStr = "FATAL";
-                break;
-            case LogType.Exit:
-                typeStr = "EXIT";
-                break;
-            case LogType.Launch:
-                typeStr = "START";
-                break;
-            defualt:
-                typeStr = "UKNWN";
-                break;
-        }
-        
-        string timeString = DateTime.Now.ToString("HH:mm:ss");
-        
-        Console.Write("[ " + typeStr + " ] " + "[ " + timeString + " ]" + "  >> ");
+        var timeString = DateTime.Now.ToString("HH:mm:ss");
 
-        foreach (var msg in messages)
-        {
-            Console.Write(msg + " ");
-        }
-        
+        Console.Write($"[ {type} ]".PadRight(6+4+2) + $"[ {timeString} ]  >> ");
+
+        foreach (var msg in messages) Console.Write(msg + " ");
+
         Console.WriteLine();
+    }
+
+    public static void LogPrefixed(LogType type, params object[] messages)
+    {
+        var typeStr = type switch
+        {
+            LogType.Info => "INFO",
+            LogType.Warning => "WARN",
+            LogType.Error => "ERROR",
+            LogType.Fatal => "FATAL",
+            LogType.Launch => "START",
+            LogType.Exit => "EXIT",
+            LogType.Debug => "DEBUG",
+            _ => "UNKWN"
+        };
+
+        LogPrefixed(typeStr, messages);
+    }
+
+    public static void Log(params object[] messages)
+    {
+        LogPrefixed(LogType.Info, messages);
+    }
+
+    public static void LogDebug(params object[] messages)
+    {
+        LogPrefixed(LogType.Debug, messages);
+    }
+
+    public static void LogWarn(params object[] messages)
+    {
+        LogPrefixed(LogType.Warning, messages);
+    }
+
+    public static void LogError(params object[] messages)
+    {
+        LogPrefixed(LogType.Error, messages);
+    }
+
+    public static void LogFatal(params object[] messages)
+    {
+        LogPrefixed(LogType.Fatal, messages);
     }
 }

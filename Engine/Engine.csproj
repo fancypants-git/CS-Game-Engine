@@ -8,7 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenTK" Version="5.0.0-pre.15" />
+        <PackageReference Include="OpenTK" Version="5.0.0-pre.15"/>
+        <PackageReference Include="StbImageSharp" Version="2.30.15" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Resources/**/*" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
 </Project>
