@@ -46,7 +46,7 @@ public class Entity : IDisposable
         _components.Add(component);
     }
 
-    public T GetComponent<T>(bool includeDisabled = false) where T : Component
+    public T? GetComponent<T>(bool includeDisabled = false) where T : Component
     {
         foreach (var component in _components)
         {
@@ -85,7 +85,7 @@ public class Entity : IDisposable
     {
         if (_isDisposed) return;
         
+        Debug.LogMemLeak("Entity");
         Dispose(false);
-        Debug.LogWarn("Memory leak detected in Entity instance! Did not call Dispose().");
     }
 }

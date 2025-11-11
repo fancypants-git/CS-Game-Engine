@@ -43,7 +43,9 @@ public class ElementBufferObject : IDisposable
 
     ~ElementBufferObject()
     {
-        Debug.LogWarn("Memory leak detected in ElementBufferObject instance! Did not call Dispose().");
+        if (_isDisposed) return;
+        
+        Debug.LogMemLeak("ElementBufferObject");
         Dispose(false);
     }
 }

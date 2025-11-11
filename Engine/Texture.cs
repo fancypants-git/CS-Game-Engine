@@ -24,8 +24,7 @@ public class Texture : IDisposable
         }
         catch (Exception e)
         {
-            Debug.LogError("Error loading image:", path, "|", e.Message);
-            Console.WriteLine(e);
+            Debug.LogError("Error loading image:", path, "|", e.Message, '\n', e);
             Dispose();
         }
 
@@ -83,7 +82,7 @@ public class Texture : IDisposable
     {
         if (_isDisposed) return;
         
-        Debug.LogWarn("Memory leak detected in Texture instance! Did not call Dispose().");
+        Debug.LogMemLeak("Texture");
         Dispose(false);
     }
 }

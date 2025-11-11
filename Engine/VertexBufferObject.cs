@@ -46,7 +46,7 @@ public class VertexBufferObject : IDisposable
     {
         if (_isDisposed) return;
 
-        Debug.LogWarn("Memory leak detected in VertexBufferObject instance! Did not call Dispose().");
+        Debug.LogMemLeak("VertexBufferObject");
         Dispose(false);
     }
 }

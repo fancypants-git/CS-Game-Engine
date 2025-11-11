@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 
 namespace Engine;
 
@@ -61,6 +62,7 @@ public class Shader : IDisposable
     public void Uniform1i(string name, int value) => GL.Uniform1i(GetUniformLocation(name), value);
     public void Uniform2i(string name, int a, int b) => GL.Uniform2i(GetUniformLocation(name), a, b);
     public void Uniform3i(string name, int a, int b, int c) => GL.Uniform3i(GetUniformLocation(name), a, b, c);
+    public void UniformMat4(string name, bool transpose, Matrix4 value) => GL.UniformMatrix4f(GetUniformLocation(name), 1, transpose, ref value);
 
     
     public bool ReportShaderCompileStatus(int shader)
@@ -69,8 +71,7 @@ public class Shader : IDisposable
         if (success == 0)
         {
             GL.GetShaderInfoLog(shader, out var log);
-            Debug.LogError("Failed to Compile Shader:", shader);
-            Console.WriteLine(log);
+            Debug.LogError("Failed to Compile Shader:", shader, '\n', log);
         }
 
         return success == 1;
@@ -82,8 +83,7 @@ public class Shader : IDisposable
         if (success == 0)
         {
             GL.GetProgramInfoLog(program, out var log);
-            Debug.LogError("Failed to Link Program:", program);
-            Console.WriteLine(log);
+            Debug.LogError("Failed to Link Program:", program, '\n', log);
         }
 
         return success == 1;
@@ -109,7 +109,7 @@ public class Shader : IDisposable
     {
         if (_isDisposed) return;
 
-        Debug.LogWarn("Memory leak detected in Shader instance! Did not call Dispose().");
+        Debug.LogMemLeak("Shader");
         Dispose(false);
     }
 }

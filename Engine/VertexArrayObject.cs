@@ -48,7 +48,7 @@ public class VertexArrayObject : IDisposable
     {
         if (_isDisposed) return;
 
-        Debug.LogWarn("Memory leak detected in VertexArrayObject instance! Did not call Dispose().");
+        Debug.LogMemLeak("VertexArrayObject");
         Dispose(false);
     }
 }

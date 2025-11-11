@@ -23,7 +23,7 @@ public static class Debug
 
         var timeString = DateTime.Now.ToString("HH:mm:ss");
 
-        Console.Write($"[ {type} ]".PadRight(6+4+2) + $"[ {timeString} ]  >> ");
+        Console.Write($"[ {type} ]".PadRight(12) + $"[ {timeString} ]  >> ");
 
         foreach (var msg in messages) Console.Write(msg + " ");
 
@@ -70,5 +70,10 @@ public static class Debug
     public static void LogFatal(params object[] messages)
     {
         LogPrefixed(LogType.Fatal, messages);
+    }
+
+    public static void LogMemLeak(string name, params object[] messages)
+    {
+        LogPrefixed("LEAK", $"Memory leak detected in {name} instance! Did not call Dispose().\n\t", messages);
     }
 }
