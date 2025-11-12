@@ -6,7 +6,7 @@ public class VertexArrayObject : IDisposable
 {
     public readonly int Handle;
 
-    private bool _isDisposed;
+    private bool _isDisposed = false;
 
     public VertexArrayObject()
     {

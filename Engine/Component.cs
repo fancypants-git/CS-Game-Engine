@@ -9,7 +9,7 @@ public class Component : IDisposable
     public Entity Parent;
     public Transform Transform { get; }
 
-    protected bool _isDisposed;
+    protected bool _isDisposed = false;
 
     public Component(Entity parent)
     {

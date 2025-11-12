@@ -10,7 +10,7 @@ public class Entity : IDisposable
 
     protected List<Component> _components;
 
-    protected bool _isDisposed;
+    protected bool _isDisposed = false;
 
     public Entity()
     {

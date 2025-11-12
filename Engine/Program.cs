@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -37,14 +38,10 @@ public class Window : GameWindow
         try
         {
             shader = new Shader(Resources.GetPath("Shaders/shader.vert"), Resources.GetPath("Shaders/shader.frag"));
-            shader.Use();
-            shader.Uniform3f("color", 1, 1, 1);
-
             texture = new Texture(Resources.GetPath("Textures/wall.jpg"), true);
 
             cube = new Entity();
-            // cube.transform.Position = new Vector3(-.5f, .5f, 0);
-            var r = new Renderer(cube, shader, texture);
+            var r = new Renderer(cube, shader, texture, Color.Yellow);
             cube.AddComponent(r);
 
             camera = new Entity();
@@ -88,11 +85,11 @@ public class Window : GameWindow
                 camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Right);
             if (KeyboardState.IsKeyDown(Keys.Space))
                 camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Up);
-
+            
             if (KeyboardState.IsKeyDown(Keys.LeftShift))
                 camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Up);
-
-
+            
+            
             var x = (float)(args.Time * 300);
             var y = (float)(Math.Sqrt(args.Time) * 2f);
             var z = (float)(Math.Sin(args.Time) * 1);

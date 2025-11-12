@@ -7,7 +7,7 @@ public class VertexBufferObject : IDisposable
 {
     public readonly int Handle;
 
-    private bool _isDisposed;
+    private bool _isDisposed = false;
 
     public VertexBufferObject()
     {

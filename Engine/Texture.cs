@@ -10,7 +10,7 @@ public class Texture : IDisposable
     public int Width { get; private set; }
     public int Height { get; private set; }
 
-    private bool _isDisposed;
+    private bool _isDisposed = false;
 
     public Texture(string path, bool generateMipmaps)
     {
@@ -35,6 +35,7 @@ public class Texture : IDisposable
 
         Handle = GL.GenTexture();
         Use();
+        GL.ActiveTexture(TextureUnit.Texture0);
         
         GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
         

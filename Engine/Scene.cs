@@ -23,7 +23,7 @@ public class Scene(string name) : IDisposable
     private SceneState _defaultState = new SceneState() { Entities = [], Drawables = [] };
 
 
-    private bool _isDisposed;
+    private bool _isDisposed = false;
 
 
     public void AddEntity(Entity entity)

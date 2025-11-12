@@ -1,3 +1,4 @@
+using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics.Vulkan;
 
@@ -5,6 +6,10 @@ namespace Engine;
 
 public class Renderer : Component, IDrawable
 {
+	// TODO Add a MaterialPropertyBlock system (like Unity) so multiple renderers can share a material but override a few properties (e.g., color).
+	// TODO Add a RendererType distinction later (MeshRenderer, SkinnedMeshRenderer, SpriteRenderer, etc.).
+	// TODO Add batching logic later based on shared Mesh and Material.
+	
 	private static float[] cubeVertices = [
 		// Front face
 		-0.5f, -0.5f,  0.5f,   0.0f, 0.0f,   0.0f,  0.0f,  1.0f, // Bottom-left
@@ -52,82 +57,85 @@ public class Renderer : Component, IDrawable
 		16, 17, 18, 18, 19, 16, // Bottom
 		20, 21, 22, 22, 23, 20 // Top
     ];
+	
+    public Material[] Materials { get; set; }
+    public Mesh Mesh { get; set; }
 
-    
-    protected VertexArrayObject Vao;
-    protected VertexBufferObject Vbo;
-    protected ElementBufferObject? Ebo;
-
-    public Shader Shader;
-    public Texture? Texture;
-
-    public Renderer(Entity parent) : base(parent)
+    public Renderer(Entity parent) : base(parent) // default constructor
     {
-        Shader = new Shader(Resources.GetPath("Shaders/shader.vert"), Resources.GetPath("Shaders/shader.frag"));
-        Texture = null;
-        
-        Initialize();
+	    Materials = [
+		    new Material
+		    {
+			    Shader = new Shader(Resources.GetPath("Shaders/shader.vert"), Resources.GetPath("Shaders/shader.frag")),
+			    Texture = null,
+			    Color = Color.White
+		    }
+	    ];
+	    
+	    Mesh = new Mesh(cubeVertices, cubeIndices);
+	    var stride = 8 * sizeof(float);
+	    Mesh.VertexArrayObject.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
+	    Mesh.VertexArrayObject.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
+	    Mesh.VertexArrayObject.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
     }
 
-    public Renderer(Entity parent, Shader? shader, Texture? texture) : base(parent)
+    public Renderer(Entity parent, Shader? shader, Texture? texture, Color? color) : base(parent)
     {
 	    shader ??= new Shader(Resources.GetPath("Shaders/shader.vert"), Resources.GetPath("Shaders/shader.frag"));
-	    Shader = shader;
-	    Texture = texture;
-
-	    Initialize();
+	    color ??= Color.White;
+	    
+	    Materials = [
+		    new Material
+		    {
+			    Shader = shader,
+			    Texture = texture,
+			    Color = (Color)color
+		    }
+	    ];
+	    
+	    Mesh = new Mesh(cubeVertices, cubeIndices);
+	    var stride = 8 * sizeof(float);
+	    Mesh.VertexArrayObject.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
+	    Mesh.VertexArrayObject.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
+	    Mesh.VertexArrayObject.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
     }
-
-    protected void Initialize()
-    {
-	    Vao = new VertexArrayObject();
-	    Vao.Use();
-	    Vbo = new VertexBufferObject();
-	    Vbo.Upload(cubeVertices, BufferUsage.StaticDraw);
-	    Ebo = new ElementBufferObject();
-	    Ebo.Upload(cubeIndices, BufferUsage.StaticDraw);
-
-	    const int stride = 8 * sizeof(float);
-	    Vao.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-	    Vao.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
-	    Vao.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
-    }
-
+	
     public void Draw(Camera camera)
     {
-	    Vao.Use();
-	    Shader.Use();
-	    Shader.UniformMat4("model", false, Transform.ModelMatrix);
-	    Shader.UniformMat4("camera", false, camera.View * camera.Projection);
-	    Texture?.Use();
+	    if (Mesh.Submeshes.Length == 0)
+	    {
+		    GL.DrawArrays(PrimitiveType.Triangles, 0, Mesh.Submeshes.Length);
+		    return;
+	    }
 	    
-	    if (Ebo != null)
-		    GL.DrawElements(PrimitiveType.Triangles, cubeIndices.Length, DrawElementsType.UnsignedInt, 0);
-	    else
-		    GL.DrawArrays(PrimitiveType.Triangles, 0, cubeVertices.Length / 8);
+	    for (int i = 0; i < Mesh.Submeshes.Length; i++)
+	    {
+		    var mat = Materials[i];
+		    mat.Use();
+		    mat.Shader.UniformMat4("model", false, Transform.ModelMatrix);
+		    mat.Shader.UniformMat4("camera", false, camera.View * camera.Projection);
+		    mat.Shader.Uniform3f("color", mat.Color.R / 255, mat.Color.G / 255, mat.Color.B / 255);
+		    mat.Shader.Uniform1i("texture0", 0);
+		    Mesh.DrawSubmesh(i);
+	    }
     }
 
 
-    
     protected override void Dispose(bool disposing)
     {
 	    if (_isDisposed) return;
-
+	    
 	    if (disposing)
 	    {
-		    GL.BindVertexArray(0);
-		    Vao.Dispose();
-		    Vbo.Dispose();
-		    Ebo?.Dispose();
-		    Shader.Dispose();
-		    Texture?.Dispose();
+		    for (int i = 0; i < Materials.Length; i++)
+			    Materials[i].Dispose();
+
+		    Mesh.Dispose();
 	    }
-	    
-	    SceneManager.ActiveScene.RemoveDrawable(this);
 	    
 	    _isDisposed = true;
     }
-    
+
     ~Renderer()
     {
 	    if (_isDisposed) return;

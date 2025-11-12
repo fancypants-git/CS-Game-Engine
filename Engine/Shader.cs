@@ -7,7 +7,7 @@ public class Shader : IDisposable
 {
     public readonly int Handle;
 
-    private bool _isDisposed;
+    private bool _isDisposed = false;
 
     public Shader(string vertPath, string fragPath)
     {
@@ -59,6 +59,8 @@ public class Shader : IDisposable
     public void Uniform1f(string name, float value) => GL.Uniform1f(GetUniformLocation(name), value);
     public void Uniform2f(string name, float a, float b) => GL.Uniform2f(GetUniformLocation(name), a, b);
     public void Uniform3f(string name, float a, float b, float c) => GL.Uniform3f(GetUniformLocation(name), a, b, c);
+    public void Uniform2fv(string name, Vector2 value) => GL.Uniform2f(GetUniformLocation(name), value.X, value.Y);
+    public void Uniform3fv(string name, Vector3 value) => GL.Uniform3f(GetUniformLocation(name), value.X, value.Y, value.Z);
     public void Uniform1i(string name, int value) => GL.Uniform1i(GetUniformLocation(name), value);
     public void Uniform2i(string name, int a, int b) => GL.Uniform2i(GetUniformLocation(name), a, b);
     public void Uniform3i(string name, int a, int b, int c) => GL.Uniform3i(GetUniformLocation(name), a, b, c);
