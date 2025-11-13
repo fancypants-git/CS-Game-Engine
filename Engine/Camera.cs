@@ -5,7 +5,7 @@ namespace Engine;
 
 public class Camera : Component
 {
-    public static Camera Main => SceneManager.MainCamera;
+    public static Camera Main => SceneManager.ActiveCamera;
 
     public enum CameraType
     {

@@ -1,44 +1,56 @@
-﻿namespace Engine;
+﻿using OpenTK.Graphics.Vulkan;
 
-public class Scene(string name) : IDisposable
+namespace Engine;
+
+public class Scene : IDisposable
 {
-    public readonly string Name = name;
+    public readonly string Name;
+    private string _path;
+    public Camera ActiveCamera { get; set; }
     
-    public struct SceneState
-    {
-        public List<Entity> Entities;
-        public List<IDrawable> Drawables;
 
-        public void CopyTo(SceneState state)
-        {
-            state.Entities.Clear();
-            state.Entities.AddRange(Entities);
-            
-            state.Drawables.Clear();
-            state.Drawables.AddRange(Drawables);
-        }
-    }
-
-    private SceneState _currentState = new SceneState() { Entities = [], Drawables = [] };
-    private SceneState _defaultState = new SceneState() { Entities = [], Drawables = [] };
+    private List<Entity> _entities = [];
+    private List<IDrawable> _drawables = [];
 
 
     private bool _isDisposed = false;
 
 
+    /// <summary>
+    /// Called when creating a scene from path
+    /// </summary>
+    /// <param name="data">the data for this scene</param>
+    /// <returns></returns>
+    public static Scene CreateFromData(SceneData data)
+    {
+        var scene = new Scene(data.Name);
+        scene._path = data.Path;
+
+        scene._entities = data.Entities;
+        scene._drawables = data.Drawables;
+        
+        return scene;
+    }
+
+    public Scene(string name)
+    {
+        Name = name;
+    }
+
+
     public void AddEntity(Entity entity)
     {
-        _currentState.Entities.Add(entity);
+        _entities.Add(entity);
     }
 
     public void RemoveEntity(Entity entity)
     {
-        _currentState.Entities.Remove(entity);
+        _entities.Remove(entity);
     }
 
     public Entity GetEntity(int index)
     {
-        return _currentState.Entities[index];
+        return _entities[index];
     }
 
     public void AddDrawable(Entity drawable)
@@ -46,12 +58,12 @@ public class Scene(string name) : IDisposable
         var renderer = drawable.GetComponent<Renderer>(true);
         
         if (renderer != null)
-            _currentState.Drawables.Add(renderer);
+            _drawables.Add(renderer);
     }
 
     public void AddDrawable<T>(T drawable) where T : IDrawable
     {
-        _currentState.Drawables.Add(drawable);
+        _drawables.Add(drawable);
     }
 
     public void RemoveDrawable(Entity drawable)
@@ -59,34 +71,50 @@ public class Scene(string name) : IDisposable
         var renderer = drawable.GetComponent<Renderer>(true);
         
         if (renderer != null)
-            _currentState.Drawables.Remove(renderer);
+            _drawables.Remove(renderer);
     }
 
     public void RemoveDrawable<T>(T drawable) where T : IDrawable
     {
-        _currentState.Drawables.Remove(drawable);
+        _drawables.Remove(drawable);
     }
 
     public IDrawable GetDrawable(int index)
     {
-        return _currentState.Drawables[index];
+        return _drawables[index];
     }
 
+    
+    /// <summary>
+    /// Should only be called when creating a scene from code after all initial entities have been added.<br/>
+    /// This method writes the scene's current data to a .scene file in the Temp/Scenes folder to allow resetting this scene.
+    /// </summary>
     public void Initialize()
     {
-        _currentState.CopyTo(_defaultState);
+        _path = Resources.GetPath("Temp", "Scenes", Name + ".scene");
+        var data = new SceneData() {
+            Name = Name,
+            Path = _path,
+            Entities = _entities,
+            Drawables = _drawables,
+            ActiveCamera = ActiveCamera
+        };
+        Resources.WriteSceneData(data);
     }
 
     public void Reset()
     {
-        _defaultState.CopyTo(_currentState);
+        var sceneData = Resources.GetSceneData(_path);
+        _entities = sceneData.Entities;
+        _drawables = sceneData.Drawables;
+        ActiveCamera = sceneData.ActiveCamera;
     }
 
     public void EarlyUpdate()
     {
         try
         {
-            foreach (var entity in _currentState.Entities)
+            foreach (var entity in _entities)
                 entity.EarlyUpdate();
         }
         catch (Exception e)
@@ -99,7 +127,7 @@ public class Scene(string name) : IDisposable
     {
         try
         {
-            foreach (var entity in _currentState.Entities)
+            foreach (var entity in _entities)
                 entity.Update();
         }
         catch (Exception e)
@@ -110,7 +138,7 @@ public class Scene(string name) : IDisposable
 
     public void Render()
     {
-        SceneManager.MainCamera.Render(_currentState.Drawables);
+        ActiveCamera.Render(_drawables);
     }
 
 
@@ -120,14 +148,14 @@ public class Scene(string name) : IDisposable
 
         if (disposing)
         {
-            var entities = new Entity[_currentState.Entities.Count];
-            _currentState.Entities.CopyTo(entities);
+            var entities = new Entity[_entities.Count];
+            _entities.CopyTo(entities);
             foreach (var entity in entities)
                 entity.Dispose();
         }
 
-        _currentState.Entities.Clear();
-        _currentState.Drawables.Clear();
+        _entities.Clear();
+        _drawables.Clear();
 
         SceneManager.ActivateScene(null);
         

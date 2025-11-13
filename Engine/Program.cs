@@ -11,12 +11,10 @@ namespace Engine;
 
 public class Window : GameWindow
 {
-    // TODO implement Scene
-    private Shader shader;
-    private Texture texture;
+    private Scene scene1;
+    private Scene scene2;
     private Entity cube;
-    private Entity camera;
-
+    
     public Window(int width, int height, string title)
         : base(GameWindowSettings.Default, new NativeWindowSettings
         {
@@ -37,27 +35,47 @@ public class Window : GameWindow
 
         try
         {
-            shader = new Shader(Resources.GetPath("Shaders/default.vert"), Resources.GetPath("Shaders/default.frag"));
-            texture = new Texture(Resources.GetPath("Textures/wall.jpg"), true);
+            var shader = Resources.GetShader("default");
+            var texture = new Texture(Resources.GetPath("Textures/wall.jpg"), true);
+
+            // Scene 1
+            scene1 = new Scene("Scene 1");
 
             cube = new Entity();
-            var r = new Renderer(cube, shader, texture, Color.Yellow);
+            var r = new Renderer(cube, shader, texture, null);
             cube.AddComponent(r);
 
-            camera = new Entity();
-            var c = new Camera(camera, Camera.CameraType.Perspective, 0.1f, 100f, 90f);
+            var camera = new Entity();
+            var c = new Camera(camera, Camera.CameraType.Perspective, 0.1f, 100f, fovy: 90f);
             camera.AddComponent(c);
-            camera.Transform.Position = new Vector3(0, 0, -5);
-            SceneManager.SetMainCamera(c);
             c.SetViewportSize(ClientSize.X, ClientSize.Y);
-            c.Update();
-
-            var scene = new Scene("Example Scene");
-            SceneManager.ActivateScene(scene);
-            scene.AddEntity(cube);
-            scene.AddEntity(camera);
-            scene.AddDrawable(r);
-            scene.Initialize();
+            
+            scene1.AddEntity(cube);
+            scene1.AddEntity(camera);
+            scene1.AddDrawable(r);
+            scene1.ActiveCamera = c;
+            scene1.Initialize();
+            
+            // Scene 2
+            scene2 = new Scene("Scene 2");
+            
+            var cube2 = new Entity();
+            cube2.Transform.Translate(0, 0, 5);
+            var r2 = new Renderer(cube2, shader, null, Color.DarkGreen);
+            cube2.AddComponent(r2);
+            
+            var camera2 = new Entity();
+            var c2 = new Camera(camera2, Camera.CameraType.Perspective, 0.1f, 100, fovy: 30);
+            camera2.AddComponent(c2);
+            c2.SetViewportSize(ClientSize.X, ClientSize.Y);
+            
+            scene2.AddEntity(cube2);
+            scene2.AddEntity(camera2);
+            scene2.AddDrawable(r2);
+            scene2.ActiveCamera = c2;
+            scene2.Initialize();
+            
+            SceneManager.ActivateScene(scene1);
         }
         catch (Exception ex)
         {
@@ -74,26 +92,26 @@ public class Window : GameWindow
         {
             SceneManager.ActiveScene?.EarlyUpdate();
 
-            const float speed = 3;
-            if (KeyboardState.IsKeyDown(Keys.W))
-                camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Forwards);
-            if (KeyboardState.IsKeyDown(Keys.S))
-                camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Forwards);
-            if (KeyboardState.IsKeyDown(Keys.D))
-                camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Right);
-            if (KeyboardState.IsKeyDown(Keys.A))
-                camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Right);
-            if (KeyboardState.IsKeyDown(Keys.Space))
-                camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Up);
-            
-            if (KeyboardState.IsKeyDown(Keys.LeftShift))
-                camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Up);
-            
-            
-            var x = (float)(args.Time * 300);
-            var y = (float)(Math.Sqrt(args.Time) * 2f);
-            var z = (float)(Math.Sin(args.Time) * 1);
-            cube.Transform.Rotate(x, y, z);
+            // const float speed = 3;
+            // if (KeyboardState.IsKeyDown(Keys.W))
+            //     camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Forwards);
+            // if (KeyboardState.IsKeyDown(Keys.S))
+            //     camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Forwards);
+            // if (KeyboardState.IsKeyDown(Keys.D))
+            //     camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Right);
+            // if (KeyboardState.IsKeyDown(Keys.A))
+            //     camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Right);
+            // if (KeyboardState.IsKeyDown(Keys.Space))
+            //     camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Up);
+            //
+            // if (KeyboardState.IsKeyDown(Keys.LeftShift))
+            //     camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Up);
+            //
+            //
+            // var x = (float)(args.Time * 300);
+            // var y = (float)(Math.Sqrt(args.Time) * 2f);
+            // var z = (float)(Math.Sin(args.Time) * 1);
+            // cube.Transform.Rotate(x, y, z);
             
             SceneManager.ActiveScene?.Update();
             
@@ -102,6 +120,24 @@ public class Window : GameWindow
                 Debug.LogPrefixed(Debug.LogType.Exit, "Exiting Due to Escape Press");
                 Close();
             }
+
+            if (KeyboardState.IsKeyPressed(Keys.Tab))
+            {
+                Debug.LogInfo("Switching scene!!");
+                switch (SceneManager.ActiveScene?.Name)
+                {
+                    case "Scene 1":
+                        SceneManager.ActivateScene(scene2);
+                        break;
+                    case "Scene 2":
+                        SceneManager.ActivateScene(scene1);
+                        break;
+                }
+                
+                SceneManager.ActiveCamera.SetViewportSize(ClientSize.X, ClientSize.Y);
+            }
+            
+            cube.Transform.Translate(0, 0, 2 * (float)args.Time);
         }
         catch (Exception ex)
         {
@@ -135,7 +171,7 @@ public class Window : GameWindow
 
         GL.Viewport(0, 0, e.Width, e.Height);
         
-        SceneManager.MainCamera.SetViewportSize(e.Width, e.Height);
+        SceneManager.ActiveCamera.SetViewportSize(e.Width, e.Height);
     }
 
 
@@ -145,9 +181,6 @@ public class Window : GameWindow
 
         try
         {
-            cube.Unload();
-            camera.Unload();
-
             Debug.LogInfo("Disposing Objects");
 
             SceneManager.ActiveScene.Dispose();

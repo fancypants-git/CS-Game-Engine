@@ -8,11 +8,28 @@ public static class Resources
         
         if (Path.Exists(path)) return path;
         
-        return Path.Combine(Directory.GetCurrentDirectory(), "Resources");
+        return Path.Combine(Directory.GetCurrentDirectory(), "Resources", path);
     }
 
 
-    public static Mesh? LoadMesh(string path)
+    public static Scene GetScene(string path)
+    {
+        var data = SceneLoader.LoadSceneData(path);
+        return Scene.CreateFromData(data);
+    }
+
+    public static SceneData GetSceneData(string path)
+    {
+        return SceneLoader.LoadSceneData(path);
+    }
+
+    public static void WriteSceneData(SceneData data)
+    {
+        SceneLoader.WriteSceneData(data);
+    }
+
+
+    public static Mesh? GetMesh(string path)
     {
         path = GetPath(path); // make sure 'path' is a global path
 

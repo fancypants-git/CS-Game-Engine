@@ -3,17 +3,17 @@
 public static class SceneManager
 {
     public static Scene ActiveScene { get; private set; }
-    public static Camera MainCamera { get; private set; }
+    public static Camera ActiveCamera => ActiveScene?.ActiveCamera;
 
 
     public static void SetMainCamera(Camera camera)
     {
-        MainCamera = camera;
+        ActiveScene.ActiveCamera = camera;
     }
 
-    public static void ActivateScene(Scene? scene)
+    public static void ActivateScene(Scene? scene, bool reset = true)
     {
         ActiveScene = scene;
-        scene?.Reset();
+        if (reset) scene?.Reset();
     }
 }
