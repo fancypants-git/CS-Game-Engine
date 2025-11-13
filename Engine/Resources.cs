@@ -2,11 +2,13 @@ namespace Engine;
 
 public static class Resources
 {
-    public static string GetPath(string relativePath)
+    public static string GetPath(params string[] relativePath)
     {
-        if (Path.Exists(relativePath)) return relativePath;
+        var path = Path.Combine(relativePath);
         
-        return Path.Combine(Directory.GetCurrentDirectory(), "Resources", relativePath);
+        if (Path.Exists(path)) return path;
+        
+        return Path.Combine(Directory.GetCurrentDirectory(), "Resources");
     }
 
 
@@ -21,5 +23,14 @@ public static class Resources
         }
 
         throw new NotImplementedException("Mesh Loading from File is not yet implemented.");
+    }
+
+
+    public static Shader GetShader(string name)
+    {
+        var vertPath = GetPath("Shaders", name + ".vert");
+        var fragPath = GetPath("Shaders", name + ".frag");
+        
+        return new Shader(vertPath, fragPath);
     }
 }

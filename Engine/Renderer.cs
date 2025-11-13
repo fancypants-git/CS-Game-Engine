@@ -66,7 +66,7 @@ public class Renderer : Component, IDrawable
 	    Materials = [
 		    new Material
 		    {
-			    Shader = new Shader(Resources.GetPath("Shaders/shader.vert"), Resources.GetPath("Shaders/shader.frag")),
+			    Shader = Resources.GetShader("default"),
 			    Texture = null,
 			    Color = Color.White
 		    }
@@ -81,7 +81,7 @@ public class Renderer : Component, IDrawable
 
     public Renderer(Entity parent, Shader? shader, Texture? texture, Color? color) : base(parent)
     {
-	    shader ??= new Shader(Resources.GetPath("Shaders/shader.vert"), Resources.GetPath("Shaders/shader.frag"));
+	    shader ??= Resources.GetShader("default");
 	    color ??= Color.White;
 	    
 	    Materials = [
@@ -98,6 +98,12 @@ public class Renderer : Component, IDrawable
 	    Mesh.VertexArrayObject.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
 	    Mesh.VertexArrayObject.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
 	    Mesh.VertexArrayObject.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
+    }
+
+    public Renderer(Entity parent, Mesh mesh, Material[] materials) : base(parent)
+    {
+	    Materials = materials;
+	    Mesh = mesh;
     }
 	
     public void Draw(Camera camera)

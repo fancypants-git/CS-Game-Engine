@@ -37,7 +37,7 @@ public class Window : GameWindow
 
         try
         {
-            shader = new Shader(Resources.GetPath("Shaders/shader.vert"), Resources.GetPath("Shaders/shader.frag"));
+            shader = new Shader(Resources.GetPath("Shaders/default.vert"), Resources.GetPath("Shaders/default.frag"));
             texture = new Texture(Resources.GetPath("Textures/wall.jpg"), true);
 
             cube = new Entity();
