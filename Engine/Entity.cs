@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using System.Reflection;
+using OpenTK.Mathematics;
 
 namespace Engine;
 
@@ -76,9 +77,22 @@ public class Entity : IDisposable
 
 
 
-    public void AddComponent(Component component)
+    public void AddComponent<T>(T component) where T : Component
     {
-        _components.Add(component);
+        // check if it has the DisallowMultiple attribute
+        var attrib = (DisallowMultipleAttribute[])component.GetType().Assembly.GetCustomAttributes(typeof(DisallowMultipleAttribute), false);
+        if (attrib.Length == 1) // has a DisallowMultiple attribute
+        {
+            if (attrib[0].OverrideIfExists)
+            {
+                _components.Add(component);
+                // TODO remove the component type from the entity
+            }
+        }
+        else // doesn't have DisallowMultiple attribute so it can always be added
+        {
+            _components.Add(component);
+        }
     }
 
     public T? GetComponent<T>(bool includeDisabled = false) where T : Component
@@ -103,6 +117,15 @@ public class Entity : IDisposable
     public void RemoveComponent(Component component)
     {
         _components.Remove(component);
+    }
+    
+    public void RemoveComponent<T>() where T : Component
+    {
+        foreach (var component in _components)
+        {
+            if (component is T c)
+                RemoveComponent(c);
+        }
     }
 
 

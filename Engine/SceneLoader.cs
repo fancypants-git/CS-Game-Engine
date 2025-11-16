@@ -99,6 +99,16 @@ internal static class SceneLoader
                     break;
             }
         }
+        
+        if (currentEntity != null)
+            data.Entities.Add(currentEntity);
+        
+        Debug.Log("Entities:", data.Entities.Count, "Drawables:", data.Drawables.Count);
+
+        foreach (var e in data.Entities)
+        {
+            Debug.Log("Entity:", e.Id);
+        }
 
         return data;
     }

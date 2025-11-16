@@ -24,18 +24,15 @@ public class Window : GameWindow
     {
         base.OnLoad();
 
-        GL.ClearColor(0.4f, 0.2f, 0.5f, 1.0f);
+        GL.ClearColor(0,0,0, 1.0f);
 
         GL.Enable(EnableCap.DepthTest);
         GL.DepthFunc(DepthFunction.Less);
 
-        var scene = Scene.CreateFromData(Resources.GetSceneData("Scenes/Example.scene"));
-        Debug.Log(scene);
-        SceneManager.ActivateScene(scene, true);
-
         try
         {
-            
+            var scene = Resources.GetScene("Scenes/Example.scene");
+            SceneManager.ActivateScene(scene);
         }
         catch (Exception ex)
         {
@@ -125,7 +122,7 @@ public class Window : GameWindow
         {
             Debug.LogInfo("Disposing Objects");
 
-            // SceneManager.ActiveScene.Dispose();
+            SceneManager.ActiveScene.Dispose();
 
             Debug.LogInfo("Finished Disposing Objects");
         }

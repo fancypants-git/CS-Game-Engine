@@ -4,6 +4,7 @@ using OpenTK.Mathematics;
 namespace Engine;
 
 [ComponentMeta("Transform")]
+[DisallowMultiple(true)]
 public class Transform : Component
 {
     private Vector3 _position;

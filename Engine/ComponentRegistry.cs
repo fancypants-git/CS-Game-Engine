@@ -21,7 +21,7 @@ internal static class ComponentRegistry
             if (!typeof(Component).IsAssignableFrom(type)) // if a variable of type Component can be assigned to of a type 'type'
                 continue;
             
-            var meta = type.GetCustomAttribute<ComponentMetaAttribute>(); // get the ComponentMeta data assigned to the type
+            var meta = type.GetCustomAttribute<ComponentMetaAttribute>(false); // get the ComponentMeta data assigned to the type
             if (meta != null)
             {
                 components[meta.Name] = type;
