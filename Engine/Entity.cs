@@ -80,12 +80,11 @@ public class Entity : IDisposable
     public T AddComponent<T>(T component) where T : Component
     {
         // check if it has the DisallowMultiple attribute
-        var attrib = (DisallowMultipleAttribute[])component.GetType().Assembly.GetCustomAttributes(typeof(DisallowMultipleAttribute), false);
+        var attrib = (DisallowMultipleAttribute[])component.GetType().GetCustomAttributes(typeof(DisallowMultipleAttribute), true);
         if (attrib.Length == 1) // has a DisallowMultiple attribute
         {
             if (attrib[0].OverrideIfExists)
             {
-                _components.Add(component);
                 RemoveComponent<T>();
             }
             else
@@ -93,14 +92,10 @@ public class Entity : IDisposable
                 var c = GetComponent<T>(true);
                 if (c != null)
                     return c;
-            
-                _components.Add(component);
             }
         }
-        else // doesn't have DisallowMultiple attribute so it can always be added
-        {
-            _components.Add(component);
-        }
+        
+        _components.Add(component);
 
         return component;
     }

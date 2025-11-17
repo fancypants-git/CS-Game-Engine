@@ -2,15 +2,17 @@ namespace Engine;
 
 public class PlayerController : Component
 {
-    public float speed = 2.5f;
+    public float Speed;
 
-    public PlayerController(Entity parent) : base(parent)
+    public PlayerController(Entity parent, float speed) : base(parent)
     {
+        Speed = speed;
     }
 
     public override void Update()
     {
         base.Update();
         
+        // TODO implement Time.deltaTime etc.
     }
 }

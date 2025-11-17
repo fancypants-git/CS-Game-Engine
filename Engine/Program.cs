@@ -139,7 +139,7 @@ internal static class Launch
 {
     private static void Main(string[] args)
     {
-        Debug.PRINT_ONLY_DEBUG = false;
+        Debug.PRINT_ONLY_DEBUG = true;
         
         Debug.LogPrefixed(Debug.LogType.Launch, "Launching Program, Creating Window");
         

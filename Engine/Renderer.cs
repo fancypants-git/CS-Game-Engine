@@ -121,6 +121,10 @@ public class Renderer : Component, IDrawable
     public Renderer(Entity parent, Mesh mesh, Material[] materials) : base(parent)
     {
 	    Materials = materials;
+	    for (int i = 0; i < materials.Length; i++)
+	    {
+		    materials[i].Shader = Resources.GetShader("default");
+	    }
 	    Mesh = mesh;
     }
 
