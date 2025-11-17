@@ -6,10 +6,12 @@ in vec3 normal;
 
 uniform vec3 color;
 uniform sampler2D texture0;
+uniform bool useTexture;
 
 void main()
 {
-    FragColor = texture(texture0, texCoord) * vec4(color, 1.0f);
-//    FragColor = vec4(abs(texCoord), 0.0f, 1.0f);
-//    FragColor = vec4(normal, 1.0f);
+    if (useTexture)
+        FragColor = texture(texture0, texCoord) * vec4(color, 1.0f);
+    else
+        FragColor = vec4(color, 1.0f);
 }

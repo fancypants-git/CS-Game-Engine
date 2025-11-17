@@ -68,7 +68,7 @@ internal static class MeshLoader
                     if (usingMaterial)
                     {
                         resultMaterials.Add(usedMaterial);
-                        resultSubmeshes.Add(new Submesh(startIndex, (int)(resultIndices.Count - startIndex)));
+                        resultSubmeshes.Add(new Submesh(startIndex, resultIndices.Count - startIndex));
                         
                         startIndex = resultIndices.Count;
                     }

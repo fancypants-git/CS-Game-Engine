@@ -1,4 +1,5 @@
 using System.Drawing;
+using OpenTK.Graphics.OpenGLES2;
 
 namespace Engine;
 
@@ -24,7 +25,10 @@ public struct Material : IDisposable
     public void Use()
     {
         Shader.Use();
-        Texture?.Use();
+        if (Texture != null)
+            Texture.Use();
+        else
+            GL.BindTexture(TextureTarget.Texture2d, 0);
     }
 
     public void Dispose()

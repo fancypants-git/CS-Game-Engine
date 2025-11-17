@@ -8,8 +8,6 @@ public static class Resources
         
         if (Path.Exists(path)) return path;
         
-        Debug.Log(Path.Combine(Directory.GetCurrentDirectory(), "Resources", path));
-        
         return Path.Combine(Directory.GetCurrentDirectory(), "Resources", path);
     }
 
