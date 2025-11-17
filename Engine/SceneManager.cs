@@ -14,6 +14,6 @@ public static class SceneManager
     public static void ActivateScene(Scene? scene, bool reset = true)
     {
         ActiveScene = scene;
-        if (reset) scene?.Reset();
+        if (reset) ActiveScene?.Reset();
     }
 }

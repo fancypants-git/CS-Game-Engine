@@ -1,4 +1,5 @@
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.Vulkan;
 
 namespace Engine;
 
@@ -50,26 +51,39 @@ public struct Mesh : IDisposable
     public Mesh(Vertex[] vertices, uint[]? indices)
     {
         _vertices = vertices;
-
-        VertexArrayObject.Use();
-        VertexBufferObject.Upload(vertices, BufferUsage.StaticDraw);
+        _indices = indices;
 
         if (indices != null)
-        {
-            ElementBufferObject = new ElementBufferObject();
-            ElementBufferObject.Upload(indices, BufferUsage.StaticDraw);
             Submeshes = [new Submesh(0, indices.Length)];
-        }
         else Submeshes = [];
+        
+        Initialize();
     }
-    public Mesh(Vertex[] vertices, Submesh[] submeshes)
+    public Mesh(Vertex[] vertices, uint[] indices, Submesh[] submeshes)
     {
         _vertices = vertices;
-        
-        VertexArrayObject.Use();
-        VertexBufferObject.Upload(vertices, BufferUsage.StaticDraw);
+        _indices = indices;
         
         Submeshes = submeshes;
+
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        VertexArrayObject.Use();
+        VertexBufferObject.Upload(_vertices, BufferUsage.StaticDraw);
+
+        if (_indices != null)
+        {
+            ElementBufferObject = new ElementBufferObject();
+            ElementBufferObject.Upload(_indices, BufferUsage.StaticDraw);
+        }
+
+        const int stride = 8 * sizeof(float);
+        VertexArrayObject.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
+        VertexArrayObject.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
+        VertexArrayObject.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, stride, 6 * sizeof(float));
     }
 
     public void Use()
@@ -81,7 +95,7 @@ public struct Mesh : IDisposable
     {
         var sub = Submeshes[index];
         Use();
-        GL.DrawElements(PrimitiveType.Triangles, sub.IndexCount, DrawElementsType.UnsignedInt, sub.IndexStart * sizeof(uint));
+        GL.DrawElements(PrimitiveType.Triangles, sub.IndexCount, DrawElementsType.UnsignedInt, sub.IndexStart);
     }
     
     public void Dispose()

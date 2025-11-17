@@ -27,7 +27,7 @@ internal static class MeshLoader
         List<Vector2> textureCoordinates = [];
 
         List<Vertex> resultVertices = [];
-        List<int> resultIndices = [];
+        List<uint> resultIndices = [];
         List<Material> resultMaterials = [];
         List<Submesh> resultSubmeshes = [];
 
@@ -50,7 +50,7 @@ internal static class MeshLoader
             var match = Regex.Match(l, pattern, RegexOptions.IgnorePatternWhitespace);
             if (!match.Success)
             {
-                Debug.Log("Failed to decode line");
+                Debug.LogWarn("Failed to decode line");
                 continue;
             }
             
@@ -93,50 +93,53 @@ internal static class MeshLoader
                 
                 // face command
                 case "f":
-                    var matches = Regex.Matches(match.Groups["rest"].Value, @"[(?<v>\d+)[/(?<vt>\d*)]?[/(?<vn>\d*)]?]{3,}",
-                        RegexOptions.IgnorePatternWhitespace);
-
-                    var facesSTR = matches.Select(m => new string[] {
-                        m.Groups["v"].Value,
-                        m.Groups["vt"].Value,
-                        m.Groups["vn"].Value
-                    }).ToArray();
+                    var facesSTR = match.Groups["rest"].Value
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(item =>
+                        {
+                            var parts = item.Split('/');
+                            return (
+                                v:  parts[0],
+                                vt: parts.Length > 1 ? parts[1] : "",
+                                vn: parts.Length > 2 ? parts[2] : ""
+                            );
+                        })
+                        .ToArray();
 
                     List<Vertex> faces = [];
                     
                     foreach (var face in facesSTR)
                     {
-                        var v = int.Parse(face[0]);
+                        var v = int.Parse(face.v);
                         Vector3 vertexNormal;
                         Vector2 textureCoord;
-                        textureCoord = int.TryParse(face[1], out var vt)
+                        textureCoord = int.TryParse(face.vt, out var vt)
                             ? textureCoordinates[vt - 1]
                             : new Vector2(0);
-                        vertexNormal = int.TryParse(face[2], out var vn)
+                        vertexNormal = int.TryParse(face.vn, out var vn)
                             ? vertexNormals[vn - 1]
                             : new Vector3(0);
-
-                        var Vertex = new Vertex {
+                        var vertex = new Vertex {
                             Position = vertexPositions[v - 1],
                             TextureCoordinate = textureCoord,
-                            Normal = vertexNormal,
+                            Normal = vertexNormal
                         };
-                        faces.Add(Vertex);
+                        faces.Add(vertex);
                     }
                     
                     // generate a list of indices (split the shape up into triangles)
                     // this can be done by using the first (v0), last used (vL) and current (vC) index
-                    int vL = 1;
-                    for (int vC = 2; vC < faces.Count; vC++)
+                    uint vL = 1;
+                    for (uint vC = 2; vC < faces.Count; vC++)
                     {
-                        resultIndices.Add(resultVertices.Count);
-                        resultIndices.Add(resultVertices.Count + vL);
-                        resultIndices.Add(resultIndices.Count + vC);
+                        resultIndices.Add((uint)resultVertices.Count);
+                        resultIndices.Add((uint)resultVertices.Count + vL);
+                        resultIndices.Add((uint)resultVertices.Count + vC);
+                        vL = vC;
                     }
                     
                     resultVertices.AddRange(faces);
-                    break;
-                    
+                    break; // case break, not foreach break!!!
             }
         }
 
@@ -147,7 +150,7 @@ internal static class MeshLoader
         }
         
         materials = resultMaterials.ToArray();
-        return new Mesh(resultVertices.ToArray(), resultSubmeshes.ToArray());
+        return new Mesh(resultVertices.ToArray(), resultIndices.ToArray(), resultSubmeshes.ToArray());
     }
 
     public static Dictionary<string, Material> ReadMTLIntoMaterials(string path)

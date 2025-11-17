@@ -1,0 +1,18 @@
+# Blender 4.5.1 LTS MTL File: 'None'
+# www.blender.org
+newmtl White_Marble
+Ns 170
+Ka 1.0 1.0 1.0
+Kd 0.68235296 0.68235296 0.68235296
+Ks 0.53333336 0.53333336 0.53333336
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1
+illum 2
+
+newmtl cool
+Ns 0
+Ka 0.0 1.0 1.0
+Kd 1.0 0.0 0.0
+Ks 0.24705882 1.0 0.0
+d 1

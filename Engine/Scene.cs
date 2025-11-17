@@ -28,6 +28,7 @@ public class Scene : IDisposable
 
         scene._entities = data.Entities;
         scene._drawables = data.Drawables;
+        scene.ActiveCamera = data.ActiveCamera;
         
         return scene;
     }

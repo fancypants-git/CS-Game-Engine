@@ -30,7 +30,7 @@ public class Entity : IDisposable
     public virtual void EarlyUpdate()
     {
         if (!IsActive) return;
-        
+
         Transform = GetComponent<Transform>(true);
 
         Component? currentComponent = null;
@@ -77,7 +77,7 @@ public class Entity : IDisposable
 
 
 
-    public void AddComponent<T>(T component) where T : Component
+    public T AddComponent<T>(T component) where T : Component
     {
         // check if it has the DisallowMultiple attribute
         var attrib = (DisallowMultipleAttribute[])component.GetType().Assembly.GetCustomAttributes(typeof(DisallowMultipleAttribute), false);
@@ -86,13 +86,23 @@ public class Entity : IDisposable
             if (attrib[0].OverrideIfExists)
             {
                 _components.Add(component);
-                // TODO remove the component type from the entity
+                RemoveComponent<T>();
+            }
+            else
+            {
+                var c = GetComponent<T>(true);
+                if (c != null)
+                    return c;
+            
+                _components.Add(component);
             }
         }
         else // doesn't have DisallowMultiple attribute so it can always be added
         {
             _components.Add(component);
         }
+
+        return component;
     }
 
     public T? GetComponent<T>(bool includeDisabled = false) where T : Component

@@ -149,6 +149,11 @@ public class Renderer : Component, IDrawable
     {
 	    if (Mesh.Submeshes.Length == 0)
 	    {
+		    var mat = Materials[0];
+		    mat.Use();
+		    mat.Shader.UniformMat4("model", false, Transform.ModelMatrix);
+		    mat.Shader.UniformMat4("camera", false, camera.View * camera.Projection);
+		    mat.Shader.Uniform3f("color", mat.Color.R / 255, mat.Color.G / 255, mat.Color.B / 255);
 		    GL.DrawArrays(PrimitiveType.Triangles, 0, Mesh.Submeshes.Length);
 		    return;
 	    }

@@ -35,7 +35,7 @@ internal static class SceneLoader
         
 
         var source = File.ReadAllText(path);
-        Debug.Log($"Loading scene {path}");
+        Debug.LogInfo($"Loading scene {path}");
 
         var i = 0;
         foreach (var line in source.Split('\n'))
@@ -77,23 +77,26 @@ internal static class SceneLoader
                     break;
                 case "add":
                     var name = DecodeString(args[0]);
-                    if (!ComponentRegistry.GetComponentType(name, out Type? type))
+                    if (!ComponentRegistry.GetComponentType(name, out var type))
                     {
                         Debug.LogError("Unknown component type:", name);
                         continue;
                     }
                     
-                    Parameter parentParameter = new Parameter(currentEntity, typeof(Entity));
+                    var parentParameter = new Parameter(currentEntity, typeof(Entity));
                     List<Parameter> parameters = [parentParameter];
                     
                     parameters.AddRange(DecodeParameters(args));
                     var c = ComponentRegistry.Create(type, parameters);
 
-                    if (type.IsSubclassOf(typeof(IDrawable)))
-                        data.Drawables.Add((IDrawable)c);
+                    if (c is IDrawable drawable)
+                        data.Drawables.Add(drawable);
 
                     if (type == typeof(Camera) && currentEntity.Id == activeCameraId)
                         data.ActiveCamera = (Camera)c;
+                    
+                    if (type == typeof(Transform))
+                        currentEntity.Transform = (Transform)c;
                     
                     currentEntity.AddComponent(c);
                     break;
@@ -102,13 +105,6 @@ internal static class SceneLoader
         
         if (currentEntity != null)
             data.Entities.Add(currentEntity);
-        
-        Debug.Log("Entities:", data.Entities.Count, "Drawables:", data.Drawables.Count);
-
-        foreach (var e in data.Entities)
-        {
-            Debug.Log("Entity:", e.Id);
-        }
 
         return data;
     }

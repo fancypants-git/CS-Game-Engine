@@ -4,6 +4,6 @@
 newmtl default
 Ns 200
 Ka 1.0 1.0 1.0
-Kd 1.0 1.0 1.0
+Kd 0.0 0.0 0.0
 Ks 0.0 0.0 0.0
 Tr 0.0

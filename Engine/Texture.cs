@@ -34,8 +34,8 @@ public class Texture : IDisposable
         Height = image.Height;
 
         Handle = GL.GenTexture();
-        Use();
         GL.ActiveTexture(TextureUnit.Texture0);
+        Use();
         
         GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
         

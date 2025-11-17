@@ -6,7 +6,7 @@ public class Component(Entity parent) : IDisposable
     public bool Enabled = true;
     
     public Entity Parent = parent;
-    public Transform Transform { get; } = parent.Transform;
+    public Transform Transform => parent.Transform;
 
     protected bool IsDisposed = false;
     

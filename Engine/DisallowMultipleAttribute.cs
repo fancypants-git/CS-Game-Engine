@@ -1,11 +1,6 @@
 namespace Engine;
 
-public class DisallowMultipleAttribute : Attribute
+public class DisallowMultipleAttribute(bool overrideIfExists = false) : Attribute
 {
-    public bool OverrideIfExists { get; }
-
-    public DisallowMultipleAttribute(bool overrideIfExists = false)
-    {
-        OverrideIfExists = overrideIfExists;
-    }
+    public bool OverrideIfExists { get; } = overrideIfExists;
 }

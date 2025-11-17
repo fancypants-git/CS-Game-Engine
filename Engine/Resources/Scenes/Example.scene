@@ -2,8 +2,8 @@ scene "Example Scene"
 camera Main
 
 entity Cube
-add Transform vec3(0) vec3(1) vec3(1, 2, 5)
-add Renderer mesh(Objects/cube.obj) shader(default) texture("Textures/wall.jpg", true)
+add Transform vec3(0) vec3(1) vec3(0)
+add Renderer mesh(Objects/dragon.obj) shader(default) texture("Textures/wall.jpg", true)
 
 
 entity Main

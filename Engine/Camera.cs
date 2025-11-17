@@ -76,6 +76,11 @@ public class Camera : Component
     {
         base.Update();
 
+        if (_aspectRatio <= 0)
+        {
+            Debug.LogError("Aspect ratio must be positive; Not updating Camera component of", Parent.Id);
+            return;
+        }
         
         View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
         Projection = Type switch {

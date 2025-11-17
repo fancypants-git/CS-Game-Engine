@@ -32,12 +32,14 @@ public class Window : GameWindow
         try
         {
             var scene = Resources.GetScene("Scenes/Example.scene");
-            SceneManager.ActivateScene(scene);
+            SceneManager.ActivateScene(scene, false);
         }
         catch (Exception ex)
         {
             Debug.LogError("Error Occured in OnLoad() |", ex.Message, '\n', ex);
         }
+        
+        SceneManager.ActiveCamera.SetViewportSize(ClientSize.X, ClientSize.Y);
     }
 
 
@@ -49,20 +51,20 @@ public class Window : GameWindow
         {
             SceneManager.ActiveScene?.EarlyUpdate();
 
-            // const float speed = 3;
-            // if (KeyboardState.IsKeyDown(Keys.W))
-            //     camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Forwards);
-            // if (KeyboardState.IsKeyDown(Keys.S))
-            //     camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Forwards);
-            // if (KeyboardState.IsKeyDown(Keys.D))
-            //     camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Right);
-            // if (KeyboardState.IsKeyDown(Keys.A))
-            //     camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Right);
-            // if (KeyboardState.IsKeyDown(Keys.Space))
-            //     camera.Transform.Translate(speed * (float)args.Time, camera.Transform.Up);
-            //
-            // if (KeyboardState.IsKeyDown(Keys.LeftShift))
-            //     camera.Transform.Translate(speed * (float)args.Time, -camera.Transform.Up);
+            const float speed = 3;
+            if (KeyboardState.IsKeyDown(Keys.W))
+                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, SceneManager.ActiveCamera.Transform.Forwards);
+            if (KeyboardState.IsKeyDown(Keys.S))
+                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, -SceneManager.ActiveCamera.Transform.Forwards);
+            if (KeyboardState.IsKeyDown(Keys.D))
+                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, -SceneManager.ActiveCamera.Transform.Right);
+            if (KeyboardState.IsKeyDown(Keys.A))
+                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, SceneManager.ActiveCamera.Transform.Right);
+            if (KeyboardState.IsKeyDown(Keys.Space))
+                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, SceneManager.ActiveCamera.Transform.Up);
+            
+            if (KeyboardState.IsKeyDown(Keys.LeftShift))
+                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, -SceneManager.ActiveCamera.Transform.Up);
             //
             //
             // var x = (float)(args.Time * 300);
@@ -74,7 +76,7 @@ public class Window : GameWindow
             
             if (KeyboardState.IsKeyDown(Keys.Escape))
             {
-                Debug.LogPrefixed(Debug.LogType.Exit, "Exiting Due to Escape Press");
+                Debug.LogPrefixed(Debug.LogType.Exit, "Exiting due to Escape Press");
                 Close();
             }
         }
@@ -137,6 +139,8 @@ internal static class Launch
 {
     private static void Main(string[] args)
     {
+        Debug.PRINT_ONLY_DEBUG = false;
+        
         Debug.LogPrefixed(Debug.LogType.Launch, "Launching Program, Creating Window");
         
         using Window window = new(600, 600, "OpenTK Game Engine");

@@ -120,6 +120,8 @@ public class Transform : Component
     public Transform(Entity parent, Vector3 position, Vector3 size, Vector3 rotation) : base(parent)
     {
         Position = position;
+        Size = size;
+        Rotation = rotation;
     }
     
     private void SetModelMatrix()
