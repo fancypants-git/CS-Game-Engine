@@ -40,8 +40,8 @@ public struct Mesh : IDisposable
     }
     
     
-    public VertexArrayObject VertexArrayObject { get; private set; } = new();
-    public VertexBufferObject VertexBufferObject { get; private set; } = new();
+    public VertexArrayObject VertexArrayObject { get; private set; }
+    public VertexBufferObject VertexBufferObject { get; private set; }
     public ElementBufferObject ElementBufferObject { get; private set; }
     
     public Submesh[] Submeshes { get; }
@@ -71,7 +71,9 @@ public struct Mesh : IDisposable
 
     private void Initialize()
     {
+        VertexArrayObject = new VertexArrayObject();
         VertexArrayObject.Use();
+        VertexBufferObject = new VertexBufferObject();
         VertexBufferObject.Upload(_vertices, BufferUsage.StaticDraw);
 
         if (_indices != null)
@@ -88,7 +90,7 @@ public struct Mesh : IDisposable
 
     public void Use()
     {
-        VertexBufferObject.Use();
+        VertexArrayObject.Use();
     }
 
     public void DrawSubmesh(int index)
