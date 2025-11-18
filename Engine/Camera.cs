@@ -1,5 +1,3 @@
-using System.Collections.Specialized;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
 namespace Engine;

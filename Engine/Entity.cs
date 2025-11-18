@@ -85,8 +85,7 @@ public class Entity : IDisposable
         {
             if (attrib[0].OverrideIfExists)
             {
-                RemoveComponent<T>();
-                Debug.Log("Overrididing component", component);
+                RemoveComponent(component.GetType());
             }
             else
             {
@@ -124,13 +123,12 @@ public class Entity : IDisposable
     {
         _components.Remove(component);
     }
-    
-    public void RemoveComponent<T>() where T : Component
+    public void RemoveComponent(Type type)
     {
         for (int i = 0; i < _components.Count; i++)
         {
             var c =_components[i];
-            if (c is T)
+            if (c.GetType() == type)
             {
                 c.Unload();
                 c.Dispose();

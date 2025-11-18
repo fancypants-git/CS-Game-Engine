@@ -17,21 +17,17 @@ public class PlayerController : Component
     {
         base.Update();
         
-        Debug.Log("DeltaTime:", Time.DeltaTime);
-        
-        
         if (Input.IsKeyDown(Keys.W))
-            SceneManager.ActiveCamera.Transform.Translate(Speed * Time.DeltaTime, SceneManager.ActiveCamera.Transform.Forwards);
+            Transform.Translate(Speed * Time.DeltaTime, Transform.Forwards);
         if (Input.IsKeyDown(Keys.S))
-            SceneManager.ActiveCamera.Transform.Translate(Speed * Time.DeltaTime, -SceneManager.ActiveCamera.Transform.Forwards);
+            Transform.Translate(Speed * Time.DeltaTime, -Transform.Forwards);
         if (Input.IsKeyDown(Keys.D))
-            SceneManager.ActiveCamera.Transform.Translate(Speed * Time.DeltaTime, -SceneManager.ActiveCamera.Transform.Right);
+            Transform.Translate(Speed * Time.DeltaTime, -Transform.Right);
         if (Input.IsKeyDown(Keys.A))
-            SceneManager.ActiveCamera.Transform.Translate(Speed * Time.DeltaTime, SceneManager.ActiveCamera.Transform.Right);
+            Transform.Translate(Speed * Time.DeltaTime, Transform.Right);
         if (Input.IsKeyDown(Keys.Space))
-            SceneManager.ActiveCamera.Transform.Translate(Speed * Time.DeltaTime, SceneManager.ActiveCamera.Transform.Up);
-            
+            Transform.Translate(Speed * Time.DeltaTime, Transform.Up);
         if (Input.IsKeyDown(Keys.LeftShift))
-            SceneManager.ActiveCamera.Transform.Translate(Speed * Time.DeltaTime, -SceneManager.ActiveCamera.Transform.Up);
+            Transform.Translate(Speed * Time.DeltaTime, -Transform.Up);
     }
 }
