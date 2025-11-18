@@ -29,6 +29,8 @@ public class Window : GameWindow
         GL.Enable(EnableCap.DepthTest);
         GL.DepthFunc(DepthFunction.Less);
 
+        Input.Initialize(KeyboardState, MouseState);
+
         try
         {
             var scene = Resources.GetScene("Scenes/Example.scene");
@@ -39,38 +41,19 @@ public class Window : GameWindow
             Debug.LogError("Error Occured in OnLoad() |", ex.Message, '\n', ex);
         }
         
-        SceneManager.ActiveCamera.SetViewportSize(ClientSize.X, ClientSize.Y);
+        SceneManager.ActiveCamera?.SetViewportSize(ClientSize.X, ClientSize.Y);
     }
 
 
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
+        
+        Time.DeltaTimeDouble = args.Time * Time.TimeScale;
 
         try
         {
             SceneManager.ActiveScene?.EarlyUpdate();
-
-            const float speed = 3;
-            if (KeyboardState.IsKeyDown(Keys.W))
-                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, SceneManager.ActiveCamera.Transform.Forwards);
-            if (KeyboardState.IsKeyDown(Keys.S))
-                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, -SceneManager.ActiveCamera.Transform.Forwards);
-            if (KeyboardState.IsKeyDown(Keys.D))
-                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, -SceneManager.ActiveCamera.Transform.Right);
-            if (KeyboardState.IsKeyDown(Keys.A))
-                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, SceneManager.ActiveCamera.Transform.Right);
-            if (KeyboardState.IsKeyDown(Keys.Space))
-                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, SceneManager.ActiveCamera.Transform.Up);
-            
-            if (KeyboardState.IsKeyDown(Keys.LeftShift))
-                SceneManager.ActiveCamera.Transform.Translate(speed * (float)args.Time, -SceneManager.ActiveCamera.Transform.Up);
-            //
-            //
-            // var x = (float)(args.Time * 300);
-            // var y = (float)(Math.Sqrt(args.Time) * 2f);
-            // var z = (float)(Math.Sin(args.Time) * 1);
-            // cube.Transform.Rotate(x, y, z);
             
             SceneManager.ActiveScene?.Update();
             
@@ -90,6 +73,8 @@ public class Window : GameWindow
     protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
+
+        Time.RenderTimeDouble = args.Time * Time.TimeScale;
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 

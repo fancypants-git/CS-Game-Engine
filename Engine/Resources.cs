@@ -8,7 +8,11 @@ public static class Resources
         
         if (Path.Exists(path)) return path;
         
-        return Path.Combine(Directory.GetCurrentDirectory(), "Resources", path);
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", path);
+
+        if (!Path.Exists(fullPath)) Debug.LogWarn("Path does not exist:", fullPath);
+
+        return fullPath;
     }
 
 

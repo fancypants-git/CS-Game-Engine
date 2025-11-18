@@ -1,6 +1,5 @@
 ﻿namespace Engine;
 
-[ComponentMeta("Component")]
 public class Component(Entity parent) : IDisposable
 {
     public bool Enabled = true;
