@@ -50,9 +50,9 @@ public class Transform : Component
                              * Matrix4.CreateRotationX(MathHelper.DegToRad * _rotation.X);
             
             Forwards = new Vector3(
-                (float)(Math.Cos(_rotation.X) * Math.Sin(_rotation.Y)),
-                (float)(-Math.Sin(_rotation.X)),
-                (float)(Math.Cos(_rotation.X) * Math.Cos(_rotation.Y)));
+                (float)(Math.Cos(MathHelper.DegToRad * _rotation.X) * Math.Sin(MathHelper.DegToRad * _rotation.Y)),
+                (float)(-Math.Sin(MathHelper.DegToRad * _rotation.X)),
+                (float)(Math.Cos(MathHelper.DegToRad * _rotation.X) * Math.Cos(MathHelper.DegToRad * _rotation.Y)));
             
             Horizontal = new Vector3(Forwards.X, 0, Forwards.Z).Normalized();
             Right = Vector3.Cross(Vector3.UnitY, Forwards);
@@ -165,5 +165,34 @@ public class Transform : Component
     public void Rotate(float v, Vector3 d)
     {
         Rotation += d * v;
+    }
+
+    public void RotateClamped(Vector3 v, Vector3 min, Vector3 max)
+    {
+        Rotation = Vector3.Clamp(_rotation + v, min, max);
+    }
+    public void RotateClamped(float x, float y, float z, Vector3 min, Vector3 max)
+    {
+        Rotation = Vector3.Clamp(_rotation + new Vector3(x, y, z), min, max);
+    }
+    public void RotateClamped(float v, Vector3 d, Vector3 min, Vector3 max)
+    {
+        Rotation = Vector3.Clamp(_rotation + (v * d), min, max);
+    }
+
+    public void RotateXClamped(float v, float min, float max)
+    {
+        float clampedX = Math.Clamp(_rotation.X + v, min, max);
+        Rotation = new Vector3(clampedX, _rotation.Y, _rotation.Z);
+    }
+    public void RotateYClamped(float v, float min, float max)
+    {
+        float clampedY = Math.Clamp(_rotation.Y + v, min, max);
+        Rotation = new Vector3(_rotation.X, clampedY, _rotation.Z);
+    }
+    public void RotateZClamped(float v, float min, float max)
+    {
+        float clampedZ = Math.Clamp(_rotation.Z + v, min, max);
+        Rotation = new Vector3(_rotation.X, _rotation.Y, clampedZ);
     }
 }

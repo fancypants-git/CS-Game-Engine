@@ -4,6 +4,7 @@ using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -30,6 +31,8 @@ public class Window : GameWindow
         GL.DepthFunc(DepthFunction.Less);
 
         Input.Initialize(KeyboardState, MouseState);
+
+        CursorState = CursorState.Grabbed;
 
         try
         {
@@ -124,7 +127,7 @@ internal static class Launch
 {
     private static void Main(string[] args)
     {
-        Debug.PRINT_ONLY_DEBUG = false;
+        Debug.PRINT_ONLY_DEBUG = true;
         
         Debug.LogPrefixed(Debug.LogType.Launch, "Launching Program, Creating Window");
         

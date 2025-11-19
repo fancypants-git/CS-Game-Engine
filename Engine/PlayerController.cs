@@ -1,3 +1,4 @@
+using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Engine;
@@ -18,16 +19,16 @@ public class PlayerController : Component
         base.Update();
         
         if (Input.IsKeyDown(Keys.W))
-            Transform.Translate(Speed * Time.DeltaTime, Transform.Forwards);
+            Transform.Translate(Speed * Time.DeltaTime, Transform.Horizontal);
         if (Input.IsKeyDown(Keys.S))
-            Transform.Translate(Speed * Time.DeltaTime, -Transform.Forwards);
+            Transform.Translate(Speed * Time.DeltaTime, -Transform.Horizontal);
         if (Input.IsKeyDown(Keys.D))
             Transform.Translate(Speed * Time.DeltaTime, -Transform.Right);
         if (Input.IsKeyDown(Keys.A))
             Transform.Translate(Speed * Time.DeltaTime, Transform.Right);
         if (Input.IsKeyDown(Keys.Space))
-            Transform.Translate(Speed * Time.DeltaTime, Transform.Up);
+            Transform.Translate(Speed * Time.DeltaTime, Vector3.UnitY);
         if (Input.IsKeyDown(Keys.LeftShift))
-            Transform.Translate(Speed * Time.DeltaTime, -Transform.Up);
+            Transform.Translate(Speed * Time.DeltaTime, -Vector3.UnitY);
     }
 }
