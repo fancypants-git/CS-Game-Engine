@@ -154,11 +154,7 @@ public class Renderer : Component, IDrawable
 	    if (Mesh.Submeshes.Length == 0)
 	    {
 		    var mat = Materials[0];
-		    mat.Use();
-		    mat.Shader.UniformMat4("model", false, Transform.ModelMatrix);
-		    mat.Shader.UniformMat4("camera", false, camera.View * camera.Projection);
-		    mat.Shader.Uniform3f("color", mat.Color.R / 255, mat.Color.G / 255, mat.Color.B / 255);
-		    mat.Shader.Uniform1i("useTexture", mat.Texture != null ? 1 : 0);
+		    mat.Use(camera, Transform.ModelMatrix);
 		    GL.DrawArrays(PrimitiveType.Triangles, 0, Mesh.Submeshes.Length);
 		    return;
 	    }
@@ -166,11 +162,7 @@ public class Renderer : Component, IDrawable
 	    for (int i = 0; i < Mesh.Submeshes.Length; i++)
 	    {
 		    var mat = Materials[i];
-		    mat.Use();
-		    mat.Shader.UniformMat4("model", false, Transform.ModelMatrix);
-		    mat.Shader.UniformMat4("camera", false, camera.View * camera.Projection);
-		    mat.Shader.Uniform3f("color", mat.Color.R / 255, mat.Color.G / 255, mat.Color.B / 255);
-		    mat.Shader.Uniform1i("useTexture", mat.Texture != null ? 1 : 0);
+		    mat.Use(camera, Transform.ModelMatrix);
 		    Mesh.DrawSubmesh(i);
 	    }
     }

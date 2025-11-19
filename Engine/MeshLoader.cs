@@ -197,7 +197,7 @@ internal static class MeshLoader
                     break;
                 case "Ks":
                     float[] valuesS = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
-                    material.DiffuseColor = Color.FromArgb(255, (int)(valuesS[0] * 255), (int)(valuesS[1] * 255), (int)(valuesS[2] * 255));
+                    material.SpecularColor = Color.FromArgb(255, (int)(valuesS[0] * 255), (int)(valuesS[1] * 255), (int)(valuesS[2] * 255));
                     break;
                 default:
                     Debug.LogWarn("Unsupported mtl attribute:", command);
