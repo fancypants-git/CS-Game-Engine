@@ -84,7 +84,7 @@ public class Renderer : Component, IDrawable
 	    Materials = [
 		    new Material
 		    {
-			    Shader = Resources.GetShader("default"),
+			    Shader = Resources.GetShader("lit"),
 			    Texture = null,
 			    Color = Color.White
 		    }
@@ -99,7 +99,7 @@ public class Renderer : Component, IDrawable
 
     public Renderer(Entity parent, Shader? shader, Texture? texture, Color? color) : base(parent)
     {
-	    shader ??= Resources.GetShader("default");
+	    shader ??= Resources.GetShader("lit");
 	    color ??= Color.White;
 	    
 	    Materials = [
@@ -123,7 +123,7 @@ public class Renderer : Component, IDrawable
 	    Materials = materials;
 	    for (int i = 0; i < materials.Length; i++)
 	    {
-		    materials[i].Shader = Resources.GetShader("default");
+		    materials[i].Shader = Resources.GetShader("lit");
 	    }
 	    Mesh = mesh;
     }

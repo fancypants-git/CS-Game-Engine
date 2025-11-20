@@ -14,7 +14,6 @@ uniform vec3 specularColor;
 uniform float specularExponent;
 
 uniform vec3 cameraPos;
-uniform vec3 viewDirection;
 
 
 void main()
