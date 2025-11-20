@@ -35,6 +35,9 @@ public class Window : GameWindow
 
         GL.Enable(EnableCap.DepthTest);
         GL.DepthFunc(DepthFunction.Less);
+        
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
         Input.Initialize(KeyboardState, MouseState);
 

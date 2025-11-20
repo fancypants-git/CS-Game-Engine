@@ -11,7 +11,9 @@ public struct SceneData
 
     public List<Entity> Entities { get; set; }
     public List<IDrawable> Drawables { get; set; }
+    
     public Camera ActiveCamera { get; set; }
+    public bool HasActiveCamera { get; set; }
 }
 
 
@@ -50,7 +52,7 @@ internal static class SceneLoader
             
             if (!match.Success)
             {
-                Debug.LogError("Failed to decode line");
+                Debug.LogError("Failed to decode line", i);
                 continue;
             }
             
@@ -62,10 +64,25 @@ internal static class SceneLoader
             switch (command)
             {
                 // global scene data
+                case "include":
+                    var includeData = LoadSceneData(Resources.GetPath(DecodeString(args[0])));
+                    if (includeData.HasActiveCamera)
+                    {
+                        if (data.HasActiveCamera)
+                            Debug.LogWarn("Scene already defined ActiveCamera but was overridden by included scene in line", i);
+                        
+                        data.HasActiveCamera = true;
+                        data.ActiveCamera = includeData.ActiveCamera;
+                    }
+                    
+                    data.Entities.AddRange(includeData.Entities);
+                    data.Drawables.AddRange(includeData.Drawables);
+                    break;
                 case "scene":
                     data.Name = DecodeString(args[0]);
                     break;
                 case "camera":
+                    data.HasActiveCamera = true;
                     activeCameraId = DecodeString(args[0]);
                     break;
                 // entity scene data
@@ -79,7 +96,7 @@ internal static class SceneLoader
                     var name = DecodeString(args[0]);
                     if (!ComponentRegistry.GetComponentType(name, out var type))
                     {
-                        Debug.LogError("Unknown component type:", name);
+                        Debug.LogError("Unknown component type at line", i);
                         continue;
                     }
                     

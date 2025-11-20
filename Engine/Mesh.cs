@@ -97,7 +97,7 @@ public struct Mesh : IDisposable
     {
         var sub = Submeshes[index];
         Use();
-        GL.DrawElements(PrimitiveType.Triangles, sub.IndexCount, DrawElementsType.UnsignedInt, sub.IndexStart);
+        GL.DrawElements(PrimitiveType.Triangles, sub.IndexCount, DrawElementsType.UnsignedInt, sub.IndexStart * sizeof(uint));
     }
     
     public void Dispose()

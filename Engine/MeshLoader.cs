@@ -184,21 +184,33 @@ internal static class MeshLoader
                 
                 // light / color
                 case "Ns":
-                    var value = float.Parse(match.Groups["rest"].Value);
-                    material.SpecularExponent = value;
+                    var specularExponent = float.Parse(match.Groups["rest"].Value);
+                    material.SpecularExponent = specularExponent;
                     break;
                 case "Ka":
-                    float[] valuesA = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
-                    material.Color = Color.FromArgb(255, (int)(valuesA[0] * 255), (int)(valuesA[1] * 255), (int)(valuesA[2] * 255));
+                    float[] ambientColor = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
+                    material.Color = Color.FromArgb(255, (int)(ambientColor[0] * 255), (int)(ambientColor[1] * 255), (int)(ambientColor[2] * 255));
                     break;
-                case "Kd":
-                    float[] valuesD = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
-                    material.DiffuseColor = Color.FromArgb(255, (int)(valuesD[0] * 255), (int)(valuesD[1] * 255), (int)(valuesD[2] * 255));
+                
+                case "map_Kd":
+                    string diffuseMap = Resources.GetPath(match.Groups["rest"].Value);
+                    material.Texture = new Texture(diffuseMap, false);
                     break;
-                case "Ks":
-                    float[] valuesS = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
-                    material.SpecularColor = Color.FromArgb(255, (int)(valuesS[0] * 255), (int)(valuesS[1] * 255), (int)(valuesS[2] * 255));
+                case "map_Ks":
+                    string specularMap = Resources.GetPath(match.Groups["rest"].Value);
+                    material.SpecularMap = new Texture(specularMap, false);
                     break;
+                
+                // transparency
+                case "Tr":
+                    float transparency = 1 - float.Parse(match.Groups["rest"].Value);
+                    material.Transparency = transparency;
+                    break;
+                case "d":
+                    transparency = float.Parse(match.Groups["rest"].Value);
+                    material.Transparency = transparency;
+                    break;
+                
                 default:
                     Debug.LogWarn("Unsupported mtl attribute:", command);
                     break;

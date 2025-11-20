@@ -27,7 +27,9 @@ public class Shader : IDisposable
 
         if (!ReportShaderCompileStatus(vertShader) ||
             !ReportShaderCompileStatus(fragShader)) // if any of the two reports fails
+        {
             Dispose(true);
+        }
 
         // create and compile the program
         Handle = GL.CreateProgram();
@@ -43,7 +45,10 @@ public class Shader : IDisposable
         GL.DeleteShader(fragShader);
 
         if (!ReportProgramLinkStatus(Handle))
+        {
             Dispose(true);
+            Handle = 0;
+        }
     }
 
 
@@ -84,7 +89,6 @@ public class Shader : IDisposable
         GL.GetProgrami(program, ProgramProperty.LinkStatus, out var success);
         if (success == 0)
         {
-            Debug.LogError("FJSFJSJF");
             GL.GetProgramInfoLog(program, out var log);
             Debug.LogError("Failed to Link Program:", program, '\n', log);
         }

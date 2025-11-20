@@ -1,9 +1,17 @@
 # Blender 4.5.1 LTS MTL File: 'None'
 # www.blender.org
 
-newmtl default
-Ns 200
+newmtl shiny
+Ns 256
 Ka 1.0 1.0 1.0
-Kd 0.0 0.0 0.0
+Tr 0
+
+map_Kd container-diffuse.png
+map_Ks container-specular.png
+
+
+newmtl default
+Ka 0.7764706 0.96862745 1.0
+Kd 0.73333335 0.78431374 0.79607844
 Ks 0.0 0.0 0.0
 Tr 0.0

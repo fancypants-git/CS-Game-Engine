@@ -2,6 +2,7 @@
 in vec2 texCoord;
 
 uniform vec3 color;
+uniform float transparency;
 
 uniform sampler2D texture0;
 uniform bool useTexture;
@@ -12,5 +13,5 @@ void main() {
     if (useTexture)
         FragColor = texture(texture0, texCoord) * vec4(color, 1.0f);
     else
-        FragColor = vec4(color, 1.0f);
+        FragColor = vec4(color, transparency);
 }

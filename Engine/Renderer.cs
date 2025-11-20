@@ -159,7 +159,7 @@ public class Renderer : Component, IDrawable
 		    return;
 	    }
 	    
-	    for (int i = 0; i < Mesh.Submeshes.Length; i++)
+	    for (var i = 0; i < Mesh.Submeshes.Length; i++)
 	    {
 		    var mat = Materials[i];
 		    mat.Use(camera, Transform.ModelMatrix);
