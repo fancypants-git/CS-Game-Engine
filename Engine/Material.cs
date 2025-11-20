@@ -38,7 +38,8 @@ public struct Material : IDisposable
         Use();
         
         Shader.UniformMat4("model", false, model);
-        Shader.UniformMat4("projection", false, camera.Projection * camera.View);
+        Shader.UniformMat4("projection", false, camera.Projection);
+        Shader.UniformMat4("view", false, camera.View);
         Shader.Uniform3fv("cameraPos", camera.Transform.Position);
         Shader.Uniform3fv("viewDirection", camera.Transform.Forwards);
         Shader.Uniform3f("color", Color.R / 255.0f, Color.G / 255.0f, Color.B / 255.0f);

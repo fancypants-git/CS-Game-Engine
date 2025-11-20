@@ -13,10 +13,16 @@ namespace Engine;
 public class Window : GameWindow
 {
     public Window(int width, int height, string title)
-        : base(GameWindowSettings.Default, new NativeWindowSettings
-        {
+        : base(GameWindowSettings.Default, new NativeWindowSettings {
+            API = ContextAPI.OpenGL,
+            Profile = ContextProfile.Core,
+            Flags = ContextFlags.Debug,
             ClientSize = (width, height),
-            Title = title
+            Vsync = VSyncMode.Off,
+            Title = title,
+            StartFocused = false,
+            WindowState = WindowState.Normal,
+            WindowBorder = WindowBorder.Resizable,
         })
     { }
 
@@ -62,7 +68,7 @@ public class Window : GameWindow
             
             if (KeyboardState.IsKeyDown(Keys.Escape))
             {
-                Debug.LogPrefixed(Debug.LogType.Exit, "Exiting due to Escape Press");
+                Debug.LogPrefixed(LogType.Exit, "Exiting due to Escape Press");
                 Close();
             }
         }
@@ -127,13 +133,13 @@ internal static class Launch
 {
     private static void Main(string[] args)
     {
-        Debug.PRINT_ONLY_DEBUG = true;
+        Debug.LogFilter = [LogFilter.Debug, LogFilter.Warning, LogFilter.Error, LogFilter.Fatal];
         
-        Debug.LogPrefixed(Debug.LogType.Launch, "Launching Program, Creating Window");
+        Debug.LogPrefixed(LogType.Launch, "Launching Program, Creating Window");
         
         using Window window = new(600, 600, "OpenTK Game Engine");
         window.Run();
         
-        Debug.LogPrefixed(Debug.LogType.Exit, "Closed Window, Exiting Program");
+        Debug.LogPrefixed(LogType.Exit, "Closed Window, Exiting Program");
     }
 }

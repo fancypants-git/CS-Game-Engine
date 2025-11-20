@@ -1,27 +1,37 @@
 ﻿namespace Engine;
 
+public enum LogType
+{
+    Info = 0,
+    Warning = 1,
+    Error = 2,
+    Fatal = 3,
+    Exit = 4,
+    Launch = 5,
+    Debug = 6,
+}
+
+public enum LogFilter
+{
+    Nothing = -1,
+    Info = LogType.Info,
+    Warning = LogType.Warning,
+    Error = LogType.Error,
+    Fatal = LogType.Fatal,
+    Exit = LogType.Exit,
+    Launch = LogType.Launch,
+    Debug = LogType.Debug,
+}
+
 public static class Debug
 {
-    public enum LogType
-    {
-        Info,
-        Warning,
-        Error,
-        Fatal,
-        Exit,
-        Launch,
-        Debug
-    }
 
-    public static bool PRINT_LOG_WARNINGS = false;
-    public static bool PRINT_ONLY_DEBUG = false;
+    public static bool PrintLogWarnings = false;
+    public static LogFilter[] LogFilter = [];
 
     public static void LogPrefixed(string type, params object?[] messages)
     {
-        if (PRINT_ONLY_DEBUG && type != "DEBUG")
-            return;
-        
-        if (type.Length > 5 && PRINT_LOG_WARNINGS)
+        if (type.Length > 5 && PrintLogWarnings)
             LogPrefixed("DEV",
                 "For readability, keep [type] of LogPrefixed(type, messages) shorter than 6 characters.");
 
@@ -36,6 +46,14 @@ public static class Debug
 
     public static void LogPrefixed(LogType type, params object?[] messages)
     {
+        // if a filter is set
+        // and that filter is either LogFilter.Nothing or does not contain LogType type
+        // do not log this message
+        if (LogFilter.Length != 0 &&
+            (LogFilter.Contains(Engine.LogFilter.Nothing) ||
+             !LogFilter.Contains((LogFilter)type)))
+            return;
+        
         var typeStr = type switch
         {
             LogType.Info => "INFO",

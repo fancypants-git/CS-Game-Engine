@@ -84,6 +84,7 @@ public class Shader : IDisposable
         GL.GetProgrami(program, ProgramProperty.LinkStatus, out var success);
         if (success == 0)
         {
+            Debug.LogError("FJSFJSJF");
             GL.GetProgramInfoLog(program, out var log);
             Debug.LogError("Failed to Link Program:", program, '\n', log);
         }

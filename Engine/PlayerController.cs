@@ -19,9 +19,9 @@ public class PlayerController : Component
         base.Update();
         
         if (Input.IsKeyDown(Keys.W))
-            Transform.Translate(Speed * Time.DeltaTime, Transform.Horizontal);
+            Transform.Translate(Speed * Time.DeltaTime, Transform.Forwards);
         if (Input.IsKeyDown(Keys.S))
-            Transform.Translate(Speed * Time.DeltaTime, -Transform.Horizontal);
+            Transform.Translate(Speed * Time.DeltaTime, -Transform.Forwards);
         if (Input.IsKeyDown(Keys.D))
             Transform.Translate(Speed * Time.DeltaTime, -Transform.Right);
         if (Input.IsKeyDown(Keys.A))
