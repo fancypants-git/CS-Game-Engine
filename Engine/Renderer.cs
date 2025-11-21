@@ -97,44 +97,12 @@ public class Renderer : Component, IDrawable
 	    Mesh.VertexArrayObject.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
     }
 
-    public Renderer(Entity parent, Shader? shader, Texture? texture, Color? color) : base(parent)
-    {
-	    shader ??= Resources.GetShader("lit");
-	    color ??= Color.White;
-	    
-	    Materials = [
-		    new Material
-		    {
-			    Shader = shader,
-			    Texture = texture,
-			    Color = (Color)color
-		    }
-	    ];
-	    
-	    Mesh = new Mesh(cubeVertices, cubeIndices);
-	    var stride = 8 * sizeof(float);
-	    Mesh.VertexArrayObject.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-	    Mesh.VertexArrayObject.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
-	    Mesh.VertexArrayObject.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
-    }
-
     public Renderer(Entity parent, Mesh mesh, Material[] materials) : base(parent)
     {
 	    Materials = materials;
 	    for (int i = 0; i < materials.Length; i++)
 	    {
 		    materials[i].Shader = Resources.GetShader("lit");
-	    }
-	    Mesh = mesh;
-    }
-
-    public Renderer(Entity parent, Mesh mesh, Material[] materials, Shader shader, Texture texture) : base(parent)
-    {
-	    Materials = materials;
-	    for (int i = 0; i < materials.Length; i++)
-	    {
-		    materials[i].Shader = shader;
-		    materials[i].Texture = texture;
 	    }
 	    Mesh = mesh;
     }

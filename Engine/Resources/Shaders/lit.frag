@@ -1,17 +1,23 @@
 ﻿#version 330 core
 in vec2 texCoord;
 
-uniform vec3 color;
-uniform float transparency;
-
-uniform sampler2D texture0;
-uniform bool useTexture;
-
 out vec4 FragColor;
 
+struct Material
+{
+    vec3 color;
+    
+    bool useAmbientMap;
+    sampler2D ambientMap;
+    
+    float transparency;
+};
+
+uniform Material material;
+
 void main() {
-    if (useTexture)
-        FragColor = texture(texture0, texCoord) * vec4(color, 1.0f);
+    if (material.useAmbientMap)
+        FragColor = texture(material.ambientMap, texCoord) * vec4(material.color, material.transparency);
     else
-        FragColor = vec4(color, transparency);
+        FragColor = vec4(material.color, material.transparency);
 }

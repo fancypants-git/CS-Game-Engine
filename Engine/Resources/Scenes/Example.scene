@@ -4,4 +4,5 @@ include "Scenes/Player.scene"
 
 entity Cube
 add Transform vec3(0) vec3(2) vec3(0)
-add Renderer mesh(Objects/cube.obj) shader(unlit)
+# add Renderer mesh(Objects/dragon.obj) shader(lit)
+add Renderer

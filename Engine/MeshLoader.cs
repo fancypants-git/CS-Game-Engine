@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -10,12 +11,12 @@ internal static class MeshLoader
     public static Mesh LoadMesh(string filename, out Material[] materials)
     {
         materials = [];
-        
+
         var extension = Path.GetExtension(filename);
         if (extension == ".obj")
             return ReadObjIntoMesh(filename, out materials);
 
-        
+
         Debug.LogError("File extension is not supported yet:", extension);
         return new Mesh();
     }
@@ -53,7 +54,7 @@ internal static class MeshLoader
                 Debug.LogWarn("Failed to decode line");
                 continue;
             }
-            
+
             var command = match.Groups["command"].Value;
 
             switch (command)
@@ -69,18 +70,19 @@ internal static class MeshLoader
                     {
                         resultMaterials.Add(usedMaterial);
                         resultSubmeshes.Add(new Submesh(startIndex, resultIndices.Count - startIndex));
-                        
+
                         startIndex = resultIndices.Count;
                     }
-                        
+
                     usingMaterial = true;
                     mats.TryGetValue(match.Groups["rest"].Value, out usedMaterial);
                     break;
-                
+
                 // mesh commands
                 case "v":
                     string[] nums1 = match.Groups["rest"].Value.Split(' ');
-                    vertexPositions.Add(new Vector3(float.Parse(nums1[0]), float.Parse(nums1[1]), float.Parse(nums1[2])));
+                    vertexPositions.Add(
+                        new Vector3(float.Parse(nums1[0]), float.Parse(nums1[1]), float.Parse(nums1[2])));
                     break;
                 case "vn":
                     string[] nums2 = match.Groups["rest"].Value.Split(' ');
@@ -90,7 +92,7 @@ internal static class MeshLoader
                     string[] nums3 = match.Groups["rest"].Value.Split(' ');
                     textureCoordinates.Add(new Vector2(float.Parse(nums3[0]), float.Parse(nums3[1])));
                     break;
-                
+
                 // face command
                 case "f":
                     var facesSTR = match.Groups["rest"].Value
@@ -99,7 +101,7 @@ internal static class MeshLoader
                         {
                             var parts = item.Split('/');
                             return (
-                                v:  parts[0],
+                                v: parts[0],
                                 vt: parts.Length > 1 ? parts[1] : "",
                                 vn: parts.Length > 2 ? parts[2] : ""
                             );
@@ -107,7 +109,7 @@ internal static class MeshLoader
                         .ToArray();
 
                     List<Vertex> faces = [];
-                    
+
                     foreach (var face in facesSTR)
                     {
                         var v = int.Parse(face.v);
@@ -119,14 +121,15 @@ internal static class MeshLoader
                         vertexNormal = int.TryParse(face.vn, out var vn)
                             ? vertexNormals[vn - 1]
                             : new Vector3(0);
-                        var vertex = new Vertex {
+                        var vertex = new Vertex
+                        {
                             Position = vertexPositions[v - 1],
                             TextureCoordinate = textureCoord,
                             Normal = vertexNormal
                         };
                         faces.Add(vertex);
                     }
-                    
+
                     // generate a list of indices (split the shape up into triangles)
                     // this can be done by using the first (v0), last used (vL) and current (vC) index
                     uint vL = 1;
@@ -137,7 +140,7 @@ internal static class MeshLoader
                         resultIndices.Add((uint)resultVertices.Count + vC);
                         vL = vC;
                     }
-                    
+
                     resultVertices.AddRange(faces);
                     break; // case break, not foreach break!!!
             }
@@ -148,7 +151,7 @@ internal static class MeshLoader
             resultMaterials.Add(usedMaterial);
             resultSubmeshes.Add(new Submesh(startIndex, (int)(resultIndices.Count - startIndex)));
         }
-        
+
         materials = resultMaterials.ToArray();
         return new Mesh(resultVertices.ToArray(), resultIndices.ToArray(), resultSubmeshes.ToArray());
     }
@@ -169,7 +172,7 @@ internal static class MeshLoader
             if (l.StartsWith('#') || string.IsNullOrWhiteSpace(l)) continue;
 
             var match = Regex.Match(l, @"\A(?<command>\w+) \s+ (?<rest>.*)", RegexOptions.IgnorePatternWhitespace);
-            
+
             var command = match.Groups["command"].Value;
 
             switch (command)
@@ -177,49 +180,66 @@ internal static class MeshLoader
                 case "newmtl":
                     if (!string.IsNullOrWhiteSpace(currentMTL))
                         materials[currentMTL] = material;
-                    
+
                     currentMTL = match.Groups["rest"].Value;
                     material = new Material();
                     break;
-                
-                // light / color
-                case "Ns":
-                    var specularExponent = float.Parse(match.Groups["rest"].Value);
-                    material.SpecularExponent = specularExponent;
-                    break;
+
+                // Color
                 case "Ka":
                     float[] ambientColor = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
-                    material.Color = Color.FromArgb(255, (int)(ambientColor[0] * 255), (int)(ambientColor[1] * 255), (int)(ambientColor[2] * 255));
+                    material.Color = Color.FromArgb(255, (int)(ambientColor[0] * 255), (int)(ambientColor[1] * 255),
+                        (int)(ambientColor[2] * 255));
+                    break;
+                case "Kd":
+                    float[] diffuseColor = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
+                    material.DiffuseColor = Color.FromArgb(255, (int)(diffuseColor[0] * 255), (int)(diffuseColor[1] * 255),
+                        (int)(diffuseColor[2] * 255));
+                    break;
+                case "Ks":
+                    float[] specularColor = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
+                    material.SpecularColor = Color.FromArgb(255, (int)(specularColor[0] * 255), (int)(specularColor[1] * 255),
+                        (int)(specularColor[2] * 255));
                     break;
                 
+                // Texture Maps
+                case "map_Ka":
+                    material.Texture = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                        true);
+                    break;
                 case "map_Kd":
-                    string diffuseMap = Resources.GetPath(match.Groups["rest"].Value);
-                    material.Texture = new Texture(diffuseMap, false);
+                    material.DiffuseMap = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                        true);
                     break;
                 case "map_Ks":
-                    string specularMap = Resources.GetPath(match.Groups["rest"].Value);
-                    material.SpecularMap = new Texture(specularMap, false);
+                    material.SpecularMap = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                        false);
+                    break;
+                case "map_Ns":
+                    material.SpecularPowerMap = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                        false);
                     break;
                 
-                // transparency
+                // Misc Lighting Details
+                case "Ns":
+                    material.SpecularPower = float.Parse(match.Groups["rest"].Value);
+                    break;
                 case "Tr":
-                    float transparency = 1 - float.Parse(match.Groups["rest"].Value);
-                    material.Transparency = transparency;
+                    material.Transparency = 1 - float.Parse(match.Groups["rest"].Value);
                     break;
                 case "d":
-                    transparency = float.Parse(match.Groups["rest"].Value);
-                    material.Transparency = transparency;
+                    material.Transparency = float.Parse(match.Groups["rest"].Value);
                     break;
-                
+                    
                 default:
                     Debug.LogWarn("Unsupported mtl attribute:", command);
                     break;
             }
         }
-        
+
         if (!string.IsNullOrWhiteSpace(currentMTL))
             materials[currentMTL] = material;
-        
+
         return materials;
     }
 }

@@ -3,15 +3,18 @@
 
 newmtl container
 Ns 64
-Ka 1.0 1.0 1.0
 Tr 0
 
-map_Kd container-diffuse.png
-map_Ks container-specular.png
-
+map_Ka container-diffuse.png
+# map_Kd container-diffuse.png
+# map_Ks container-specular.png
+Ka 1.0 1.0 1.0
 
 newmtl default
-Ka 0.7764706 0.96862745 1.0
-Kd 0.73333335 0.78431374 0.79607844
+Ka 0.39607844 0.39607844 0.39607844
+Kd 0.69411767 0.69411767 0.69411767
 Ks 0.0 0.0 0.0
 Tr 0.0
+map_Ka Textures/wall.jpg
+map_Kd Textures/wall.jpg
+
