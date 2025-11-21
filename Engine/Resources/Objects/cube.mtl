@@ -1,8 +1,8 @@
 # Blender 4.5.1 LTS MTL File: 'None'
 # www.blender.org
 
-newmtl shiny
-Ns 256
+newmtl container
+Ns 64
 Ka 1.0 1.0 1.0
 Tr 0
 

@@ -26,7 +26,7 @@ uniform Material material;
 
 void main()
 {
-    Light light = Light(vec3(1), vec3(-1, -1, 1));
+    Light light = Light(vec3(1), normalize(vec3(-1, -1, 1)));
     
     vec3 diffuseMapTexel = texture(material.texture0, texCoord).rgb;
     vec3 color = light.color * material.color;
