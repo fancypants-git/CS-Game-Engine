@@ -45,8 +45,7 @@ public class Window : GameWindow
 
         try
         {
-            var scene = Resources.GetScene("Scenes/PhysicsTest.scene");
-            SceneManager.ActivateScene(scene, false);
+            
         }
         catch (Exception ex)
         {
@@ -65,10 +64,6 @@ public class Window : GameWindow
 
         try
         {
-            SceneManager.ActiveScene?.EarlyUpdate();
-            
-            SceneManager.ActiveScene?.Update();
-            
             if (KeyboardState.IsKeyDown(Keys.Escape))
             {
                 Debug.LogPrefixed(LogType.Exit, "Exiting due to Escape Press");
@@ -92,7 +87,6 @@ public class Window : GameWindow
 
         try
         {
-            SceneManager.ActiveScene?.Render();
         }
         catch (Exception ex)
         {
@@ -120,8 +114,6 @@ public class Window : GameWindow
         try
         {
             Debug.LogInfo("Disposing Objects");
-
-            SceneManager.ActiveScene.Dispose();
 
             Debug.LogInfo("Finished Disposing Objects");
         }
