@@ -137,10 +137,10 @@ public class Scene : IDisposable
 
         if (disposing)
         {
-            var entities = new Entity[_entities.Count];
-            _entities.CopyTo(entities);
-            foreach (var entity in entities)
-                entity.Dispose();
+            foreach (var t in _entities)
+            {
+                t.Dispose();
+            }
         }
 
         _entities.Clear();

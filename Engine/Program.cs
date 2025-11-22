@@ -45,7 +45,7 @@ public class Window : GameWindow
 
         try
         {
-            var scene = Resources.GetScene("Scenes/Example.scene");
+            var scene = Resources.GetScene("Scenes/PhysicsTest.scene");
             SceneManager.ActivateScene(scene, false);
         }
         catch (Exception ex)

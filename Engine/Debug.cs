@@ -94,8 +94,8 @@ public static class Debug
         LogPrefixed(LogType.Fatal, messages);
     }
 
-    public static void LogMemLeak(string name, params object?[] messages)
+    public static void LogMemLeak(string name)
     {
-        LogPrefixed("LEAK", $"Memory leak detected in {name} instance! Did not call Dispose().\n\t", messages);
+        LogPrefixed("LEAK", $"Memory leak detected in {name} instance! Did not call Dispose().");
     }
 }

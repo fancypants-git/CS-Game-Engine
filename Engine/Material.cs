@@ -99,6 +99,9 @@ public struct Material : IDisposable
         
         Shader.Dispose();
         Texture?.Dispose();
+        DiffuseMap?.Dispose();
+        SpecularMap?.Dispose();
+        SpecularPowerMap?.Dispose();
         
         _isDisposed = true;
     }

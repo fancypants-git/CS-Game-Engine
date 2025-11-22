@@ -104,7 +104,18 @@ internal static class SceneLoader
                     List<Parameter> parameters = [parentParameter];
                     
                     parameters.AddRange(DecodeParameters(args[1..]));
-                    var c = ComponentRegistry.Create(type, parameters);
+
+                    Component c;
+                    try
+                    {
+                        c = ComponentRegistry.Create(type, parameters);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("Failed to create Component of type", name, "in line", i, "\n\b", e);
+                        break;
+                    }
+                    
 
                     if (c is IDrawable drawable)
                         data.Drawables.Add(drawable);

@@ -11,6 +11,7 @@ public class Renderer : Component, IDrawable
 	// TODO Add a MaterialPropertyBlock system (like Unity) so multiple renderers can share a material but override a few properties (e.g., color).
 	// TODO Add a RendererType distinction later (MeshRenderer, SkinnedMeshRenderer, SpriteRenderer, etc.).
 	// TODO Add batching logic later based on shared Mesh and Material.
+	// TODO Add automatic material/indices combination to combine submeshes with the same Material
 	
 	private static readonly Vertex[] cubeVertices =
 	{

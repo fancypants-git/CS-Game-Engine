@@ -6,8 +6,8 @@ Ns 64
 Tr 0
 
 map_Ka container-diffuse.png
-# map_Kd container-diffuse.png
-# map_Ks container-specular.png
+map_Kd container-diffuse.png
+map_Ks container-specular.png
 Ka 1.0 1.0 1.0
 
 newmtl default
