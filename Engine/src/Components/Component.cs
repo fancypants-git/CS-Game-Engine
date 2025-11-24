@@ -1,4 +1,6 @@
-﻿namespace Engine;
+﻿using Engine.Helpers;
+
+namespace Engine.Components;
 
 public class Component(Entity parent) : IDisposable
 {
@@ -14,14 +16,14 @@ public class Component(Entity parent) : IDisposable
     public virtual void Load()
     {
     }
-
-    public virtual void EarlyUpdate()
-    {
-    }
-
+    
     public virtual void Update()
     {
     }
+    public virtual void FixedUpdate()
+    {
+    }
+    
     public virtual void Unload()
     {
         Parent.RemoveComponent(this);

@@ -1,4 +1,7 @@
 ﻿using System.Reflection;
+using Engine.Attributes;
+using Engine.Components;
+using Engine.Helpers;
 using OpenTK.Mathematics;
 
 namespace Engine;
@@ -27,27 +30,6 @@ public class Entity : IDisposable
             c.Load();
     }
 
-    public virtual void EarlyUpdate()
-    {
-        if (!IsActive) return;
-
-        Transform = GetComponent<Transform>(true);
-
-        Component? currentComponent = null;
-        try
-        {
-            foreach (var c in _components)
-            {
-                currentComponent = c;
-                c.EarlyUpdate();
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error Occured when Updating Component", currentComponent, "|", e.Message, '\n', e);
-        }
-    }
-
     public virtual void Update()
     {
         if (!IsActive) return;
@@ -64,6 +46,25 @@ public class Entity : IDisposable
         catch (Exception e)
         {
             Debug.LogError("Error Occured when Updating Component", currentComponent, "|", e.Message, '\n', e);
+        }
+    }
+
+    public virtual void FixedUpdate()
+    {
+        if (!IsActive) return;
+        
+        Component? currentComponent = null;
+        try
+        {
+            foreach (var c in _components)
+            {
+                currentComponent = c;
+                c.FixedUpdate();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error Occured when Updating Component in FixedUpdate", currentComponent, "|", e.Message, '\n', e);
         }
     }
 

@@ -1,7 +1,8 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using Engine.Helpers;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Rendering;
 
 public class Shader : IDisposable
 {

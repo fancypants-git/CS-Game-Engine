@@ -1,0 +1,9 @@
+{
+  "0.0.1": {
+    "enableEntityHierarchy": false,
+    "entityHierarchyMethod": "None",
+    "allowOptionalArguments": false,
+    "allowEnableComponentArgument": false,
+    "finalizeEntityWithInit": false
+  }
+}

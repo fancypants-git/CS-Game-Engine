@@ -1,7 +1,6 @@
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Graphics.Vulkan;
 
-namespace Engine;
+namespace Engine.Rendering;
 
 /// <summary>
 /// Mesh contains the vertex data of a mesh<br/>

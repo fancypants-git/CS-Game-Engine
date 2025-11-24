@@ -1,6 +1,4 @@
-using OpenTK.Graphics.OpenGL;
-
-namespace Engine;
+namespace Engine.Rendering;
 
 /// <summary>
 /// Submesh contains index data of a part of a Mesh<br/>

@@ -1,6 +1,6 @@
-namespace Engine;
+namespace Engine.Attributes;
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public class ComponentMetaAttribute(string name) : Attribute
 {
     public string Name { get; } = name;

@@ -1,10 +1,10 @@
 using System.Drawing;
-using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
-using OpenTK.Graphics.OpenGL;
+using Engine.Helpers;
+using Engine.Rendering;
 using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Internals;
 
 internal static class MeshLoader
 {

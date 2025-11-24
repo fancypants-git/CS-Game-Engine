@@ -1,6 +1,8 @@
-﻿using OpenTK.Mathematics;
+﻿using Engine.Attributes;
+using Engine.Helpers;
+using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Components;
 
 [ComponentMeta("CameraController")]
 [DisallowMultiple(true)]

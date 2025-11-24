@@ -1,7 +1,7 @@
 ﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace Engine;
+namespace Engine.Helpers;
 
 public static class Input
 {

@@ -45,7 +45,7 @@ void main()
     
     if (material.useAmbientMap)
     {
-        ambient *= texture(material.ambientMap, texCoord);
+        ambient *= texture(material.ambientMap, texCoord).rgb;
     }
     
     
@@ -56,7 +56,7 @@ void main()
     
     if (material.useDiffuseMap)
     {
-        diffuse *= texture(material.diffuseMap, texCoord);
+        diffuse *= texture(material.diffuseMap, texCoord).rgb;
     }
     
     
@@ -76,7 +76,7 @@ void main()
     
     if (material.useSpecularMap)
     {
-        specular *= texture(material.specularMap, texCoord);
+        specular *= texture(material.specularMap, texCoord).rgb;
     }
     
     // Total

@@ -1,7 +1,9 @@
+using Engine.Attributes;
+using Engine.Helpers;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace Engine;
+namespace Engine.Components;
 
 [ComponentMeta("PlayerController")]
 [DisallowMultiple(true)]

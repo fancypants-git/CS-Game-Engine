@@ -1,7 +1,8 @@
 using System.Runtime.CompilerServices;
+using Engine.Helpers;
 using OpenTK.Graphics.OpenGL;
 
-namespace Engine;
+namespace Engine.Rendering;
 
 public class VertexBufferObject : IDisposable
 {

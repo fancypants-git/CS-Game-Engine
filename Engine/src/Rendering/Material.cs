@@ -1,8 +1,8 @@
 using System.Drawing;
-using OpenTK.Graphics.OpenGLES2;
+using Engine.Components;
 using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Rendering;
 
 /// <summary>
 /// Material contains the Material data of a Mesh

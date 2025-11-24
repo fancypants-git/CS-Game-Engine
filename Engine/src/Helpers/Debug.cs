@@ -1,4 +1,4 @@
-﻿namespace Engine;
+﻿namespace Engine.Helpers;
 
 public enum LogType
 {
@@ -50,7 +50,7 @@ public static class Debug
         // and that filter is either LogFilter.Nothing or does not contain LogType type
         // do not log this message
         if (LogFilter.Length != 0 &&
-            (LogFilter.Contains(Engine.LogFilter.Nothing) ||
+            (LogFilter.Contains(Helpers.LogFilter.Nothing) ||
              !LogFilter.Contains((LogFilter)type)))
             return;
         

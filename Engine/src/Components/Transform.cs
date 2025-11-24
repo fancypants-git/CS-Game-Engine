@@ -1,7 +1,7 @@
-﻿using OpenTK.Graphics.Vulkan;
+﻿using Engine.Attributes;
 using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Components;
 
 [ComponentMeta("Transform")]
 [DisallowMultiple(true)]

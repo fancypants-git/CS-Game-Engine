@@ -1,8 +1,23 @@
-scene "Example Scene"
+meta_start
+version 0.0.1
+name "Example Scene"
+camera Main
 
-include "Scenes/Player.scene"
+meta_end
+
+entity Main
+add Transform vec3(0, 0, -5) vec3(0) vec3(0)
+add Camera 0   0.1 100.0   90. vec2(0)
+
+add PlayerController 2.6
+add CameraController 10. true
 
 entity Cube
-add Transform vec3(0) vec3(2) vec3(0)
-# add Renderer mesh(Objects/dragon.obj) shader(lit)
-add Renderer
+add Transform vec3(-1, 0, 0) vec3(1) vec3(0)
+add Renderer mesh(Objects/cube.obj) shader(unlit)
+#add Rigidbody 0.
+
+entity Cube2
+add Transform vec3(1, 0, 0) vec3(1) vec3(0)
+add Renderer mesh(Objects/cube.obj) shader(unlit)
+add Rigidbody 0.

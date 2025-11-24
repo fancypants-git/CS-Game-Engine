@@ -1,7 +1,8 @@
+using Engine.Helpers;
 using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
 
-namespace Engine;
+namespace Engine.Rendering;
 
 public class Texture : IDisposable
 {

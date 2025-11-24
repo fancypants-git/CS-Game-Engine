@@ -1,4 +1,7 @@
-namespace Engine;
+using Engine.Internals;
+using Engine.Rendering;
+
+namespace Engine.Helpers;
 
 public static class Resources
 {
@@ -16,18 +19,6 @@ public static class Resources
     }
 
 
-    public static Scene GetScene(string path)
-    {
-        var data = GetSceneData(path);
-        return Scene.CreateFromData(data);
-    }
-
-    public static SceneData GetSceneData(string path)
-    {
-        return SceneLoader.LoadSceneData(GetPath(path));
-    }
-
-
     public static Mesh? GetMesh(string path, out Material[] materials)
     {
         materials = [];
@@ -41,8 +32,7 @@ public static class Resources
 
         return MeshLoader.LoadMesh(path, out materials);
     }
-
-
+    
     public static Shader GetShader(string name)
     {
         var vertPath = GetPath("Shaders", name + ".vert");

@@ -1,105 +1,136 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Engine.Components;
+using Engine.Helpers;
+using Engine.Interfaces;
+using Engine.Rendering;
+using Engine.Scene;
+using Newtonsoft.Json;
 using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Internals;
 
-public struct SceneData
+
+public static class SceneLoader
 {
-    public string Name { get; set; }
-    public string Path { get; set; }
+    public readonly static string NewestVersion = "0.0.1";
+    public readonly static Dictionary<string, SceneVersion> SceneVersions;
 
-    public List<Entity> Entities { get; set; }
-    public List<IDrawable> Drawables { get; set; }
-    
-    public Camera ActiveCamera { get; set; }
-    public bool HasActiveCamera { get; set; }
-}
-
-
-internal static class SceneLoader
-{
-    internal static SceneData LoadSceneData(string path)
+    static SceneLoader()
     {
-        var data = new SceneData
-        {
-            Path = path,
-            Entities = [],
-            Drawables = [],
-        };
-        
-        // global scene data
-        var activeCameraId = "";
-        
-        // current entity data
-        Entity currentEntity = null;
-        
-        
-
+        var json = File.ReadAllText(Resources.GetPath("Internal/SceneVersions.json"));
+        SceneVersions = JsonConvert.DeserializeObject<Dictionary<string, SceneVersion>>(json);
+    }
+    
+    public static SceneData LoadSceneData(string path)
+    {
         var source = File.ReadAllText(path);
-        Debug.LogInfo($"Loading scene {path}");
-
-        var i = 0;
-        foreach (var line in source.Split('\n'))
+        var header = Regex.Match(source, @"(?ms)^meta_start\s*\n(?<meta>.*?)^meta_end\b", RegexOptions.Multiline);
+        if (!header.Success)
         {
-            i++;
-            var l = line.Trim();
-            if (l.StartsWith('#') || string.IsNullOrWhiteSpace(l)) continue;
+            Debug.LogError("Could not register Scene Header in", path);
+            return new SceneData();
+        }
+
+        var versionMatch = Regex.Match(header.Groups["meta"].Value, @"(?m)^version\s+(?<version>[^\s]+)");
+        string version;
+        if (!versionMatch.Success)
+        {
+            Debug.LogWarn("Could not register Scene Version in", path, ". Make sure to always include Version!");
+            Debug.LogWarn("Defaulting to newest version.");
+            version = NewestVersion;
+        }
+        else
+            version = versionMatch.Groups["version"].Value;
+
+        
+
+        var data = ParseScene(path, version);
+        
+        return data;
+    }
+
+    public static SceneData ParseScene(string path, string version)
+    {
+        if (!SceneVersions.TryGetValue(version, out var rules))
+        {
+            Debug.LogError("Scene Version \"", version, "\" was not registered. Make sure to use a registered version!");
+            Debug.LogWarn("Using to newest version.");
+            version = NewestVersion;
+        }
+
+        var meta = new SceneMeta {
+            Path = path,
+            Version = version
+        };
+        var data = new SceneData {
+            Meta = meta,
+            Entities = [],
+            Drawables = []
+        };
+
+        var activeCameraId = "";
+
+        Entity currentEntity = null!;
+        
+        var source = File.ReadAllText(path);
+        string[] lines = source.Split('\n');
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i].Trim();
+            if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line)) continue;
             
-            // find the command and rest using RegEx
-            const string commandPattern = @"\A(?<command>\w+) \s+ (?<rest>.*)";
-            var match = Regex.Match(l, commandPattern, RegexOptions.IgnorePatternWhitespace);
-            
+            var match = Regex.Match(line, @"\A(?<command>\w+) \s* (?<rest>.*)", RegexOptions.IgnorePatternWhitespace);
+
             if (!match.Success)
             {
-                Debug.LogError("Failed to decode line", i);
+                Debug.LogError("Failed to decode line", i, "of scene", path);
                 continue;
             }
-            
+
             var command = match.Groups["command"].Value;
-            const string argPattern = """(?<arg>"[^"]*" | \w+\([^\)]*\) | [^\s"()<>]+)""";
-            var matches = Regex.Matches(match.Groups["rest"].Value, argPattern, RegexOptions.IgnorePatternWhitespace);
-            var args = matches.Select(m => m.Groups["arg"].Value).ToArray();
+
+            var argumentsMatches = Regex.Matches(match.Groups["rest"].Value, """(?<arg> "[^"]*" | \w+\([^)]*\) | [^\s"()]+)""",
+                RegexOptions.IgnorePatternWhitespace);
+            
+            var args = argumentsMatches.Select(m => m.Groups["arg"].Value).ToArray();
+
+            bool isMetaDataBlock = false;
 
             switch (command)
             {
-                // global scene data
-                case "include":
-                    var includeData = LoadSceneData(Resources.GetPath(DecodeString(args[0])));
-                    if (includeData.HasActiveCamera)
-                    {
-                        if (data.HasActiveCamera)
-                            Debug.LogWarn("Scene already defined ActiveCamera but was overridden by included scene in line", i);
-                        
-                        data.HasActiveCamera = true;
-                        data.ActiveCamera = includeData.ActiveCamera;
-                    }
-                    
-                    data.Entities.AddRange(includeData.Entities);
-                    data.Drawables.AddRange(includeData.Drawables);
-                    break;
+                // meta data stuff
                 case "scene":
-                    data.Name = DecodeString(args[0]);
+                    isMetaDataBlock = true;
+                    break;
+                case "init":
+                    isMetaDataBlock = false;
+                    break;
+                case "name":
+                    meta.Name = DecodeString(args[0]);
                     break;
                 case "camera":
-                    data.HasActiveCamera = true;
                     activeCameraId = DecodeString(args[0]);
                     break;
-                // entity scene data
+                
+                // global scene data
+                case "include":
+                    var includeData = LoadSceneData(DecodeString(args[0]));
+                    data.AddData(includeData);
+                    break;
                 case "entity":
-                    if (currentEntity != null)
-                        data.Entities.Add(currentEntity);
-                    
                     currentEntity = new Entity(DecodeString(args[0]));
+                    data.Entities.Add(currentEntity);
                     break;
                 case "add":
-                    var name = DecodeString(args[0]);
-                    if (!ComponentRegistry.GetComponentType(name, out var type))
+                    var ctypeStr = DecodeString(args[0]);
+                    if (!ComponentRegistry.GetComponentType(ctypeStr, out var ctype))
                     {
-                        Debug.LogError("Unknown component type at line", i);
-                        continue;
+                        Debug.LogWarn("Unknown component type at line", i);
+                        break;
                     }
-                    
+
                     var parentParameter = new Parameter(currentEntity, typeof(Entity));
                     List<Parameter> parameters = [parentParameter];
                     
@@ -108,32 +139,32 @@ internal static class SceneLoader
                     Component c;
                     try
                     {
-                        c = ComponentRegistry.Create(type, parameters);
+                        c = ComponentRegistry.Create(ctype, parameters);
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError("Failed to create Component of type", name, "in line", i, "\n\b", e);
+                        Debug.LogError("Failed to create Component of type", ctype, "in line", i, "\n\b", e);
                         break;
                     }
-                    
 
-                    if (c is IDrawable drawable)
-                        data.Drawables.Add(drawable);
+                    switch (c)
+                    {
+                        case IDrawable drawable:
+                            data.Drawables.Add(drawable);
+                            break;
+                        case Camera camera when currentEntity.Id == activeCameraId:
+                            data.ActiveCamera = camera;
+                            break;
+                        case Transform transform:
+                            currentEntity.Transform = transform;
+                            break;
+                    }
 
-                    if (type == typeof(Camera) && currentEntity.Id == activeCameraId)
-                        data.ActiveCamera = (Camera)c;
-                    
-                    if (type == typeof(Transform))
-                        currentEntity.Transform = (Transform)c;
-                    
                     currentEntity.AddComponent(c);
                     break;
             }
         }
         
-        if (currentEntity != null)
-            data.Entities.Add(currentEntity);
-
         return data;
     }
 
@@ -209,7 +240,7 @@ internal static class SceneLoader
     // --------------------------
     // Main parameter decoder
     // --------------------------
-    public static Parameter[] DecodeParameters(string[] values)
+    private static Parameter[] DecodeParameters(string[] values)
     {
         List<Parameter> parameters = [];
         

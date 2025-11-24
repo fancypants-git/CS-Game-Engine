@@ -1,6 +1,7 @@
-namespace Engine;
+namespace Engine.Attributes;
 
-public class DisallowMultipleAttribute(bool overrideIfExists = false) : Attribute
+[AttributeUsage(AttributeTargets.Class)]
+public class DisallowMultipleAttribute(bool overrideIfExists = true) : Attribute
 {
     public bool OverrideIfExists { get; } = overrideIfExists;
 }

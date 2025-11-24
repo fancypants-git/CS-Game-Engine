@@ -1,36 +1,44 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
+using Engine.Attributes;
+using Engine.Helpers;
+using Engine.Scene;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Debug = Engine.Helpers.Debug;
 
 namespace Engine;
 
 public class Window : GameWindow
 {
-    public Window(int width, int height, string title)
+    public Window(ProgramSettings settings)
         : base(GameWindowSettings.Default, new NativeWindowSettings {
             API = ContextAPI.OpenGL,
             Profile = ContextProfile.Core,
-            Flags = ContextFlags.Debug,
-            ClientSize = (width, height),
-            Vsync = VSyncMode.Off,
-            Title = title,
-            StartFocused = false,
-            WindowState = WindowState.Normal,
-            WindowBorder = WindowBorder.Resizable,
+            Flags = settings.Flags,
+            ClientSize = settings.WindowSize,
+            Vsync = settings.VSync,
+            Title = settings.Title,
+            StartFocused = true,
+            WindowState = settings.WindowState,
+            WindowBorder = settings.WindowBorder,
         })
-    { }
+    {
+        Settings = settings;
+    }
+    
+    protected ProgramSettings Settings { get; }
+    private double _fixedUpdateWaitingTime = 0;
+    
 
-
-    protected override void OnLoad()
+    protected override sealed void OnLoad()
     {
         base.OnLoad();
-
+        
+        Debug.LogPrefixed(LogType.Launch, "Initializing OpenGL Context");
+        
         GL.ClearColor(0,0,0, 1.0f);
 
         GL.Enable(EnableCap.DepthTest);
@@ -38,46 +46,59 @@ public class Window : GameWindow
         
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
+        
         Input.Initialize(KeyboardState, MouseState);
-
-        CursorState = CursorState.Grabbed;
+        
+        Debug.LogPrefixed(LogType.Launch, "Finished Initializing OpenGL Context");
 
         try
         {
-            
+            Start();
         }
         catch (Exception ex)
         {
-            Debug.LogError("Error Occured in OnLoad() |", ex.Message, '\n', ex);
+            Debug.LogError("Error Occured in Load() |", ex.Message, '\n', ex);
         }
-        
-        SceneManager.ActiveCamera?.SetViewportSize(ClientSize.X, ClientSize.Y);
     }
 
 
-    protected override void OnUpdateFrame(FrameEventArgs args)
+    protected override sealed void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
         
         Time.DeltaTimeDouble = args.Time * Time.TimeScale;
 
+        _fixedUpdateWaitingTime += Time.DeltaTimeDouble;
+
+        while (_fixedUpdateWaitingTime > Settings.FixedUpdateDelta)
+        {
+            try
+            {
+                Time.FixedDeltaTimeDouble = _fixedUpdateWaitingTime;
+                _fixedUpdateWaitingTime -= Settings.FixedUpdateDelta;
+                
+                SceneManager.FixedUpdateScene();
+                FixedUpdate();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("Error Occured in FixedUpdate() |", ex.Message, '\n', ex);
+            }
+        }
+
         try
         {
-            if (KeyboardState.IsKeyDown(Keys.Escape))
-            {
-                Debug.LogPrefixed(LogType.Exit, "Exiting due to Escape Press");
-                Close();
-            }
+            SceneManager.UpdateScene();
+            Update();
         }
         catch (Exception ex)
         {
-            Debug.LogError("Error Occured in UpdateFrame() |", ex.Message, '\n', ex);
+            Debug.LogError("Error Occured in Update() |", ex.Message, '\n', ex);
         }
     }
 
 
-    protected override void OnRenderFrame(FrameEventArgs args)
+    protected override sealed void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
 
@@ -87,6 +108,7 @@ public class Window : GameWindow
 
         try
         {
+            SceneManager.RenderScene();
         }
         catch (Exception ex)
         {
@@ -97,23 +119,26 @@ public class Window : GameWindow
     }
 
 
-    protected override void OnFramebufferResize(FramebufferResizeEventArgs e)
+    protected override sealed void OnFramebufferResize(FramebufferResizeEventArgs e)
     {
         base.OnFramebufferResize(e);
 
         GL.Viewport(0, 0, e.Width, e.Height);
-        
         SceneManager.ActiveCamera.SetViewportSize(e.Width, e.Height);
     }
 
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override sealed void OnClosing(CancelEventArgs e)
     {
         base.OnClosing(e);
 
         try
         {
+            OnClose();
+
             Debug.LogInfo("Disposing Objects");
+
+            SceneManager.Dispose();
 
             Debug.LogInfo("Finished Disposing Objects");
         }
@@ -121,20 +146,47 @@ public class Window : GameWindow
         {
             Debug.LogError("Error Occured in UnLoad() |", ex.Message, '\n', ex);
         }
+        finally
+        {
+            Debug.LogPrefixed(LogType.Exit, "Exited Program.");
+        }
+    }
+
+
+    protected virtual void Start()
+    {
+        
+    }
+
+    protected virtual void Update()
+    {
+        
+    }
+
+    protected virtual void FixedUpdate()
+    {
+    }
+    
+    protected virtual void OnClose()
+    {
     }
 }
 
-internal static class Launch
+[GameEntry]
+internal class Program() : Window(ProgramSettings.Default)
 {
-    private static void Main(string[] args)
+    protected override void Start()
     {
-        Debug.LogFilter = [LogFilter.Debug, LogFilter.Warning, LogFilter.Error, LogFilter.Fatal];
-        
-        Debug.LogPrefixed(LogType.Launch, "Launching Program, Creating Window");
-        
-        using Window window = new(600, 600, "OpenTK Game Engine");
-        window.Run();
-        
-        Debug.LogPrefixed(LogType.Exit, "Closed Window, Exiting Program");
+        SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
+        CursorState = CursorState.Grabbed;
+    }
+
+    protected override void Update()
+    {
+        if (Input.IsKeyDown(Keys.Escape))
+        {
+            Debug.LogPrefixed(LogType.Exit, "Exiting Due to Escape press!");
+            Close();
+        }
     }
 }

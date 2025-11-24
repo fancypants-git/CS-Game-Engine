@@ -1,6 +1,10 @@
+using Engine.Attributes;
+using Engine.Helpers;
+using Engine.Interfaces;
+using Engine.Scene;
 using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Components;
 
 [ComponentMeta("Camera")]
 public class Camera : Component

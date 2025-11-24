@@ -1,9 +1,12 @@
 using System.Drawing;
+using Engine.Attributes;
+using Engine.Helpers;
+using Engine.Interfaces;
+using Engine.Rendering;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Graphics.Vulkan;
 using OpenTK.Mathematics;
 
-namespace Engine;
+namespace Engine.Components;
 
 [ComponentMeta("Renderer")]
 public class Renderer : Component, IDrawable

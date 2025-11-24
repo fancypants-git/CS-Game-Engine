@@ -1,6 +1,8 @@
 using System.Reflection;
+using Engine.Attributes;
+using Engine.Components;
 
-namespace Engine;
+namespace Engine.Internals;
 
 public struct Parameter(object value, Type type)
 {
