@@ -11,9 +11,9 @@ using Debug = Engine.Helpers.Debug;
 
 namespace Engine;
 
-public class Window : GameWindow
+public class Game : GameWindow
 {
-    public Window(ProgramSettings settings)
+    protected Game(ProgramSettings settings)
         : base(GameWindowSettings.Default, new NativeWindowSettings {
             API = ContextAPI.OpenGL,
             Profile = ContextProfile.Core,
@@ -27,6 +27,8 @@ public class Window : GameWindow
         })
     {
         Settings = settings;
+        Winfo.WindowSize = ClientSize;
+        Debug.LogFilter = settings.LogFilter;
     }
     
     protected ProgramSettings Settings { get; }
@@ -35,6 +37,8 @@ public class Window : GameWindow
 
     protected override sealed void OnLoad()
     {
+        Awake();
+        
         base.OnLoad();
         
         Debug.LogPrefixed(LogType.Launch, "Initializing OpenGL Context");
@@ -47,9 +51,13 @@ public class Window : GameWindow
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         
+        GL.Viewport(0, 0, Winfo.WindowSize.X, Winfo.WindowSize.Y);
+        
         Input.Initialize(KeyboardState, MouseState);
         
         Debug.LogPrefixed(LogType.Launch, "Finished Initializing OpenGL Context");
+        
+        
 
         try
         {
@@ -62,7 +70,7 @@ public class Window : GameWindow
     }
 
 
-    protected override sealed void OnUpdateFrame(FrameEventArgs args)
+    protected sealed override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
         
@@ -98,7 +106,7 @@ public class Window : GameWindow
     }
 
 
-    protected override sealed void OnRenderFrame(FrameEventArgs args)
+    protected sealed override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
 
@@ -119,16 +127,17 @@ public class Window : GameWindow
     }
 
 
-    protected override sealed void OnFramebufferResize(FramebufferResizeEventArgs e)
+    protected sealed override void OnFramebufferResize(FramebufferResizeEventArgs e)
     {
         base.OnFramebufferResize(e);
 
         GL.Viewport(0, 0, e.Width, e.Height);
         SceneManager.ActiveCamera.SetViewportSize(e.Width, e.Height);
+        Winfo.WindowSize = (e.Width, e.Height);
     }
 
 
-    protected override sealed void OnClosing(CancelEventArgs e)
+    protected sealed override void OnClosing(CancelEventArgs e)
     {
         base.OnClosing(e);
 
@@ -153,6 +162,10 @@ public class Window : GameWindow
     }
 
 
+    protected virtual void Awake()
+    {
+        
+    }
     protected virtual void Start()
     {
         
@@ -172,9 +185,19 @@ public class Window : GameWindow
     }
 }
 
+
+
 [GameEntry]
-internal class Program() : Window(ProgramSettings.Default)
+internal class Program() : Game(new ProgramSettings(ProgramSettings.Release)
 {
+    // WindowState = WindowState.Maximized
+    Flags = ContextFlags.ForwardCompatible
+})
+{
+    protected override void Awake()
+    {
+    }
+    
     protected override void Start()
     {
         SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
@@ -183,10 +206,18 @@ internal class Program() : Window(ProgramSettings.Default)
 
     protected override void Update()
     {
-        if (Input.IsKeyDown(Keys.Escape))
+        if (Input.IsKeyPressed(Keys.Escape))
         {
-            Debug.LogPrefixed(LogType.Exit, "Exiting Due to Escape press!");
-            Close();
+            if (CursorState == CursorState.Grabbed)
+            {
+                CursorState = CursorState.Normal;
+                Time.TimeScale = 0;
+            }
+            else
+            {
+                CursorState = CursorState.Grabbed;
+                Time.TimeScale = 1;
+            }
         }
     }
 }

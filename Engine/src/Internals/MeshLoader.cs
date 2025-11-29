@@ -35,6 +35,7 @@ internal static class MeshLoader
         int startIndex = 0;
 
         Dictionary<string, Material> mats = [];
+        List<string> usedMaterials = [];
 
         Material usedMaterial = new();
         bool usingMaterial = false;
@@ -76,6 +77,7 @@ internal static class MeshLoader
 
                     usingMaterial = true;
                     mats.TryGetValue(match.Groups["rest"].Value, out usedMaterial);
+                    usedMaterials.Add(match.Groups["rest"].Value);
                     break;
 
                 // mesh commands
@@ -152,6 +154,17 @@ internal static class MeshLoader
             resultSubmeshes.Add(new Submesh(startIndex, (int)(resultIndices.Count - startIndex)));
         }
 
+
+        var usedSet = new HashSet<string>(usedMaterials);
+
+        foreach (var key in mats.Keys.Where(k => !usedSet.Contains(k)).ToList())
+        {
+            mats[key].Dispose();
+            mats.Remove(key);
+        }
+        
+        
+        
         materials = resultMaterials.ToArray();
         return new Mesh(resultVertices.ToArray(), resultIndices.ToArray(), resultSubmeshes.ToArray());
     }

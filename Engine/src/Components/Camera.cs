@@ -47,7 +47,7 @@ public class Camera : Component
     public Matrix4 Projection { get; private set; }
     public Matrix4 View { get; private set; }
     
-    public Camera(Entity parent) : base(parent)
+    public Camera(Entity entity) : base(entity)
     {
         Type = CameraType.Perspective;
         Fovy = 90.0f;
@@ -55,8 +55,8 @@ public class Camera : Component
         MinDepth = 1f;
     }
 
-    public Camera(Entity parent, CameraType cameraType, float minDepth, float maxDepth, float fovy = 90.0f, Vector2? size = null)
-        : base(parent)
+    public Camera(Entity entity, CameraType cameraType, float minDepth, float maxDepth, float fovy = 90.0f, Vector2? size = null)
+        : base(entity)
     {
         Type = cameraType;
         MinDepth = minDepth;
@@ -64,8 +64,8 @@ public class Camera : Component
         Fovy = fovy;
         Size = size ?? Vector2.One;
     }
-    public Camera(Entity parent, int cameraType, float minDepth, float maxDepth, float fovy, Vector2 size)
-        : base(parent)
+    public Camera(Entity entity, int cameraType, float minDepth, float maxDepth, float fovy, Vector2 size)
+        : base(entity)
     {
         Type = (CameraType)cameraType;
         MinDepth = minDepth;
@@ -80,7 +80,7 @@ public class Camera : Component
 
         if (_aspectRatio <= 0)
         {
-            Debug.LogError("Aspect ratio must be positive; Not updating Camera component of", Parent.Id);
+            Debug.LogError("Aspect ratio must be positive; Not updating Camera component of", Entity.Id);
             return;
         }
         

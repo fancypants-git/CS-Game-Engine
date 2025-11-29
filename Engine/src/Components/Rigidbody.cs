@@ -12,13 +12,13 @@ public class Rigidbody : Component
     public float Gravity;
     public Vector3 Velocity;
     
-    public Rigidbody(Entity parent, float mass) : base(parent)
+    public Rigidbody(Entity entity, float mass) : base(entity)
     {
         Mass = mass;
         Gravity = -9.81f;
     }
 
-    public Rigidbody(Entity parent, float mass, float gravity) : base(parent)
+    public Rigidbody(Entity entity, float mass, float gravity) : base(entity)
     {
         Mass = mass;
         Gravity = gravity;

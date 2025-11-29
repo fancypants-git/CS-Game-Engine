@@ -25,6 +25,7 @@ public static class SceneManager
 
         var sceneData = SceneLoader.LoadSceneData(path);
         CurrentScene = sceneData;
+        CurrentScene.ActiveCamera.SetViewportSize(Winfo.WindowSize.X, Winfo.WindowSize.Y);
     }
 
     /// <summary>

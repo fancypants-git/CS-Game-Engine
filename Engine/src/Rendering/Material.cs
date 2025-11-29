@@ -1,13 +1,12 @@
 using System.Drawing;
 using Engine.Components;
+using Engine.Helpers;
 using OpenTK.Mathematics;
 
 namespace Engine.Rendering;
 
-/// <summary>
-/// Material contains the Material data of a Mesh
-/// </summary>
-public struct Material : IDisposable
+
+public struct Material() : IDisposable
 {
     // Shader //
     public Shader Shader { get; set; }
@@ -29,10 +28,6 @@ public struct Material : IDisposable
     
 
     private bool _isDisposed = false;
-
-    public Material()
-    {
-    }
 
     public void Use()
     {
@@ -96,8 +91,13 @@ public struct Material : IDisposable
     public void Dispose()
     {
         if (_isDisposed) return;
+
+        try
+        {
+            Shader.Dispose();
+        }
+        catch (NullReferenceException) {}
         
-        Shader.Dispose();
         Texture?.Dispose();
         DiffuseMap?.Dispose();
         SpecularMap?.Dispose();

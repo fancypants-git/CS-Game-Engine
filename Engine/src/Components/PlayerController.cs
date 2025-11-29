@@ -6,12 +6,12 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 namespace Engine.Components;
 
 [ComponentMeta("PlayerController")]
-[DisallowMultiple(true)]
+[DisallowMultiple]
 public class PlayerController : Component
 {
     public float Speed;
 
-    public PlayerController(Entity parent, float speed) : base(parent)
+    public PlayerController(Entity entity, float speed) : base(entity)
     {
         Speed = speed;
     }

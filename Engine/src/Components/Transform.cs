@@ -4,9 +4,11 @@ using OpenTK.Mathematics;
 namespace Engine.Components;
 
 [ComponentMeta("Transform")]
-[DisallowMultiple(true)]
+[DisallowMultiple]
 public class Transform : Component
 {
+    
+    
     private Vector3 _position;
     public Vector3 Position
     {
@@ -17,9 +19,16 @@ public class Transform : Component
         set
         {
             _position = value;
-            TranslationMatrix = Matrix4.CreateTranslation(_position);
+            TranslationMatrix = Matrix4.CreateTranslation(GlobalPosition);
         }
     }
+
+    public Vector3 GlobalPosition
+    {
+        get => _position + (Parent?._position ?? Vector3.AdditiveIdentity);
+        set => Position = value - (Parent?._position ?? Vector3.AdditiveIdentity);
+    }
+    
 
     private Vector3 _size;
     public Vector3 Size
@@ -31,10 +40,17 @@ public class Transform : Component
         set
         {
             _size = value;
-            SizeMatrix = Matrix4.CreateScale(_size);
+            SizeMatrix = Matrix4.CreateScale(GlobalSize);
         }
     }
 
+    public Vector3 GlobalSize
+    {
+        get => _size * (Parent?._size ?? Vector3.MultiplicativeIdentity);
+        set => Size = value / (Parent?._size ?? Vector3.MultiplicativeIdentity);
+    }
+
+    
     private Vector3 _rotation;
     public Vector3 Rotation
     {
@@ -45,9 +61,9 @@ public class Transform : Component
         set
         {
             _rotation = value;
-            RotationMatrix = Matrix4.CreateRotationZ(MathHelper.DegToRad * _rotation.Z)
-                             * Matrix4.CreateRotationY(MathHelper.DegToRad * _rotation.Y)
-                             * Matrix4.CreateRotationX(MathHelper.DegToRad * _rotation.X);
+            RotationMatrix = Matrix4.CreateRotationZ(MathHelper.DegToRad * GlobalRotation.Z)
+                             * Matrix4.CreateRotationY(MathHelper.DegToRad * GlobalRotation.Y)
+                             * Matrix4.CreateRotationX(MathHelper.DegToRad * GlobalRotation.X);
             
             Forwards = new Vector3(
                 (float)(Math.Cos(MathHelper.DegToRad * _rotation.X) * Math.Sin(MathHelper.DegToRad * _rotation.Y)),
@@ -58,6 +74,12 @@ public class Transform : Component
             Right = Vector3.Cross(Vector3.UnitY, Forwards);
             Up = Vector3.Cross(Forwards, Right);
         }
+    }
+
+    public Vector3 GlobalRotation
+    {
+        get => _rotation + (Parent?._rotation ?? Vector3.AdditiveIdentity);
+        set => Rotation = value - (Parent?._rotation ?? Vector3.AdditiveIdentity);
     }
 
 
@@ -110,18 +132,46 @@ public class Transform : Component
     public Vector3 Up { get; private set; }
     public Vector3 Horizontal { get; private set; }
 
-    public Transform(Entity parent) : base(parent)
+    private Transform? _parent;
+
+    public Transform? Parent
+    {
+        get => _parent;
+        set
+        {
+            _parent = value;
+        }
+    }
+
+    public Transform(Entity entity) : base(entity)
     {
         Position = new Vector3(0, 0, 0);
         Size = new Vector3(1, 1, 1);
         Rotation = new Vector3(0, 0, 0);
     }
 
-    public Transform(Entity parent, Vector3 position, Vector3 size, Vector3 rotation) : base(parent)
+    public Transform(Entity entity, Vector3 position, Vector3 size, Vector3 rotation) : base(entity)
     {
         Position = position;
         Size = size;
         Rotation = rotation;
+    }
+
+    public Transform(Entity entity, Transform parent) : base(entity)
+    {
+        Position = new Vector3(0, 0, 0);
+        Size = new Vector3(1, 1, 1);
+        Rotation = new Vector3(0, 0, 0);
+        Parent = parent;
+    }
+
+    public Transform(Entity entity, Transform parent, Vector3 position, Vector3 size, Vector3 rotation)
+        : base(entity)
+    {
+        Position = position;
+        Size = size;
+        Rotation = rotation;
+        Parent = parent;
     }
     
     private void SetModelMatrix()

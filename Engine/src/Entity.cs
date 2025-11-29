@@ -84,16 +84,7 @@ public class Entity : IDisposable
         var attrib = (DisallowMultipleAttribute[])component.GetType().GetCustomAttributes(typeof(DisallowMultipleAttribute), true);
         if (attrib.Length == 1) // has a DisallowMultiple attribute
         {
-            if (attrib[0].OverrideIfExists)
-            {
-                RemoveComponent(component.GetType());
-            }
-            else
-            {
-                var c = GetComponent<T>(true);
-                if (c != null)
-                    return c;
-            }
+            RemoveComponent(component.GetType());
         }
         
         _components.Add(component);

@@ -5,13 +5,13 @@ using OpenTK.Mathematics;
 namespace Engine.Components;
 
 [ComponentMeta("CameraController")]
-[DisallowMultiple(true)]
+[DisallowMultiple]
 public class CameraController : Component
 {
     public float Sensitivity;
     public bool InvertY;
 
-    public CameraController(Entity parent, float sensitivity, bool invertY) : base(parent)
+    public CameraController(Entity entity, float sensitivity, bool invertY) : base(entity)
     {
         Sensitivity = sensitivity;
         InvertY = invertY;

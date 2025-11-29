@@ -83,7 +83,7 @@ public class Renderer : Component, IDrawable
     public Mesh Mesh { get; set; }
     
 
-    public Renderer(Entity parent) : base(parent) // default constructor
+    public Renderer(Entity entity) : base(entity) // default constructor
     {
 	    Materials = [
 		    new Material
@@ -101,7 +101,7 @@ public class Renderer : Component, IDrawable
 	    Mesh.VertexArrayObject.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
     }
 
-    public Renderer(Entity parent, Mesh mesh, Material[] materials) : base(parent)
+    public Renderer(Entity entity, Mesh mesh, Material[] materials) : base(entity)
     {
 	    Materials = materials;
 	    for (int i = 0; i < materials.Length; i++)
@@ -111,7 +111,7 @@ public class Renderer : Component, IDrawable
 	    Mesh = mesh;
     }
 
-    public Renderer(Entity parent, Mesh mesh, Material[] materials, Shader shader) : base(parent)
+    public Renderer(Entity entity, Mesh mesh, Material[] materials, Shader shader) : base(entity)
     {
 	    Materials = materials;
 	    for (int i = 0; i < materials.Length; i++)

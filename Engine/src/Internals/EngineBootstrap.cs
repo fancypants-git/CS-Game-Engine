@@ -16,7 +16,7 @@ public static class EngineBootstrap
         if (entryType == null)
             throw new Exception("No class with [GameEntry] was found.");
 
-        var instance = (Window)Activator.CreateInstance(entryType);
+        var instance = (Game)Activator.CreateInstance(entryType);
         if (instance == null)
         {
             Debug.LogFatal("No GameEntry Attribute instance was found. Make sure to add this to your main class!");
