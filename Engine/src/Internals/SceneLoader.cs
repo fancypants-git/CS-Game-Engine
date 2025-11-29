@@ -10,6 +10,28 @@ using OpenTK.Mathematics;
 
 namespace Engine.Internals;
 
+public struct BlockData
+{
+    public string Command { get; set; }
+    public CommandData[] Block { get; set; }
+}
+public struct CommandData
+{
+    public string Command { get; set; }
+    public string[] Arguments { get; set; }
+}
+public struct ComponentData
+{
+    public string Type { get; set; }
+    public string[] Arguments { get; set; }
+}
+public struct EntityData
+{
+    public string Id { get; init; }
+    public List<ComponentData> Components { get; set; }
+}
+
+
 
 public static class SceneLoader
 {
@@ -68,14 +90,8 @@ public static class SceneLoader
             Entities = [],
             Drawables = []
         };
-
-        var activeCameraId = "";
-
-        Entity currentEntity = null!;
         
         var source = File.ReadAllText(path);
-
-        var upperBlocks = Regex.Matches(source);
         
         return data;
     }
