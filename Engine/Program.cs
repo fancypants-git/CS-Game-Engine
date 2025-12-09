@@ -188,10 +188,9 @@ public class Game : GameWindow
 
 
 [GameEntry]
-internal class Program() : Game(new ProgramSettings(ProgramSettings.Release)
+internal class Program() : Game(new ProgramSettings(ProgramSettings.Debug)
 {
     // WindowState = WindowState.Maximized
-    Flags = ContextFlags.ForwardCompatible
 })
 {
     protected override void Awake()
@@ -200,8 +199,15 @@ internal class Program() : Game(new ProgramSettings(ProgramSettings.Release)
     
     protected override void Start()
     {
-        SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
-        CursorState = CursorState.Grabbed;
+        // try
+        // {
+            SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
+            CursorState = CursorState.Grabbed;
+        // }
+        // finally
+        // {
+        //     Close();
+        // }
     }
 
     protected override void Update()

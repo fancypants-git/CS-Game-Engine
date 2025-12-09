@@ -13,25 +13,22 @@ namespace Engine.Internals;
 public struct BlockData
 {
     public string Command { get; set; }
-    public CommandData[] Block { get; set; }
-}
-public struct CommandData
-{
-    public string Command { get; set; }
-    public string[] Arguments { get; set; }
-}
-public struct ComponentData
-{
-    public string Type { get; set; }
-    public string[] Arguments { get; set; }
-}
-public struct EntityData
-{
-    public string Id { get; init; }
-    public List<ComponentData> Components { get; set; }
+    public List<(string command, string[] args)> Block { get; set; }
+    public bool IsSceneMetaBlock { get; set; }
 }
 
 
+// public struct ComponentData
+// {
+//     public string Type { get; set; }
+//     public string[] Arguments { get; set; }
+// }
+//
+// public struct EntityData
+// {
+//     public string Id { get; init; }
+//     public List<ComponentData> Components { get; set; }
+// }
 
 public static class SceneLoader
 {
@@ -43,18 +40,18 @@ public static class SceneLoader
         var json = File.ReadAllText(Resources.GetPath("Internal/SceneVersions.json"));
         SceneVersions = JsonConvert.DeserializeObject<Dictionary<string, SceneVersion>>(json);
     }
-    
+
     public static SceneData LoadSceneData(string path)
     {
         var source = File.ReadAllText(path);
-        var header = Regex.Match(source, @"(?ms)^meta_start\s*\n(?<meta>.*?)^meta_end\b", RegexOptions.Multiline);
+        var header = Regex.Match(source, @"(?ms)^meta\s*\{(?<meta>.*)\s*\}", RegexOptions.Multiline);
         if (!header.Success)
         {
             Debug.LogError("Could not register Scene Header in", path);
             return new SceneData();
         }
 
-        var versionMatch = Regex.Match(header.Groups["meta"].Value, @"(?m)^version\s+(?<version>[^\s]+)");
+        var versionMatch = Regex.Match(header.Groups["meta"].Value, @"(?m)version\s+(?<version>[^\s]+)", RegexOptions.Multiline);
         string version;
         if (!versionMatch.Success)
         {
@@ -65,10 +62,10 @@ public static class SceneLoader
         else
             version = versionMatch.Groups["version"].Value;
 
-        
+        Debug.Log("Using version", version, "for scene", path);
 
         var data = ParseScene(path, version);
-        
+
         return data;
     }
 
@@ -76,24 +73,143 @@ public static class SceneLoader
     {
         if (!SceneVersions.TryGetValue(version, out var rules))
         {
-            Debug.LogError("Scene Version \"", version, "\" was not registered. Make sure to use a registered version!");
+            Debug.LogError("Scene Version \"", version,
+                "\" was not registered. Make sure to use a registered version!");
             Debug.LogWarn("Using to newest scene version.");
             version = NewestVersion;
         }
 
-        var meta = new SceneMeta {
+        var source = File.ReadAllText(path);
+
+        var blockMatches = Regex.Matches(source,
+            @"(?<name>[A-Za-z_]\w*)\s*\{\s*(?<inner>(?:[^{}]|\{(?<c>)|\}(?<-c>))*(?(c)(?!)))\s*\}",
+            RegexOptions.Multiline);
+
+        BlockData[] blockDatas = blockMatches.Select(m => new BlockData
+        {
+            Command = m.Groups["name"].Value,
+            Block = ParseBlockToDictionary(m.Groups["inner"].Value),
+            IsSceneMetaBlock = m.Groups["name"].Value == "meta"
+        }).ToArray();
+
+        
+        // Actually parse the blocks into Entities
+        var meta = new SceneMeta
+        {
             Path = path,
             Version = version
         };
-        var data = new SceneData {
+        var data = new SceneData
+        {
             Meta = meta,
             Entities = [],
             Drawables = []
         };
+
+
+        string activeCameraId = "";
         
-        var source = File.ReadAllText(path);
+        foreach (var block in blockDatas)
+        {
+            if (block.IsSceneMetaBlock)
+            {
+                foreach (var line in block.Block)
+                    switch (line.command)
+                    {
+                        case "name":
+                            meta.Name = DecodeString(line.args[0]);
+                            break;
+                        case "camera":
+                            activeCameraId = DecodeString(line.args[0]);
+                            break;
+                    }
+
+                continue;
+            }
+
+            switch (block.Command)
+            {
+                case "entity":
+                    var entity = ParseEntityFromBlockData(block, out bool hasDrawable, out var drawable);
+                    if (entity.Id == activeCameraId)
+                        data.ActiveCamera = entity.GetComponent<Camera>(false);
+                    if (hasDrawable)
+                        data.Drawables.Add(drawable);
+                    
+                    break;
+                default:
+                    Debug.LogWarn("Block type", block.Command, "is not recognised.");
+                    break;
+            }
+        }
         
         return data;
+    }
+    
+    
+    // --------------------------
+    // Block Data decoders
+    // --------------------------
+    private static List<(string, string[])> ParseBlockToDictionary(string source)
+    {
+        Debug.Log("Parsing CommandData:\n", source);
+        
+        var lines = Regex.Split(source, @"\n");
+
+        List<(string, string[])> commands = [];
+        
+        foreach (var line in lines)
+        {
+            var l = line.Trim();
+
+            if (l.StartsWith('#') || string.IsNullOrWhiteSpace(l)) continue;
+
+            var matches = Regex.Match(l, @"(?<command>\w+)\s+(?<args>.*)", RegexOptions.IgnorePatternWhitespace);
+            var argsMatches = Regex.Matches(matches.Groups["args"].Value,
+                """(?<arg> "[^"]" | \w+\([^\)]\) | [\w\d_-]+)""",
+                RegexOptions.IgnorePatternWhitespace);
+
+            commands.Add((matches.Groups["command"].Value, argsMatches.Select(m => m.Groups["arg"].Value).ToArray()));
+        }
+
+        return commands;
+    }
+
+
+    private static Entity ParseEntityFromBlockData(BlockData block, out bool hasDrawable, out IDrawable? drawable)
+    {
+        var entityId = block.Block.TryGetValue("id", out var id) ? DecodeString(id[0]) : Guid.NewGuid().ToString();
+        
+        var entity = new Entity(entityId);
+
+        foreach (var cmd in block.Block)
+        {
+            switch (cmd.Key)
+            {
+                case "add":
+                    var typeStr = DecodeString(cmd.Value[0]);
+                    if (!ComponentRegistry.GetComponentType(typeStr, out var type))
+                    {
+                        Debug.LogWarn("Component of type", typeStr, "is not registered. Make sure to include the ComponentMeta attribute!");
+                        break;
+                    }
+
+                    List<Parameter> args = [new Parameter(entity, entity.GetType())];
+                    args.AddRange(DecodeParameters(cmd.Value[1..]));
+                    if (!ComponentRegistry.Create(type, args, out var component))
+                    {
+                        Debug.LogError("Failed to create Component of type", typeStr);
+                    }
+
+                    entity.AddComponent(component);
+                    break;
+            }
+        }
+
+        hasDrawable = true;
+        drawable = null;
+        
+        return entity;
     }
 
 
@@ -171,17 +287,19 @@ public static class SceneLoader
     private static Parameter[] DecodeParameters(string[] values)
     {
         List<Parameter> parameters = [];
-        
+
         foreach (var value in values)
         {
             var v = value.Trim();
-            
+
             // Function-style argument: mesh(...), texture(...), shader(...), vec3(...)
             var match = Regex.Match(v, @"(?<name>\w+)\((?<args>[^\)]*)\)");
 
             // Boolean literal
-            if (v.Equals("true", StringComparison.CurrentCultureIgnoreCase) || v.Equals("false", StringComparison.CurrentCultureIgnoreCase))
-                parameters.Add(new Parameter(v.Equals("true", StringComparison.CurrentCultureIgnoreCase), typeof(bool)));
+            if (v.Equals("true", StringComparison.CurrentCultureIgnoreCase) ||
+                v.Equals("false", StringComparison.CurrentCultureIgnoreCase))
+                parameters.Add(new Parameter(v.Equals("true", StringComparison.CurrentCultureIgnoreCase),
+                    typeof(bool)));
             // Single literal
             else if (value.Contains('.') && float.TryParse(v, out float f))
                 parameters.Add(new Parameter(f, typeof(float)));
@@ -219,7 +337,7 @@ public static class SceneLoader
             else
                 parameters.Add(new Parameter(DecodeString(v), typeof(string)));
         }
-        
+
         return parameters.ToArray();
     }
 }

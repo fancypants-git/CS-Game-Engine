@@ -34,7 +34,7 @@ internal static class ComponentRegistry
     public static bool GetComponentType(string componentName, out Type? type)
         => components.TryGetValue(componentName, out type);
 
-    public static Component Create(Type type, List<Parameter> arguments)
+    public static bool Create(Type type, List<Parameter> arguments, out Component? component)
     {
         foreach (var ctor in type.GetConstructors())
         {
@@ -47,9 +47,11 @@ internal static class ComponentRegistry
             if (!match) continue;
 
             var args = arguments.Select(arg => arg.Value).ToArray();
-            return (Component)ctor.Invoke(args);
+            component = (Component)ctor.Invoke(args);
+            return true;
         }
-        
-        throw new Exception($"No matching constructor found for {type.Name}");
+
+        component = null;
+        return false;
     }
 }
