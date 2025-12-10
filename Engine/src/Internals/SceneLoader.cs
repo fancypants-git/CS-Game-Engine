@@ -15,6 +15,8 @@ public struct BlockData
     public string Command { get; set; }
     public List<(string command, string[] args)> Block { get; set; }
     public bool IsSceneMetaBlock { get; set; }
+    
+    public readonly string[][] GetArgs(string command) => Block.Where(p => p.command == command).Select(p => p.args).ToArray();
 }
 
 
@@ -150,13 +152,13 @@ public static class SceneLoader
     // --------------------------
     // Block Data decoders
     // --------------------------
-    private static List<(string, string[])> ParseBlockToDictionary(string source)
+    private static List<(string command, string[] args)> ParseBlockToDictionary(string source)
     {
         Debug.Log("Parsing CommandData:\n", source);
         
         var lines = Regex.Split(source, @"\n");
 
-        List<(string, string[])> commands = [];
+        List<(string command, string[] args)> commands = [];
         
         foreach (var line in lines)
         {
@@ -166,10 +168,11 @@ public static class SceneLoader
 
             var matches = Regex.Match(l, @"(?<command>\w+)\s+(?<args>.*)", RegexOptions.IgnorePatternWhitespace);
             var argsMatches = Regex.Matches(matches.Groups["args"].Value,
-                """(?<arg> "[^"]" | \w+\([^\)]\) | [\w\d_-]+)""",
+                """(?<arg> "[^"]" | \w+\([^\)]*\) | [^\"\(\)\s]+)""",
                 RegexOptions.IgnorePatternWhitespace);
 
-            commands.Add((matches.Groups["command"].Value, argsMatches.Select(m => m.Groups["arg"].Value).ToArray()));
+            var command = matches.Groups["command"].Value;
+            commands.Add((command, argsMatches.Select(m => m.Groups["arg"].Value).ToArray()));
         }
 
         return commands;
@@ -178,16 +181,22 @@ public static class SceneLoader
 
     private static Entity ParseEntityFromBlockData(BlockData block, out bool hasDrawable, out IDrawable? drawable)
     {
-        var entityId = block.Block.TryGetValue("id", out var id) ? DecodeString(id[0]) : Guid.NewGuid().ToString();
+        var idArray = block.GetArgs("id");
+        string entityId = idArray.Length != 0 ? idArray[0][0] : Guid.NewGuid().ToString();
         
         var entity = new Entity(entityId);
 
-        foreach (var cmd in block.Block)
+        foreach (var line in block.Block)
         {
-            switch (cmd.Key)
+            Debug.Log("line:", line.command, "with args:", line.args.Length);
+            foreach(var arg in line.args)
+            {
+                Debug.Log("arg:", arg);
+            }
+            switch (line.command)
             {
                 case "add":
-                    var typeStr = DecodeString(cmd.Value[0]);
+                    var typeStr = DecodeString(line.args[0]);
                     if (!ComponentRegistry.GetComponentType(typeStr, out var type))
                     {
                         Debug.LogWarn("Component of type", typeStr, "is not registered. Make sure to include the ComponentMeta attribute!");
@@ -195,7 +204,7 @@ public static class SceneLoader
                     }
 
                     List<Parameter> args = [new Parameter(entity, entity.GetType())];
-                    args.AddRange(DecodeParameters(cmd.Value[1..]));
+                    args.AddRange(DecodeParameters(line.args[1..]));
                     if (!ComponentRegistry.Create(type, args, out var component))
                     {
                         Debug.LogError("Failed to create Component of type", typeStr);
@@ -206,7 +215,7 @@ public static class SceneLoader
             }
         }
 
-        hasDrawable = true;
+        hasDrawable = false;
         drawable = null;
         
         return entity;

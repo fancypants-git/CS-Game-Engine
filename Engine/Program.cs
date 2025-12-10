@@ -199,15 +199,8 @@ internal class Program() : Game(new ProgramSettings(ProgramSettings.Debug)
     
     protected override void Start()
     {
-        // try
-        // {
             SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
             CursorState = CursorState.Grabbed;
-        // }
-        // finally
-        // {
-        //     Close();
-        // }
     }
 
     protected override void Update()
