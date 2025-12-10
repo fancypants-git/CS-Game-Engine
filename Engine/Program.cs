@@ -139,8 +139,6 @@ public class Game : GameWindow
 
     protected sealed override void OnClosing(CancelEventArgs e)
     {
-        base.OnClosing(e);
-
         try
         {
             OnClose();
@@ -157,6 +155,7 @@ public class Game : GameWindow
         }
         finally
         {
+            base.OnClosing(e);
             Debug.LogPrefixed(LogType.Exit, "Exited Program.");
         }
     }

@@ -64,7 +64,7 @@ public static class SceneLoader
         else
             version = versionMatch.Groups["version"].Value;
 
-        Debug.Log("Using version", version, "for scene", path);
+        Debug.LogInfo("Using version", version, "for scene", path);
 
         var data = ParseScene(path, version);
 
@@ -132,12 +132,13 @@ public static class SceneLoader
             switch (block.Command)
             {
                 case "entity":
-                    var entity = ParseEntityFromBlockData(block, out bool hasDrawable, out var drawable);
+                    var entity = ParseEntityFromBlockData(block, out var drawables);
                     if (entity.Id == activeCameraId)
                         data.ActiveCamera = entity.GetComponent<Camera>(false);
-                    if (hasDrawable)
-                        data.Drawables.Add(drawable);
+                    if (drawables.Count > 0)
+                        data.Drawables.AddRange(drawables);
                     
+                    data.Entities.Add(entity);
                     break;
                 default:
                     Debug.LogWarn("Block type", block.Command, "is not recognised.");
@@ -154,8 +155,6 @@ public static class SceneLoader
     // --------------------------
     private static List<(string command, string[] args)> ParseBlockToDictionary(string source)
     {
-        Debug.Log("Parsing CommandData:\n", source);
-        
         var lines = Regex.Split(source, @"\n");
 
         List<(string command, string[] args)> commands = [];
@@ -179,8 +178,10 @@ public static class SceneLoader
     }
 
 
-    private static Entity ParseEntityFromBlockData(BlockData block, out bool hasDrawable, out IDrawable? drawable)
+    private static Entity ParseEntityFromBlockData(BlockData block, out List<IDrawable> drawables)
     {
+        drawables = [];
+        
         var idArray = block.GetArgs("id");
         string entityId = idArray.Length != 0 ? idArray[0][0] : Guid.NewGuid().ToString();
         
@@ -188,11 +189,6 @@ public static class SceneLoader
 
         foreach (var line in block.Block)
         {
-            Debug.Log("line:", line.command, "with args:", line.args.Length);
-            foreach(var arg in line.args)
-            {
-                Debug.Log("arg:", arg);
-            }
             switch (line.command)
             {
                 case "add":
@@ -211,12 +207,16 @@ public static class SceneLoader
                     }
 
                     entity.AddComponent(component);
+                    if (typeof(IDrawable).IsAssignableFrom(type))
+                        drawables.Add((IDrawable)component);
+                        
+                    else if (typeof(Transform).IsAssignableFrom(type))
+                        entity.Transform = (Transform)component;
                     break;
             }
         }
-
-        hasDrawable = false;
-        drawable = null;
+        
+        
         
         return entity;
     }

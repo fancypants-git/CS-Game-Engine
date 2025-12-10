@@ -7,16 +7,16 @@ public static class Resources
 {
     public static string GetPath(params string[] relativePath)
     {
-        var path = Path.Combine(relativePath);
-        
-        if (Path.Exists(path)) return path;
-        
-        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", path);
+        string exeDir = AppContext.BaseDirectory;
 
-        if (!Path.Exists(fullPath)) Debug.LogWarn("Path does not exist:", fullPath);
+        string fullPath = Path.Combine(exeDir, "Resources", Path.Combine(relativePath));
+
+        if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
+            Debug.LogWarn("Path does not exist:", fullPath);
 
         return fullPath;
     }
+
 
 
     public static Mesh? GetMesh(string path, out Material[] materials)
