@@ -5,11 +5,11 @@ namespace Engine.Helpers;
 
 public static class Resources
 {
+    public static readonly string ResourcesPath = Path.Combine(AppContext.BaseDirectory, "Resources");
+    
     public static string GetPath(params string[] relativePath)
     {
-        string exeDir = AppContext.BaseDirectory;
-
-        string fullPath = Path.Combine(exeDir, "Resources", Path.Combine(relativePath));
+        string fullPath = Path.Combine(ResourcesPath, Path.Combine(relativePath));
 
         if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
             Debug.LogWarn("Path does not exist:", fullPath);

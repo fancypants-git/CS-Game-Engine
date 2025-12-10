@@ -31,6 +31,9 @@ public static class Debug
 
     public static void LogPrefixed(string type, params object?[] messages)
     {
+        if (LogFilter.Contains(Helpers.LogFilter.Nothing))
+            return;
+        
         if (type.Length > 5 && PrintLogWarnings)
             LogPrefixed("DEV",
                 "For readability, keep [type] of LogPrefixed(type, messages) shorter than 6 characters.");
@@ -88,10 +91,22 @@ public static class Debug
     {
         LogPrefixed(LogType.Error, messages);
     }
+    
+    public static void LogError(Exception exception)
+    {
+        LogPrefixed(LogType.Error, exception.GetType().Name, "occured in", exception.TargetSite, '|', exception.Message);
+        LogPrefixed("STACK", exception.StackTrace?.TrimStart());
+    }
 
     public static void LogFatal(params object?[] messages)
     {
         LogPrefixed(LogType.Fatal, messages);
+    }
+    
+    public static void LogFatal(Exception exception)
+    {
+        LogPrefixed(LogType.Fatal, "Fatal", exception.GetType().Name, "occured in", exception.TargetSite, '|', exception.Message);
+        LogPrefixed("STACK", exception.StackTrace);
     }
 
     public static void LogMemLeak(string name)

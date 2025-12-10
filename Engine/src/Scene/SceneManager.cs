@@ -1,8 +1,10 @@
 ﻿using Engine.Components;
 using Engine.Helpers;
 using Engine.Internals;
+using Engine.Scene;
 
-namespace Engine.Scene;
+// ReSharper disable once CheckNamespace
+namespace Engine;
 
 public static class SceneManager
 {
@@ -17,7 +19,7 @@ public static class SceneManager
     /// This overrides the current scene.
     /// </summary>
     /// <param name="path">The full path to the .scene file<br/>
-    /// (HINT: use Resources.GetPath to get the full path from the "Resources" folder)
+    /// (HINT: use Resources.GetPath() to get the full path from the "Resources" folder)
     /// </param>
     public static void InitializeScene(string path)
     {
@@ -32,7 +34,7 @@ public static class SceneManager
     /// Loads and adds the scene from the .scene at PATH to the current scene.
     /// </summary>
     /// <param name="path">The full path to the .scene file<br/>
-    /// (HINT: use Resources.GetPath to get the full path from the "Resources" folder)
+    /// (HINT: use Resources.GetPath() to get the full path from the "Resources" folder)
     /// </param>
     public static void LoadScene(string path)
     {
@@ -80,7 +82,7 @@ public static class SceneManager
     }
 
     /// <summary>
-    /// Renders the POV of the Active Camera (from the Current Scene)
+    /// Renders the Current Scene from the POV of the Active Camera
     /// </summary>
     public static void RenderScene()
     {

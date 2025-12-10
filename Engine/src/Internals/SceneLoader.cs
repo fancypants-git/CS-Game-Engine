@@ -40,7 +40,7 @@ public static class SceneLoader
     static SceneLoader()
     {
         var json = File.ReadAllText(Resources.GetPath("Internal/SceneVersions.json"));
-        SceneVersions = JsonConvert.DeserializeObject<Dictionary<string, SceneVersion>>(json);
+        SceneVersions = JsonConvert.DeserializeObject<Dictionary<string, SceneVersion>>(json) ?? [];
     }
 
     public static SceneData LoadSceneData(string path)

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
 using Engine.Attributes;
 using Engine.Components;
 using Engine.Helpers;
@@ -33,19 +34,17 @@ public class Entity : IDisposable
     public virtual void Update()
     {
         if (!IsActive) return;
-
-        Component? currentComponent = null;
-        try
+        
+        foreach (var c in _components)
         {
-            foreach (var c in _components)
+            try
             {
-                currentComponent = c;
                 c.Update();
             }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error Occured when Updating Component", currentComponent, "|", e.Message, '\n', e);
+            catch(Exception e)
+            {
+                Debug.LogError(e);
+            }
         }
     }
 
@@ -53,30 +52,19 @@ public class Entity : IDisposable
     {
         if (!IsActive) return;
         
-        Component? currentComponent = null;
-        try
+        foreach (var c in _components)
         {
-            foreach (var c in _components)
+            try
             {
-                currentComponent = c;
                 c.FixedUpdate();
             }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error Occured when Updating Component in FixedUpdate", currentComponent, "|", e.Message, '\n', e);
+            catch(Exception e)
+            {
+                Debug.LogError(e);
+            }
         }
     }
-
-    public virtual void Unload()
-    {
-        Component[] unloadComponents = new Component[_components.Count];
-        _components.CopyTo(unloadComponents);
-        foreach (var c in unloadComponents)
-            c.Unload();
-    }
-
-
+    
 
     public T AddComponent<T>(T component) where T : Component
     {
@@ -114,6 +102,7 @@ public class Entity : IDisposable
     public void RemoveComponent(Component component)
     {
         _components.Remove(component);
+        component.Dispose();
     }
     public void RemoveComponent(Type type)
     {
@@ -122,8 +111,7 @@ public class Entity : IDisposable
             var c =_components[i];
             if (c.GetType() == type)
             {
-                c.Unload();
-                c.Dispose();
+                RemoveComponent(c);
                 return;
             }
         }
@@ -138,6 +126,8 @@ public class Entity : IDisposable
         {
             foreach (var c in _components) c.Dispose();
         }
+        
+        _components.Clear();
         
         _isDisposed = true;
     }

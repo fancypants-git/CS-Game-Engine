@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Engine.Helpers;
+﻿using Engine.Helpers;
 
 namespace Engine.Components;
 
@@ -38,14 +37,10 @@ public class Component(Entity entity) : IDisposable
     public virtual void FixedUpdate()
     {
     }
-    
-    public virtual void Unload()
-    {
-        Entity.RemoveComponent(this);
-    }
 
     protected virtual void Dispose(bool disposing)
     {
+        IsDisposed = true;
     }
 
     public void Dispose()
