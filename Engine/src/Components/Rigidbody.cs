@@ -1,5 +1,7 @@
 using Engine.Attributes;
 using Engine.Helpers;
+using Engine.Physics;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
 namespace Engine.Components;
@@ -33,5 +35,12 @@ public class Rigidbody : Component
         Velocity.Y += halfGravity;
         Transform.Translate(Velocity * Time.FixedDeltaTime);
         Velocity.Y += halfGravity;
+        
+        foreach (var collider in Entity.GetComponents<BoxCollider>(false))
+        {
+            CollisionInfo[] collisions = collider.CollidesWithAny();
+            
+            Debug.Log("Collision Count:", collisions.Length);
+        }
     }
 }

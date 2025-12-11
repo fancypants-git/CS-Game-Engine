@@ -1,8 +1,11 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+using System.Net.Sockets;
 using System.Reflection;
 using Engine.Attributes;
 using Engine.Components;
 using Engine.Helpers;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
 namespace Engine;
@@ -90,6 +93,21 @@ public class Entity : IDisposable
 
         return null;
     }
+    
+    public bool GetComponent<T>(out T? component, bool includeDisabled = false) where T : Component
+    {
+        foreach (var c in _components)
+        {
+            if (c is T Tc && (includeDisabled || c.Enabled))
+            {
+                component = Tc;
+                return true;
+            }
+        }
+        
+        component = null;
+        return false;
+    }
 
     public Component[] GetComponents(bool includeDisabled = false)
     {
@@ -97,6 +115,14 @@ public class Entity : IDisposable
             return _components.ToArray();
         
         return _components.Where(component => component.Enabled).ToArray();
+    }
+    
+    public T[] GetComponents<T>(bool includeDisabled = false) where T : Component
+    {
+        if (includeDisabled)
+            return _components.OfType<T>().ToArray();
+            
+        return _components.OfType<T>().Where(c => c.Enabled).ToArray();
     }
 
     public void RemoveComponent(Component component)
