@@ -21,7 +21,7 @@ entity
     add Transform vec3(0, -1, 0) vec3(2, 1, 2) vec3(0)
     add Renderer mesh("Objects/cube.obj") shader(lit)
     
-    add BoxCollider
+    add Collider
 }
 
 entity
@@ -30,6 +30,6 @@ entity
     add Transform vec3(0, 2, 0) vec3(1) vec3(0)
     add Renderer mesh("Objects/cube.obj") shader(unlit)
     
-    add BoxCollider
+    add Collider
     add Rigidbody 1.
 }

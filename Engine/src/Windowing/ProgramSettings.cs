@@ -32,7 +32,6 @@ public class ProgramSettings
     }
     public ProgramSettings() {}
 
-
     public static readonly ProgramSettings Default = new();
     
     public static readonly ProgramSettings Debug = new() {

@@ -9,6 +9,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 internal class Program() : Game(new ProgramSettings(ProgramSettings.Debug)
 {
     // WindowState = WindowState.Maximized
+    FixedUpdateDelta = 0.01
 })
 {
     protected override void Awake()

@@ -36,11 +36,11 @@ public class Rigidbody : Component
         Transform.Translate(Velocity * Time.FixedDeltaTime);
         Velocity.Y += halfGravity;
         
-        foreach (var collider in Entity.GetComponents<BoxCollider>(false))
+        foreach (var collider in Entity.GetComponents<Collider>(false))
         {
-            CollisionInfo[] collisions = collider.CollidesWithAny();
+            CollisionInfo[] collisions = collider.CalculateCollisions();
             
-            Debug.Log("Collision Count:", collisions.Length);
+            Debug.Log(collisions.Length);
         }
     }
 }
