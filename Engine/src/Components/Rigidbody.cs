@@ -38,9 +38,6 @@ public class Rigidbody : Component
         
         foreach (var collider in Entity.GetComponents<Collider>(false))
         {
-            CollisionInfo[] collisions = collider.CalculateCollisions();
-            
-            Debug.Log(collisions.Length);
         }
     }
 }

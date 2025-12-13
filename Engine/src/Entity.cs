@@ -94,7 +94,7 @@ public class Entity : IDisposable
         return null;
     }
     
-    public bool GetComponent<T>(out T? component, bool includeDisabled = false) where T : Component
+    public bool GetComponent<T>(out T component, bool includeDisabled = false) where T : Component
     {
         foreach (var c in _components)
         {
