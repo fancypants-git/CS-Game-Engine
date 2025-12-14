@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Engine.Helpers;
 using Engine.Rendering;
 using OpenTK.Mathematics;
+using Engine.Debugging;
 
 namespace Engine.Internals;
 

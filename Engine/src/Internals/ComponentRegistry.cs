@@ -1,6 +1,7 @@
 using System.Reflection;
 using Engine.Attributes;
 using Engine.Components;
+using Engine.Debugging;
 
 namespace Engine.Internals;
 
@@ -31,24 +32,34 @@ internal static class ComponentRegistry
         }
     }
     
-    public static bool GetComponentType(string componentName, out Type? type)
+    public static bool GetComponentType(string componentName, out Type type)
         => components.TryGetValue(componentName, out type);
 
-    public static bool Create(Type type, List<Parameter> arguments, out Component? component)
+    public static bool Create(Type type, List<Parameter> arguments, out Component component)
     {
         foreach (var ctor in type.GetConstructors())
         {
-            var parameters = ctor.GetParameters();
-            
-            // check if all parameters match
-            if (parameters.Length != arguments.Count) continue;
+            try
+            {
+                var parameters = ctor.GetParameters();
+                
+                // check if all parameters match
+                if (parameters.Length != arguments.Count) continue;
 
-            var match = !parameters.Where((t, i) => arguments[i].Type != t.ParameterType).Any();
-            if (!match) continue;
+                var match = !parameters.Where((t, i) => arguments[i].Type != t.ParameterType).Any();
+                if (!match) continue;
 
-            var args = arguments.Select(arg => arg.Value).ToArray();
-            component = (Component)ctor.Invoke(args);
-            return true;
+                var args = arguments.Select(arg => arg.Value).ToArray();
+                component = (Component)ctor.Invoke(args);
+                return true;
+            }
+            catch(TargetInvocationException e)
+            {
+                if (e.InnerException != null)
+                    Debug.LogError(e.InnerException);
+                else
+                    Debug.LogError(e);
+            }
         }
 
         component = null;

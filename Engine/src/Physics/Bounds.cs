@@ -38,4 +38,9 @@ public struct Bounds
                         a.Min.Y < b.Max.Y && b.Min.Y < a.Max.Y &&
                         a.Min.Z < b.Max.Z && b.Min.Z < a.Max.Z;
     }
+    
+    public Bounds TransformedToModel(Matrix4 model)
+    {
+        return new Bounds((new Vector4(Min, 1) * model).Xyz, (new Vector4(Max, 1) * model).Xyz);
+    }
 }

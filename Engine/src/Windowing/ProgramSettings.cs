@@ -1,4 +1,4 @@
-using Engine.Helpers;
+using Engine.Debugging;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 
@@ -35,7 +35,7 @@ public class ProgramSettings
     public static readonly ProgramSettings Default = new();
     
     public static readonly ProgramSettings Debug = new() {
-        LogFilter = [Helpers.LogFilter.Debug, Helpers.LogFilter.Warning, Helpers.LogFilter.Error, Helpers.LogFilter.Fatal],
+        LogFilter = [Debugging.LogFilter.Debug, Debugging.LogFilter.Warning, Debugging.LogFilter.Error, Debugging.LogFilter.Fatal],
         Flags = ContextFlags.Debug,
         WindowSize = (800, 600),
         Title = "[ DEBUG ] OpenGL Engine GameWindow",
@@ -45,7 +45,7 @@ public class ProgramSettings
 
     public static readonly ProgramSettings Release = new()
     {
-        LogFilter = [Helpers.LogFilter.Nothing],
+        LogFilter = [Debugging.LogFilter.Nothing],
         WindowSize = (800, 600),
         Title = "[ RELEASE ] OpenGL Engine GameWindow",
         WindowState = WindowState.Maximized,

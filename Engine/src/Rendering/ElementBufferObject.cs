@@ -1,4 +1,4 @@
-using Engine.Helpers;
+using Engine.Debugging;
 using OpenTK.Graphics.OpenGL;
 
 namespace Engine.Rendering;

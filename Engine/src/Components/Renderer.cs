@@ -5,6 +5,7 @@ using Engine.Interfaces;
 using Engine.Rendering;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
+using Engine.Debugging;
 
 namespace Engine.Components;
 

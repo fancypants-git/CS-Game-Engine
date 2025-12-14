@@ -1,8 +1,8 @@
 using Engine.Attributes;
 using Engine.Helpers;
-using Engine.Physics;
-using OpenTK.Graphics.OpenGL;
+using Engine.Debugging;
 using OpenTK.Mathematics;
+using Engine.Physics;
 
 namespace Engine.Components;
 
@@ -38,6 +38,14 @@ public class Rigidbody : Component
         
         foreach (var collider in Entity.GetComponents<Collider>(false))
         {
+            var collisions = collider.CollidesWithAny();
+            Vector3 totalPush = Vector3.Zero;
+            foreach (CollisionInfo collision in collisions)
+            {
+                totalPush += collision.CollisionNormal * collision.CollisionDepth;
+            }
+
+            Transform.Translate(totalPush);
         }
     }
 }

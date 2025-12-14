@@ -1,12 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
-using System.Net.Sockets;
-using System.Reflection;
-using Engine.Attributes;
+﻿using Engine.Attributes;
 using Engine.Components;
-using Engine.Helpers;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+using Engine.Debugging;
 
 namespace Engine;
 

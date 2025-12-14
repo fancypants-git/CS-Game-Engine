@@ -33,3 +33,12 @@ entity
     add Collider
     add Rigidbody 1.
 }
+
+entity
+{
+    id Dragon
+    add Transform vec3(3, 4, 1) vec3(2) vec3(0)
+    add Renderer mesh(Objects/dragon.obj) shader(lit)
+    
+    add Collider
+}

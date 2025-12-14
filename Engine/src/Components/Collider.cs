@@ -1,8 +1,9 @@
 using Engine.Attributes;
-using Engine.Interfaces;
 using Engine.Physics;
-using Engine.Helpers;
+using Engine.Debugging;
 using OpenTK.Mathematics;
+using Engine.Helpers;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Engine.Components;
 
@@ -23,7 +24,7 @@ public class Collider : Component
             return;
         }
         
-        BoundingVolumeHierarchy = new BVH(r.Mesh.Vertices.Select(v => v.Position).ToArray(), r.Mesh.Indices, true, Transform.ModelMatrix);
+        BoundingVolumeHierarchy = new BVH(r.Mesh.Vertices.Select(v => v.Position).ToArray(), r.Mesh.Indices);
         _colliders.Add(this);
     }
     
@@ -33,19 +34,20 @@ public class Collider : Component
     /// <param name="entity">Entity that this Collider is attached to</param>
     /// <param name="vertices">The vertices for the BVH</param>
     /// <param name="indices">The indices for the BVH triangles</param>
-    public Collider(Entity entity, Vector3[] vertices, uint[] indices, bool normalized) : base(entity)
+    public Collider(Entity entity, Vector3[] vertices, uint[] indices) : base(entity)
     {
-        BoundingVolumeHierarchy = new BVH(vertices, indices, normalized, Transform.ModelMatrix);
+        BoundingVolumeHierarchy = new BVH(vertices, indices);
         _colliders.Add(this);
     }
     
     protected BVH BoundingVolumeHierarchy;
+    private int _renderDepth = 0;
     
     public CollisionInfo CollidesWith(Collider other)
     {
-        if (Entity.Id == other.Entity.Id) return new CollisionInfo();
+        if (Entity.Id == other.Entity.Id) return CollisionInfo.NoCollision;
         
-        
+        return BVHTreeNode.Collide(BoundingVolumeHierarchy.Root, Transform.ModelMatrix, other.BoundingVolumeHierarchy.Root, other.Transform.ModelMatrix);
     }
     
     public CollisionInfo[] CollidesWithAny()
@@ -59,5 +61,19 @@ public class Collider : Component
         }
         
         return collisions.ToArray();
+    }
+
+    public override void Update()
+    {
+        if (Input.IsKeyPressed(Keys.Up))
+            _renderDepth ++;
+        if (Input.IsKeyPressed(Keys.Down))
+            _renderDepth --;
+        
+        BoundingVolumeHierarchy.Root.DrawNodeAndChildrenBounds(Transform.ModelMatrix, _renderDepth);
+    }
+
+    public override void FixedUpdate()
+    {
     }
 }

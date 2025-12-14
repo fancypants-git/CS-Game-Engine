@@ -1,8 +1,4 @@
-
-using System.ComponentModel.DataAnnotations;
-using Engine.Rendering;
 using OpenTK.Mathematics;
-using OpenTK.Platform;
 
 namespace Engine.Physics;
 
@@ -36,6 +32,13 @@ public struct BVHTriangle
         max = Math.Max(Math.Max(p0, p1), p2);
     }
     
+    public BVHTriangle Transformed(Matrix4 model)
+    {
+        return new BVHTriangle((new Vector4(Vertex0, 1) * model).Xyz,
+                                (new Vector4(Vertex1, 1) * model).Xyz,
+                                (new Vector4(Vertex2, 1) * model).Xyz);
+    }
+    
     public static bool Overlap(float minA, float maxA, float minB, float maxB, out float depth)
     {
         if (minA < maxB && minB < maxA)
@@ -67,6 +70,7 @@ public struct BVHTriangle
             if (depth < minDepth)
             {
                 minDepth = depth;
+                minAxis = axis;
                 Vector3 delta = t1.Centre - t0.Centre;
                 if (Vector3.Dot(minAxis, delta) < 0)
                     minAxis = -minAxis;

@@ -36,8 +36,6 @@ public class Component(Entity entity) : IDisposable
     ~Component()
     {
         if (IsDisposed) return;
-        
-        Debug.LogMemLeak("Component");
         Dispose(false);
     }
 }

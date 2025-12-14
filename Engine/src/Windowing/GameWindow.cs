@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using Engine.Components;
+using Engine.Debugging;
 using Engine.Helpers;
 using Engine.Scene;
 using OpenTK.Graphics.OpenGL;
@@ -129,6 +131,7 @@ public class Game : GameWindow
         try
         {
             SceneManager.RenderScene();
+            Debug.Render(SceneManager.ActiveCamera);
         }
         catch (Exception e)
         {

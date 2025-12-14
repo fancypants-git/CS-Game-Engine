@@ -2,8 +2,11 @@
 using Engine.Windowing;
 using Engine.Attributes;
 using Engine.Helpers;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Engine.Debugging;
+using System.Drawing;
 
 [GameEntry]
 internal class Program() : Game(new ProgramSettings(ProgramSettings.Debug)
@@ -18,8 +21,16 @@ internal class Program() : Game(new ProgramSettings(ProgramSettings.Debug)
     
     protected override void Start()
     {
-        SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
-        CursorState = CursorState.Grabbed;
+        try
+        {
+            SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
+            CursorState = CursorState.Grabbed;
+        }
+        finally
+        {
+            // Debug.LogPrefixed(LogType.Debug, "Closing Window");
+            // Close();
+        }
     }
 
     protected override void Update()

@@ -1,5 +1,5 @@
 using Engine.Attributes;
-using Engine.Helpers;
+using Engine.Debugging;
 using Engine.Interfaces;
 using Engine.Scene;
 using OpenTK.Mathematics;

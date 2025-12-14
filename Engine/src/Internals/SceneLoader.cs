@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Engine.Components;
 using Engine.Helpers;
@@ -7,6 +6,7 @@ using Engine.Rendering;
 using Engine.Scene;
 using Newtonsoft.Json;
 using OpenTK.Mathematics;
+using Engine.Debugging;
 
 namespace Engine.Internals;
 
@@ -132,7 +132,18 @@ public static class SceneLoader
             switch (block.Command)
             {
                 case "entity":
-                    var entity = ParseEntityFromBlockData(block, out var drawables);
+                    Entity entity;
+                    List<IDrawable> drawables;
+                    try
+                    {
+                        entity = ParseEntityFromBlockData(block, out drawables);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                        break;
+                    }
+                    
                     if (entity.Id == activeCameraId)
                         data.ActiveCamera = entity.GetComponent<Camera>(false);
                     if (drawables.Count > 0)
@@ -201,9 +212,10 @@ public static class SceneLoader
 
                     List<Parameter> args = [new Parameter(entity, entity.GetType())];
                     args.AddRange(DecodeParameters(line.args[1..]));
-                    if (!ComponentRegistry.Create(type, args, out var component))
+                    if (!ComponentRegistry.Create(type, args, out Component component))
                     {
                         Debug.LogError("Failed to create Component of type", typeStr);
+                        break;
                     }
 
                     entity.AddComponent(component);

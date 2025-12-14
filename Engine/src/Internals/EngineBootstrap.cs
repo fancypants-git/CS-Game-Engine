@@ -1,7 +1,7 @@
 using System.Reflection;
 using Engine.Windowing;
 using Engine.Attributes;
-using Engine.Helpers;
+using Engine.Debugging;
 
 namespace Engine.Internals;
 
