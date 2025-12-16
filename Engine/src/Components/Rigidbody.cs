@@ -1,6 +1,7 @@
 using Engine.Attributes;
 using Engine.Helpers;
 using OpenTK.Mathematics;
+using BulletSharp;
 
 namespace Engine.Components;
 
@@ -9,29 +10,27 @@ namespace Engine.Components;
 public class Rigidbody : Component
 {
     public float Mass;
-    public float Gravity;
-    public Vector3 Velocity;
     
     public Rigidbody(Entity entity, float mass) : base(entity)
     {
         Mass = mass;
-        Gravity = -9.81f;
     }
 
-    public Rigidbody(Entity entity, float mass, float gravity) : base(entity)
+    public override void Load()
     {
-        Mass = mass;
-        Gravity = gravity;
+        var colliders = Entity.GetComponents<Collider>(true);
+        foreach (var collider in colliders)
+        {
+            collider.Load();
+            ApplyMassTo(collider);
+        }
     }
 
-    public override void FixedUpdate()
+    private void ApplyMassTo(Collider collider)
     {
-        base.Update();
-
-        var halfGravity = Gravity * Time.FixedDeltaTime / 2;
-        
-        Velocity.Y += halfGravity;
-        Transform.Translate(Velocity * Time.FixedDeltaTime);
-        Velocity.Y += halfGravity;
+        collider.CollisionShape.CalculateLocalInertia(Mass, out var inertia);
+        collider.Body.SetMassProps(Mass, inertia);
+        collider.Body.UpdateInertiaTensor();
+        collider.Body.ActivationState = ActivationState.ActiveTag;
     }
 }

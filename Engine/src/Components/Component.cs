@@ -10,21 +10,6 @@ public class Component(Entity entity) : IDisposable
     public Transform Transform => entity.Transform;
 
     protected bool IsDisposed = false;
-
-
-    public object this[string propertyName]
-    {
-        get
-        {
-            var info = GetType().GetProperty(propertyName);
-            return info.GetValue(this, null);
-        }
-        set
-        {              
-            var myPropInfo = GetType().GetProperty(propertyName);
-            myPropInfo.SetValue(this, value, null);
-        }
-    }
     
 
     public virtual void Load()

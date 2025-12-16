@@ -6,10 +6,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 [GameEntry]
-internal class Program() : Game(new ProgramSettings(ProgramSettings.Debug)
-{
-    // WindowState = WindowState.Maximized
-})
+internal class Program() : Game(ProgramSettings.Debug, GameSettings.Default)
 {
     protected override void Awake()
     {

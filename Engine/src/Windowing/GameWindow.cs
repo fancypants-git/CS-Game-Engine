@@ -1,16 +1,15 @@
 using System.ComponentModel;
 using Engine.Helpers;
-using Engine.Scene;
+using Engine.Physics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Engine.Windowing ;
 
 public class Game : GameWindow
 {
-    protected Game(ProgramSettings settings)
+    protected Game(ProgramSettings settings, GameSettings gameSettings)
         : base(GameWindowSettings.Default, new NativeWindowSettings {
             API = ContextAPI.OpenGL,
             Profile = ContextProfile.Core,
@@ -26,9 +25,14 @@ public class Game : GameWindow
         Settings = settings;
         Winfo.WindowSize = ClientSize;
         Debug.LogFilter = settings.LogFilter;
+        
+        GameSettings = gameSettings;
+        PhysicsHandler.Initialize(gameSettings.Gravity);
     }
     
     protected ProgramSettings Settings { get; }
+    protected GameSettings GameSettings { get; }
+    
     private double _fixedUpdateWaitingTime = 0;
     
 
@@ -90,13 +94,15 @@ public class Game : GameWindow
 
         _fixedUpdateWaitingTime += Time.DeltaTimeDouble;
 
-        while (_fixedUpdateWaitingTime > Settings.FixedUpdateDelta)
+        while (_fixedUpdateWaitingTime > GameSettings.FixedUpdateDelta)
         {
             try
             {
                 Time.FixedDeltaTimeDouble = _fixedUpdateWaitingTime;
-                _fixedUpdateWaitingTime -= Settings.FixedUpdateDelta;
+                _fixedUpdateWaitingTime -= GameSettings.FixedUpdateDelta;
                 
+                if (GameSettings.PhysicsUpdate == GameSettings.FixedUpdate)
+                    PhysicsHandler.World.StepSimulation(Time.FixedDeltaTime);
                 SceneManager.FixedUpdateScene();
                 FixedUpdate();
             }
@@ -108,6 +114,8 @@ public class Game : GameWindow
 
         try
         {
+            if (GameSettings.PhysicsUpdate == GameSettings.Update)
+                PhysicsHandler.World.StepSimulation(Time.DeltaTime);
             SceneManager.UpdateScene();
             Update();
         }
