@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using Engine.Helpers;
+using Engine.Debugging;
 using OpenTK.Graphics.OpenGL;
 
 namespace Engine.Rendering;
@@ -47,7 +47,7 @@ public class VertexBufferObject : IDisposable
     {
         if (_isDisposed) return;
 
-        Debug.LogMemLeak("VertexBufferObject");
+        Debug.LogMemLeak(GetType().Name);
         Dispose(false);
     }
 }

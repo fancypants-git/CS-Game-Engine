@@ -27,7 +27,9 @@ public static class SceneManager
 
         var sceneData = SceneLoader.LoadSceneData(path);
         CurrentScene = sceneData;
-        CurrentScene.ActiveCamera.SetViewportSize(Winfo.WindowSize.X, Winfo.WindowSize.Y);
+        
+        foreach (var entity in CurrentScene.Entities)
+            entity.Load();
     }
 
     /// <summary>
@@ -42,6 +44,9 @@ public static class SceneManager
         
         var sceneData = SceneLoader.LoadSceneData(path);
         CurrentScene.AddData(sceneData);
+        
+        foreach (var entity in sceneData.Entities)
+            entity.Load();
     }
     
     /// <summary>
@@ -62,9 +67,7 @@ public static class SceneManager
         if (_isDisposed) return;
 
         foreach (var entity in CurrentScene.Entities)
-        {
             entity.Update();
-        }
     }
 
     /// <summary>
@@ -76,9 +79,7 @@ public static class SceneManager
         if (_isDisposed) return;
 
         foreach (var entity in CurrentScene.Entities)
-        {
             entity.FixedUpdate();
-        }
     }
 
     /// <summary>

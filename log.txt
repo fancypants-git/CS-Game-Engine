@@ -1,0 +1,3 @@
+[ INFO ]    [ 11:19:13 ]  >> Using version 0.0.1 for scene /home/michiel/Coding/CSGameEngine/Engine/bin/Debug/net9.0/Resources/Scenes/BodyTest.scene
+[ INFO ]    [ 11:19:22 ]  >> Disposing Objects
+[ INFO ]    [ 11:19:22 ]  >> Finished Disposing Objects

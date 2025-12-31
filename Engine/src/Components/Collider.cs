@@ -1,47 +1,55 @@
-using BulletSharp.Math;
-using BulletSharp;
-using Engine.Internals;
+using JoltPhysicsSharp;
+using Engine.Maths;
+using Quaternion = System.Numerics.Quaternion;
 
 namespace Engine.Components;
 
+/// <summary>
+/// A Collider represents a Collision Shape with the given settings,<br/>
+/// Collider Itself is not a valid Collider as it does not have any associated shape,<br/>
+/// Only Children of this class (e.g. BoxCollider, CapsuleCollider) are a valid Collider, this class is just the base.
+/// Please keep this in mind.
+/// </summary>
 public class Collider : Component
 {
-    public CollisionShape CollisionShape;
-    public RigidBody Body;
-    public readonly bool IsKinematic;
-    
-    public Collider(Entity entity, CollisionShape shape, bool isKinematic) : base(entity)
+    public Collider(Entity e) : base(e)
     {
-        IsKinematic = isKinematic;
-        
-        CollisionShape = shape;
-        var motionState = new TransformMotionState(Transform);
-        var rigidbodyInfo = new RigidBodyConstructionInfo(0, motionState, CollisionShape, Vector3.Zero);
-        Body = new RigidBody(rigidbodyInfo);
-        if (isKinematic)
-        {
-            Body.CollisionFlags |= CollisionFlags.KinematicObject;
-            Body.ActivationState = ActivationState.DisableDeactivation;
-        }
-        Physics.PhysicsHandler.AddRigidBody(Body);
-        rigidbodyInfo.Dispose();
+        Offset = Vector3.Zero;
+        Rotation = Vector3.Zero;
+        const float deg2rad = MathF.PI / 180f;
+        RotationQuat = Quaternion.CreateFromYawPitchRoll(deg2rad * Rotation.Y, deg2rad * Rotation.X, deg2rad * Rotation.Z);
     }
 
-    public override void Load()
+    public Collider(Entity e, Vector3 offset, Vector3 rotation) : base(e)
     {
-        CollisionShape.LocalScaling = new Vector3(Transform.GlobalSize.X, Transform.GlobalSize.Y, Transform.GlobalSize.Z);
+        Offset = offset;
+        Rotation = rotation;
+        const float deg2rad = MathF.PI / 180f;
+        RotationQuat = Quaternion.CreateFromYawPitchRoll(deg2rad * Rotation.Y, deg2rad * Rotation.X, deg2rad * Rotation.Z);
     }
 
-    protected override void Dispose(bool disposing)
+    private Shape? _shape;
+    public Shape Shape
     {
-        if (IsDisposed) return;
-        
-        if (disposing)
+        get
         {
-            CollisionShape.Dispose();
-            Body.Dispose();
+            return _shape!;
         }
-        
-        IsDisposed = true;
+        set
+        {
+            _shape ??= value;
+        }
+    }
+
+    public Vector3 Offset { get; protected init; }
+    public Vector3 Rotation { get; protected init; }
+    public Quaternion RotationQuat { get; protected init; }
+
+    public virtual Shape CreateShape(float density)
+        => null!;
+
+    public virtual void InitializeShape(float density)
+    {
+        Shape = CreateShape(density);
     }
 }

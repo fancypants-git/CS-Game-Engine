@@ -1,7 +1,8 @@
 using Engine.Attributes;
-using Engine.Helpers;
-using OpenTK.Mathematics;
-using BulletSharp;
+using Engine.Debugging;
+using Engine.Maths;
+using Engine.Physics;
+using Quaternion = System.Numerics.Quaternion;
 
 namespace Engine.Components;
 
@@ -9,28 +10,36 @@ namespace Engine.Components;
 [DisallowMultiple]
 public class Rigidbody : Component
 {
-    public float Mass;
-    
-    public Rigidbody(Entity entity, float mass) : base(entity)
+    public Rigidbody(Entity e, float density) : base(e)
     {
-        Mass = mass;
+        Density = density;
     }
+    
+    
+    public float Density { get; private set; }
 
     public override void Load()
     {
-        var colliders = Entity.GetComponents<Collider>(true);
-        foreach (var collider in colliders)
-        {
-            collider.Load();
-            ApplyMassTo(collider);
-        }
+        PhysicsHandler.AddRigidBody(this);
     }
-
-    private void ApplyMassTo(Collider collider)
+    
+    public void SyncFromPhysics()
     {
-        collider.CollisionShape.CalculateLocalInertia(Mass, out var inertia);
-        collider.Body.SetMassProps(Mass, inertia);
-        collider.Body.UpdateInertiaTensor();
-        collider.Body.ActivationState = ActivationState.ActiveTag;
+        /**
+         * get world (transposed) transform using BodyInterface.GetWorldTransform(BodyID)
+         * get the Translation from the transform
+         * get the Rotation Vector using QuaternionToAxis
+         * set the Translation and Rotation Vector in the Transform component
+         */
+        if (!Entity.GetComponent(out PhysicsObject? po, true))
+        {
+            Debug.LogWarn("Entity ", Entity.Id.ToString(), " does not contain a PhysicsObject, please consider adding this to the entity for participation in the physics system!");
+            return;
+        }
+
+        if (!(Enabled && po!.Enabled)) return;
+
+        Transform.Position = PhysicsHandler.BodyInterface.GetPosition(po!.Body.ID);
+        Transform.Rotation = PhysicsHandler.BodyInterface.GetRotation(po!.Body.ID);
     }
 }

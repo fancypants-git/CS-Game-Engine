@@ -1,6 +1,7 @@
-﻿using Engine.Helpers;
+﻿using Engine.Debugging;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+using Engine.Maths;
+using Matrix4 = OpenTK.Mathematics.Matrix4;
 
 namespace Engine.Rendering;
 
@@ -79,7 +80,8 @@ public class Shader : IDisposable
         if (success == 0)
         {
             GL.GetShaderInfoLog(shader, out var log);
-            Debug.LogError("Failed to Compile Shader:", shader, '\n', log);
+            Debug.LogErr("Failed to Compile Shader: ", shader.ToString());
+            Debug.LogErr(log);
         }
 
         return success == 1;
@@ -91,7 +93,8 @@ public class Shader : IDisposable
         if (success == 0)
         {
             GL.GetProgramInfoLog(program, out var log);
-            Debug.LogError("Failed to Link Program:", program, '\n', log);
+            Debug.LogErr("Failed to Link Program:", program.ToString());
+            Debug.LogErr(log);
         }
 
         return success == 1;
@@ -117,7 +120,7 @@ public class Shader : IDisposable
     {
         if (_isDisposed) return;
 
-        Debug.LogMemLeak("Shader");
+        Debug.LogMemLeak(GetType().Name);
         Dispose(false);
     }
 }

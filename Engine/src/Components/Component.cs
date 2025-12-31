@@ -1,4 +1,4 @@
-﻿using Engine.Helpers;
+﻿using Engine.Debugging;
 
 namespace Engine.Components;
 
@@ -38,7 +38,7 @@ public class Component(Entity entity) : IDisposable
     {
         if (IsDisposed) return;
         
-        Debug.LogMemLeak("Component");
+        Debug.LogMemLeak(GetType().Name);
         Dispose(false);
     }
 }

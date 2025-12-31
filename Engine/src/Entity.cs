@@ -1,9 +1,7 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+﻿
 using Engine.Attributes;
 using Engine.Components;
-using Engine.Helpers;
-using OpenTK.Mathematics;
+using Engine.Debugging;
 
 namespace Engine;
 
@@ -28,7 +26,16 @@ public class Entity : IDisposable
     public virtual void Load()
     {
         foreach (var c in _components)
-            c.Load();
+        {
+            try
+            {
+                c.Load();
+            }
+            catch(Exception e)
+            {
+                Debug.LogErr(e);
+            }
+        }
     }
 
     public virtual void Update()
@@ -43,7 +50,7 @@ public class Entity : IDisposable
             }
             catch(Exception e)
             {
-                Debug.LogError(e);
+                Debug.LogErr(e);
             }
         }
     }
@@ -60,7 +67,7 @@ public class Entity : IDisposable
             }
             catch(Exception e)
             {
-                Debug.LogError(e);
+                Debug.LogErr(e);
             }
         }
     }
@@ -89,6 +96,21 @@ public class Entity : IDisposable
         }
 
         return null;
+    }
+    
+    public bool GetComponent<T>(out T? componentOut, bool includeDisabled = false) where T : Component
+    {
+        foreach (var component in _components)
+        {
+            if (component is T c && (includeDisabled || component.Enabled))
+            {
+                componentOut = c;
+                return true;
+            }
+        }
+
+        componentOut = null;
+        return false;
     }
 
     public Component[] GetComponents(bool includeDisabled = false)
@@ -150,7 +172,7 @@ public class Entity : IDisposable
     {
         if (_isDisposed) return;
         
-        Debug.LogMemLeak("Entity");
+        Debug.LogMemLeak(GetType().Name);
         Dispose(false);
     }
 }

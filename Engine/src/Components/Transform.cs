@@ -1,6 +1,7 @@
-﻿using BulletSharp;
-using Engine.Attributes;
-using OpenTK.Mathematics;
+﻿using Engine.Attributes;
+using Engine.Maths;
+using Matrix4 = OpenTK.Mathematics.Matrix4;
+using Quaternion = OpenTK.Mathematics.Quaternion;
 
 namespace Engine.Components;
 
@@ -8,242 +9,214 @@ namespace Engine.Components;
 [DisallowMultiple]
 public class Transform : Component
 {
-    
-    
-    private Vector3 _position;
+    public Transform(Entity e, Transform parent) : base(e)
+    {
+        Parent = parent;
+        LocalPosition = Vector3.Zero;
+        // LocalRotation = Vector3.Zero;
+        LocalSize = Vector3.One;
+    }
+    public Transform(Entity e, Vector3 position, Vector3 rotation, Vector3 size)
+        : base(e)
+    {
+        Parent = null!;
+        LocalPosition = position;
+        // LocalRotation = rotation;
+        LocalSize = size;
+    }
+    public Transform(Entity e, Transform parent, Vector3 position, Vector3 rotation, Vector3 size)
+        : base(e)
+    {
+        Parent = parent;
+        LocalPosition = position;
+        // LocalRotation = rotation;
+        LocalSize = size;
+    }
+
+
+    #region Properties
+    protected Vector3 _localPosition;
+    public Vector3 LocalPosition
+    {
+        get => _localPosition;
+        set => InternalUpdatePosition(value, Space.Local);
+    }
+
     public Vector3 Position
     {
-        get
-        {
-            return _position;
-        }
-        set
-        {
-            _position = value;
-            TranslationMatrix = Matrix4.CreateTranslation(GlobalPosition);
-        }
+        get => _localPosition + (Parent?.Position ?? Vector3.AdditiveIdentity);
+        set => InternalUpdatePosition(value, Space.World);
     }
 
-    public Vector3 GlobalPosition
+
+
+    protected Vector3 _localSize;
+    public Vector3 LocalSize
     {
-        get => _position + (Parent?._position ?? Vector3.AdditiveIdentity);
-        set => Position = value - (Parent?._position ?? Vector3.AdditiveIdentity);
+        get => _localSize;
+        set => InternalUpdateSize(value, Space.Local);
     }
-    
 
-    private Vector3 _size;
     public Vector3 Size
     {
-        get
-        {
-            return _size;
-        }
-        set
-        {
-            _size = value;
-            SizeMatrix = Matrix4.CreateScale(GlobalSize);
-        }
+        get => _localSize * (Parent?.Size ?? Vector3.MultiplicativeIdentity);
+        set => InternalUpdateSize(value, Space.World);
     }
 
-    public Vector3 GlobalSize
+
+
+    protected Quaternion _localRotation;
+    public Quaternion LocalRotation
     {
-        get => _size * (Parent?._size ?? Vector3.MultiplicativeIdentity);
-        set => Size = value / (Parent?._size ?? Vector3.MultiplicativeIdentity);
+        get => _localRotation;
+        set => InternalUpdateRotation(value, Space.Local);
     }
 
-    
-    private Vector3 _rotation;
-    public Vector3 Rotation
+    public Quaternion Rotation
     {
-        get
-        {
-            return _rotation;
-        }
-        set
-        {
-            _rotation = value;
-            RotationMatrix = Matrix4.CreateRotationZ(MathHelper.DegToRad * GlobalRotation.Z)
-                             * Matrix4.CreateRotationY(MathHelper.DegToRad * GlobalRotation.Y)
-                             * Matrix4.CreateRotationX(MathHelper.DegToRad * GlobalRotation.X);
-            
-            Forwards = new Vector3(
-                (float)(Math.Cos(MathHelper.DegToRad * _rotation.X) * Math.Sin(MathHelper.DegToRad * _rotation.Y)),
-                (float)(-Math.Sin(MathHelper.DegToRad * _rotation.X)),
-                (float)(Math.Cos(MathHelper.DegToRad * _rotation.X) * Math.Cos(MathHelper.DegToRad * _rotation.Y)));
-            
-            Horizontal = new Vector3(Forwards.X, 0, Forwards.Z).Normalized();
-            Right = Vector3.Cross(Vector3.UnitY, Forwards);
-            Up = Vector3.Cross(Forwards, Right);
-        }
-    }
-
-    public Vector3 GlobalRotation
-    {
-        get => _rotation + (Parent?._rotation ?? Vector3.AdditiveIdentity);
-        set => Rotation = value - (Parent?._rotation ?? Vector3.AdditiveIdentity);
+        get => (Parent?.Rotation ?? Quaternion.Identity) * _localRotation;
+        set => InternalUpdateRotation(value, Space.World);
     }
 
 
-    private Matrix4 _translationMatrix;
-    public Matrix4 TranslationMatrix
-    {
-        get
-        {
-            return _translationMatrix;
-        }
-        private set
-        {
-            _translationMatrix = value;
-            SetModelMatrix();
-        }
-    }
-    
-    private Matrix4 _sizeMatrix;
-    public Matrix4 SizeMatrix
-    {
-        get
-        {
-            return _sizeMatrix;
-        }
-        private set
-        {
-            _sizeMatrix = value;
-            SetModelMatrix();
-        }
-    }
-    
-    private Matrix4 _rotationMatrix;
-    public Matrix4 RotationMatrix
-    {
-        get
-        {
-            return _rotationMatrix;
-        }
-        private set
-        {
-            _rotationMatrix = value;
-            SetModelMatrix();
-        }
-    }
-    
-    public Matrix4 ModelMatrix { get; private set; }
-    
-    public Vector3 Forwards { get; private set; }
-    public Vector3 Right { get; private set; }
-    public Vector3 Up { get; private set; }
-    public Vector3 Horizontal { get; private set; }
 
-    private Transform? _parent;
-
+    protected Transform? _parent;
     public Transform? Parent
     {
         get => _parent;
-        set
+        set => _parent = value;
+    }
+
+
+
+    public Vector3 Forwards { get; protected set; }
+    public Vector3 Right { get; protected set; }
+    public Vector3 Up { get; protected set; }
+
+
+    public Matrix4 TranslationMatrix { get; protected set; }
+    public Matrix4 SizeMatrix { get; protected set; }
+    public Matrix4 RotationMatrix { get; protected set; }
+    public Matrix4 ModelMatrix { get; protected set; }
+    #endregion
+
+
+    #region Internal Updates
+    protected void InternalUpdatePosition(Vector3 value, Space space)
+    {
+        if (space == Space.Local || Parent == null)
         {
-            _parent = value;
+            _localPosition = value;
+        }
+        else if (space == Space.World)
+        {
+            Vector3 delta = value - Parent.Position;
+            Quaternion invParentRotation = Quaternion.Conjugate(Parent.Rotation);
+            _localPosition = invParentRotation * delta;
+        }
+
+        TranslationMatrix = Matrix4.CreateTranslation(Position);
+        InternalUpdateModelMatrix();
+    }
+
+    protected void InternalUpdateSize(Vector3 value, Space space)
+    {
+        if (space == Space.Local || Parent == null)
+        {
+            _localSize = value;
+        }
+        else if (space == Space.World)
+        {
+            _localSize = value / Parent.Size;
+        }
+
+        SizeMatrix = Matrix4.CreateScale(Size);
+        InternalUpdateModelMatrix();
+    }
+
+    protected void InternalUpdateRotation(Quaternion value, Space space)
+    {
+        if (space == Space.Local || Parent == null)
+        {
+            _localRotation = value;
+        }
+        else if (space == Space.World)
+        {
+            // given Quaternions P, Q and R
+            // with P and Q being a spacial rotation
+            // and R = P * Q
+            // gives R = P( Q )
+            // 
+            // P is Parent.Rotation
+            // Q is localRotation
+            // R is result is globalRotation
+            Quaternion p = Parent.Rotation;
+            Quaternion pInvert = Quaternion.Conjugate(p);
+            _localRotation = pInvert * value;
+        }
+
+        _localRotation.Normalize();
+        RotationMatrix = Matrix4.CreateFromQuaternion(Rotation);
+
+        Forwards = Rotation * Vector3.UnitZ;
+        Right = Rotation * Vector3.UnitX;
+        Up = Rotation * Vector3.UnitY;
+
+        InternalUpdateModelMatrix();
+    }
+
+
+
+    protected void InternalUpdateModelMatrix()
+    {
+        ModelMatrix = SizeMatrix * TranslationMatrix;
+    }
+    #endregion
+
+    #region Transformations
+
+    public void Translate(Vector3 v, Space space = Space.World)
+    {
+        if (space == Space.Local)
+        {
+            v = Rotation * v;
+        }
+
+        InternalUpdatePosition(_localPosition + v, Space.Local);
+    }
+
+    public void Translate(float x, float y, float z, Space space = Space.World)
+    {
+        Translate(new(x, y, z), space);
+    }
+
+    public void Translate(Vector3 d, float l, Space space = Space.World)
+    {
+        Translate(d * l, space);
+    }
+
+
+    public void Rotate(Quaternion q, Space space = Space.World)
+    {
+        if (space == Space.World)
+        {
+            // instead of rotating delta (aka q) by localRotation (aka P):
+            //      R = P( q )
+            // rotate localRotation by delta,
+            // because you literally rotate the rotation of this object by delta:
+            //      R = q( P )
+            InternalUpdateRotation(q * Rotation, Space.World);
+        }
+        else if (space == Space.Local)
+        {
+            InternalUpdateRotation(Rotation * q, Space.World);
         }
     }
 
-    public Transform(Entity entity) : base(entity)
+    public void Rotate(Vector3 axis, float angle, Space space = Space.World)
     {
-        Position = new Vector3(0, 0, 0);
-        Size = new Vector3(1, 1, 1);
-        Rotation = new Vector3(0, 0, 0);
+        Quaternion quat = Quaternion.FromAxisAngle(axis, angle);
+        Rotate(quat, space);
     }
-
-    public Transform(Entity entity, Vector3 position, Vector3 size, Vector3 rotation) : base(entity)
-    {
-        Position = position;
-        Size = size;
-        Rotation = rotation;
-    }
-
-    public Transform(Entity entity, Transform parent) : base(entity)
-    {
-        Position = new Vector3(0, 0, 0);
-        Size = new Vector3(1, 1, 1);
-        Rotation = new Vector3(0, 0, 0);
-        Parent = parent;
-    }
-
-    public Transform(Entity entity, Transform parent, Vector3 position, Vector3 size, Vector3 rotation)
-        : base(entity)
-    {
-        Position = position;
-        Size = size;
-        Rotation = rotation;
-        Parent = parent;
-    }
-    
-    private void SetModelMatrix()
-    {
-        ModelMatrix = _translationMatrix * _sizeMatrix * _rotationMatrix;
-    }
-    
-    
-    // TRANSFORMATIONS
-
-    public void Translate(Vector3 v)
-    {
-        Position += v;
-    }
-    public void Translate(float x, float y, float z)
-    {
-        Position += new Vector3(x, y, z);
-    }
-    public void Translate(float v, Vector3 d)
-    {
-        Position += d * v;
-    }
-    
-    public void Scale(Vector3 v)
-    {
-        Size *= v;
-    }
-    public void Scale(float x, float y, float z)
-    {
-        Size *= new Vector3(x, y, z);
-    }
-
-    public void Rotate(Vector3 v)
-    {
-        Rotation += v;
-    }
-    public void Rotate(float x, float y, float z)
-    {
-        Rotation += new Vector3(x, y, z);
-    }
-    public void Rotate(float v, Vector3 d)
-    {
-        Rotation += d * v;
-    }
-
-    public void RotateClamped(Vector3 v, Vector3 min, Vector3 max)
-    {
-        Rotation = Vector3.Clamp(_rotation + v, min, max);
-    }
-    public void RotateClamped(float x, float y, float z, Vector3 min, Vector3 max)
-    {
-        Rotation = Vector3.Clamp(_rotation + new Vector3(x, y, z), min, max);
-    }
-    public void RotateClamped(float v, Vector3 d, Vector3 min, Vector3 max)
-    {
-        Rotation = Vector3.Clamp(_rotation + (v * d), min, max);
-    }
-
-    public void RotateXClamped(float v, float min, float max)
-    {
-        float clampedX = Math.Clamp(_rotation.X + v, min, max);
-        Rotation = new Vector3(clampedX, _rotation.Y, _rotation.Z);
-    }
-    public void RotateYClamped(float v, float min, float max)
-    {
-        float clampedY = Math.Clamp(_rotation.Y + v, min, max);
-        Rotation = new Vector3(_rotation.X, clampedY, _rotation.Z);
-    }
-    public void RotateZClamped(float v, float min, float max)
-    {
-        float clampedZ = Math.Clamp(_rotation.Z + v, min, max);
-        Rotation = new Vector3(_rotation.X, _rotation.Y, clampedZ);
-    }
+    #endregion
 }

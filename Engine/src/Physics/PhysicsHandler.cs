@@ -1,75 +1,97 @@
-using BulletSharp;
-using BulletSharp.Math;
-using OpenTK.Graphics.Vulkan;
+using Quaternion =  System.Numerics.Quaternion;
+using Engine.Components;
+using Engine.Debugging;
+using JoltPhysicsSharp;
 
 namespace Engine.Physics;
 
 public static class PhysicsHandler
 {
-    private static CollisionConfiguration _collisionConfiguration;
-    private static CollisionDispatcher _dispatcher;
-    private static DbvtBroadphase _broadphase;
-    public static DiscreteDynamicsWorld World;
     public static bool IsInitialized { get; private set; } = false;
     public static bool IsDisposed { get; private set; } = false;
     
-    public static void Initialize(OpenTK.Mathematics.Vector3 gravity)
+    public static PhysicsSystem PhysicsSystem { get; private set; }
+    public static JobSystem JobSystem { get; private set; }
+    public static BodyInterface BodyInterface { get; private set; }
+    
+    private static List<Rigidbody> _rigidbodies = [];
+    
+    public static void Initialize(bool doublePrecision)
     {
         if (IsInitialized) return;
         
-        _collisionConfiguration = new DefaultCollisionConfiguration();
-        _dispatcher = new CollisionDispatcher(_collisionConfiguration);
+        // set the Trace and Failure handlers
+        Foundation.SetTraceHandler((message) => 
+        {
+            Debug.LogInfo(message);
+        });
         
-        _broadphase = new DbvtBroadphase();
-        World = new DiscreteDynamicsWorld(_dispatcher, _broadphase, null, _collisionConfiguration);
-        World.Gravity = new Vector3(gravity.X, gravity.Y, gravity.Z);
+        Foundation.SetAssertFailureHandler((inExpression, inMessage, inFile, inLine) =>
+        {
+            string message = inMessage ?? inExpression;
+            string outMessage = $"JoltPhysics Assertion failure at {inFile}:{inLine}: {message}";
+            Debug.LogErr(outMessage);
+            
+            throw new Exception(outMessage);
+        });
         
-        var co = new CollisionObject();
         
+        // initialize the foundation
+        if (!Foundation.Init(false))
+        {
+            Debug.LogFatal("Failed to Initialize JoltPhysics Foundation!");
+            return;
+        }
+        
+        JobSystem = new JobSystemThreadPool();
+        
+        PhysicsSystemSettings settings = new();
+        
+        BroadPhaseLayerInterfaceMask broadPhaseLayerInterface = new((uint)LayerManager.BroadLayerCount);
+        
+        Dictionary<BroadPhaseLayer, uint> includeMasks = new();
+        foreach (DefaultLayer layer in LayerManager.DefinedLayers.Values)
+        {
+            if (!includeMasks.TryGetValue(layer.BroadPhaseLayer, out uint mask))
+                mask = 0;
+                
+            mask |= layer.Value;
+            includeMasks[layer.BroadPhaseLayer] = mask;
+        }
+        
+        foreach (var (layer, mask) in includeMasks)
+            broadPhaseLayerInterface.ConfigureLayer(layer, mask, 0);
+            
+        settings.ObjectLayerPairFilter = new ObjectLayerPairFilterMask();
+        settings.BroadPhaseLayerInterface = broadPhaseLayerInterface;
+        settings.ObjectVsBroadPhaseLayerFilter = new ObjectVsBroadPhaseLayerFilterMask(broadPhaseLayerInterface);
+        
+        PhysicsSystem = new(settings);
+        BodyInterface = PhysicsSystem.BodyInterface;
         
         IsInitialized = true;
     }
     
-    public static void AddRigidBody(RigidBody rb)
+    public static void Update(float delta)
     {
-        World.AddRigidBody(rb);
+        int stepCount = (int)Math.Ceiling(delta / (1/60f));
+        var error = PhysicsSystem.Update(delta, stepCount, JobSystem);
+        Debug.Assert(error == PhysicsUpdateError.None, $"PhysicsUpdate Failed due to {error}");
+        
+        foreach (var rb in _rigidbodies)
+            rb.SyncFromPhysics();
     }
     
-    public static void Update(float dt)
+    public static void AddRigidBody(Rigidbody rb)
     {
-        World.StepSimulation(dt);
+        _rigidbodies.Add(rb);
     }
-
+    
     public static void Dispose()
     {
         if (IsDisposed) return;
         
-        //remove/dispose constraints
-        int i;
-        for (i = World.NumConstraints - 1; i >= 0; i--)
-        {
-            TypedConstraint constraint = World.GetConstraint(i);
-            World.RemoveConstraint(constraint);
-            constraint.Dispose();
-        }
-        
-        //remove the rigidbodies from the dynamics world and delete them
-        for (i = World.NumCollisionObjects - 1; i >= 0; i--)
-        {
-            CollisionObject obj = World.CollisionObjectArray[i];
-            RigidBody body = obj as RigidBody;
-            if (body != null && body.MotionState != null)
-            {
-                body.MotionState.Dispose();
-            }
-            World.RemoveCollisionObject(obj);
-            obj.Dispose();
-        }
-        
-        World.Dispose();
-        _broadphase.Dispose();
-        _dispatcher?.Dispose();
-        _collisionConfiguration.Dispose();
+        PhysicsSystem.Dispose();
         
         IsDisposed = true;
     }

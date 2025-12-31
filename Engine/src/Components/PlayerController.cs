@@ -1,6 +1,6 @@
 using Engine.Attributes;
 using Engine.Helpers;
-using OpenTK.Mathematics;
+using Engine.Maths;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Engine.Components;

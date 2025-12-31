@@ -1,6 +1,6 @@
 ﻿using Engine.Attributes;
 using Engine.Helpers;
-using OpenTK.Mathematics;
+using Engine.Maths;
 
 namespace Engine.Components;
 
@@ -21,10 +21,10 @@ public class CameraController : Component
     {
         base.Update();
         
-        Transform.Rotate(-Input.MouseDelta.X / 100f * Sensitivity, Vector3.UnitY);
+        Transform.Rotate(Vector3.UnitY, -Input.MouseDelta.X / 100f * Sensitivity);
         if (InvertY)
-            Transform.RotateXClamped(Input.MouseDelta.Y / 100f * Sensitivity, -89, 89);
+            Transform.Rotate(Vector3.UnitX, Input.MouseDelta.Y / 100f * Sensitivity);
         else
-            Transform.RotateXClamped(-Input.MouseDelta.Y / 100f * Sensitivity, -89, 89);
+            Transform.Rotate(Vector3.UnitX, -Input.MouseDelta.Y / 100f * Sensitivity);
     }
 }

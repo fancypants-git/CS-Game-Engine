@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Engine.Helpers;
+using Engine.Debugging;
 using Engine.Physics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -14,7 +15,7 @@ public class Game : GameWindow
             API = ContextAPI.OpenGL,
             Profile = ContextProfile.Core,
             Flags = settings.Flags,
-            ClientSize = settings.WindowSize,
+            ClientSize = (OpenTK.Mathematics.Vector2i)settings.WindowSize,
             Vsync = settings.VSync,
             Title = settings.Title,
             StartFocused = true,
@@ -27,16 +28,16 @@ public class Game : GameWindow
         Debug.LogFilter = settings.LogFilter;
         
         GameSettings = gameSettings;
-        PhysicsHandler.Initialize(gameSettings.Gravity);
+        LayerManager.Initialize(GameSettings.Layers);
+        PhysicsHandler.Initialize(GameSettings.DoublePhysicsPrecision);
     }
     
     protected ProgramSettings Settings { get; }
-    protected GameSettings GameSettings { get; }
+    public static GameSettings GameSettings { get; private set; }
     
     private double _fixedUpdateWaitingTime = 0;
-    
 
-    protected override sealed void OnLoad()
+    protected sealed override void OnLoad()
     {
         try
         {
@@ -44,10 +45,10 @@ public class Game : GameWindow
         }
         catch(Exception e)
         {
-            Debug.LogError(e);
+            Debug.LogErr(e);
         }
         
-        Debug.LogPrefixed(LogType.Launch, "Initializing OpenGL Context");
+        Debug.Log(LogType.Launch, "Initializing OpenGL Context");
         try
         {
             base.OnLoad();
@@ -59,7 +60,7 @@ public class Game : GameWindow
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             
-            GL.Viewport(0, 0, Winfo.WindowSize.X, Winfo.WindowSize.Y);
+            GL.Viewport(0, 0, (int)Winfo.WindowSize.X, (int)Winfo.WindowSize.Y);
             
             Input.Initialize(KeyboardState, MouseState);
         }
@@ -71,17 +72,18 @@ public class Game : GameWindow
             return;
         }
         
-        Debug.LogPrefixed(LogType.Launch, "Succesfully Finished Initializing OpenGL Context");
+        Debug.Log(LogType.Launch, "Succesfully Finished Initializing OpenGL Context");
         
         
 
         try
         {
             Start();
+            PhysicsHandler.PhysicsSystem.OptimizeBroadPhase();
         }
         catch (Exception e)
         {
-            Debug.LogError(e);
+            Debug.LogErr(e);
         }
     }
 
@@ -101,32 +103,39 @@ public class Game : GameWindow
                 Time.FixedDeltaTimeDouble = _fixedUpdateWaitingTime;
                 _fixedUpdateWaitingTime -= GameSettings.FixedUpdateDelta;
                 
-                if (GameSettings.PhysicsUpdate == GameSettings.FixedUpdate)
-                    PhysicsHandler.World.StepSimulation(Time.FixedDeltaTime);
                 SceneManager.FixedUpdateScene();
                 FixedUpdate();
+                
+                if (GameSettings.PhysicsUpdate == GameSettings.FixedUpdate)
+                    PhysicsHandler.Update(Time.FixedDeltaTime);
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                Debug.LogErr(e);
             }
         }
 
         try
         {
-            if (GameSettings.PhysicsUpdate == GameSettings.Update)
-                PhysicsHandler.World.StepSimulation(Time.DeltaTime);
             SceneManager.UpdateScene();
             Update();
+            
+            if (GameSettings.PhysicsUpdate == GameSettings.Update)
+                PhysicsHandler.Update(Time.DeltaTime);
         }
         catch (Exception e)
         {
-            Debug.LogError(e);
+            Debug.LogErr(e);
+        }
+        
+        if (!EngineApplication.IsRunning)
+        {
+            Close();
         }
     }
 
 
-    sealed protected override void OnRenderFrame(FrameEventArgs args)
+    protected sealed override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
 
@@ -137,10 +146,11 @@ public class Game : GameWindow
         try
         {
             SceneManager.RenderScene();
+            Debug.Render(SceneManager.ActiveCamera);
         }
         catch (Exception e)
         {
-            Debug.LogError(e);
+            Debug.LogErr(e);
         }
 
         SwapBuffers();
@@ -152,7 +162,7 @@ public class Game : GameWindow
         base.OnFramebufferResize(args);
 
         GL.Viewport(0, 0, args.Width, args.Height);
-        Winfo.WindowSize = (args.Width, args.Height);
+        Winfo.WindowSize = new(args.Width, args.Height);
         
         try
         {
@@ -164,7 +174,7 @@ public class Game : GameWindow
         }
         catch(Exception e)
         {
-            Debug.LogError(e);
+            Debug.LogErr(e);
         }
     }
 
@@ -178,17 +188,19 @@ public class Game : GameWindow
             Debug.LogInfo("Disposing Objects");
 
             SceneManager.Dispose();
+            PhysicsHandler.Dispose();
+            Debug.DisposeDrawing();
 
             Debug.LogInfo("Finished Disposing Objects");
         }
         catch (Exception e)
         {
-            Debug.LogError(e);
+            Debug.LogErr(e);
         }
         finally
         {
             base.OnClosing(args);
-            Debug.LogPrefixed(LogType.Exit, "Exited Program.");
+            Debug.Log(LogType.Exit, "Exited Program.");
         }
     }
 

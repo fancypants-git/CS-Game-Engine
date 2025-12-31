@@ -2,11 +2,17 @@
 using Engine.Windowing;
 using Engine.Attributes;
 using Engine.Helpers;
+using Engine.Debugging;
+using Engine.Maths;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Drawing;
 
 [GameEntry]
-internal class Program() : Game(ProgramSettings.Debug, GameSettings.Default)
+internal class Program() : Game(ProgramSettings.Debug, new(GameSettings.Default)
+{
+    FixedUpdateDelta = 0.01f,
+})
 {
     protected override void Awake()
     {
@@ -14,7 +20,7 @@ internal class Program() : Game(ProgramSettings.Debug, GameSettings.Default)
     
     protected override void Start()
     {
-        SceneManager.InitializeScene(Resources.GetPath("Scenes/Example.scene"));
+        SceneManager.InitializeScene(Resources.GetPath("Scenes/BodyTest.scene"));
         CursorState = CursorState.Grabbed;
     }
 
@@ -33,5 +39,10 @@ internal class Program() : Game(ProgramSettings.Debug, GameSettings.Default)
                 Time.TimeScale = 1;
             }
         }
+
+        const float length = 100f;
+        Debug.DrawLine(Vector3.Zero, Vector3.UnitX * length, Color.Red);
+        Debug.DrawLine(Vector3.Zero, Vector3.UnitY * length, Color.Blue);
+        Debug.DrawLine(Vector3.Zero, Vector3.UnitZ * length, Color.Green);
     }
 }

@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Engine.Components;
 using Engine.Helpers;
@@ -6,7 +5,8 @@ using Engine.Interfaces;
 using Engine.Rendering;
 using Engine.Scene;
 using Newtonsoft.Json;
-using OpenTK.Mathematics;
+using Engine.Maths;
+using Engine.Debugging;
 
 namespace Engine.Internals;
 
@@ -19,18 +19,6 @@ public struct BlockData
     public readonly string[][] GetArgs(string command) => Block.Where(p => p.command == command).Select(p => p.args).ToArray();
 }
 
-
-// public struct ComponentData
-// {
-//     public string Type { get; set; }
-//     public string[] Arguments { get; set; }
-// }
-//
-// public struct EntityData
-// {
-//     public string Id { get; init; }
-//     public List<ComponentData> Components { get; set; }
-// }
 
 public static class SceneLoader
 {
@@ -49,7 +37,7 @@ public static class SceneLoader
         var header = Regex.Match(source, @"(?ms)^meta\s*\{(?<meta>.*)\s*\}", RegexOptions.Multiline);
         if (!header.Success)
         {
-            Debug.LogError("Could not register Scene Header in", path);
+            Debug.LogErr("Could not register Scene Header in ", path);
             return new SceneData();
         }
 
@@ -57,14 +45,14 @@ public static class SceneLoader
         string version;
         if (!versionMatch.Success)
         {
-            Debug.LogWarn("Could not register Scene Version in", path, ". Make sure to always include Version!");
+            Debug.LogWarn("Could not register Scene Version in ", path, " ; Make sure to always include Version!");
             Debug.LogWarn("Defaulting to newest version.");
             version = NewestVersion;
         }
         else
             version = versionMatch.Groups["version"].Value;
 
-        Debug.LogInfo("Using version", version, "for scene", path);
+        Debug.LogInfo("Using version ", version, " for scene ", path);
 
         var data = ParseScene(path, version);
 
@@ -75,7 +63,7 @@ public static class SceneLoader
     {
         if (!SceneVersions.TryGetValue(version, out var rules))
         {
-            Debug.LogError("Scene Version \"", version,
+            Debug.LogErr("Scene Version \"", version,
                 "\" was not registered. Make sure to use a registered version!");
             Debug.LogWarn("Using to newest scene version.");
             version = NewestVersion;
@@ -141,7 +129,7 @@ public static class SceneLoader
                     data.Entities.Add(entity);
                     break;
                 default:
-                    Debug.LogWarn("Block type", block.Command, "is not recognised.");
+                    Debug.LogWarn("Block type ", block.Command, " is not recognised.");
                     break;
             }
         }
@@ -195,23 +183,23 @@ public static class SceneLoader
                     var typeStr = DecodeString(line.args[0]);
                     if (!ComponentRegistry.GetComponentType(typeStr, out var type))
                     {
-                        Debug.LogWarn("Component of type", typeStr, "is not registered. Make sure to include the ComponentMeta attribute!");
+                        Debug.LogWarn("Component of type ", typeStr, " is not registered. Make sure to include the ComponentMeta attribute!");
                         break;
                     }
 
                     List<Parameter> args = [new Parameter(entity, entity.GetType())];
                     args.AddRange(DecodeParameters(line.args[1..]));
-                    if (!ComponentRegistry.Create(type, args, out var component))
+                    if (!ComponentRegistry.Create(type!, args, out var component))
                     {
-                        Debug.LogError("Failed to create Component of type", typeStr);
+                        Debug.LogFatal("Failed to create Component of type ", typeStr);
                     }
 
-                    entity.AddComponent(component);
+                    entity.AddComponent(component!);
                     if (typeof(IDrawable).IsAssignableFrom(type))
-                        drawables.Add((IDrawable)component);
+                        drawables.Add((IDrawable)component!);
                         
                     else if (typeof(Transform).IsAssignableFrom(type))
-                        entity.Transform = (Transform)component;
+                        entity.Transform = (Transform)component!;
                     break;
             }
         }
@@ -289,6 +277,19 @@ public static class SceneLoader
             _ => throw new ArgumentException($"vec3 must have 1 or 2 values: {arg}")
         };
     }
+    
+    private static Layer DecodeLayer(params string[] args)
+    {
+        var layerName = DecodeString(args[0]);
+        uint include = uint.MaxValue;
+        uint exclude = 0;
+        if (args.Length > 1)
+            uint.TryParse(args[1], out include);
+        if (args.Length > 2)
+            uint.TryParse(args[2], out exclude);
+        
+        return LayerManager.FromName(layerName).WithMask(include, exclude);
+    }
 
     // --------------------------
     // Main parameter decoder
@@ -339,6 +340,9 @@ public static class SceneLoader
                         break;
                     case "vec2":
                         parameters.Add(new Parameter(DecodeVector2(v), typeof(Vector2)));
+                        break;
+                    case "layer":
+                        parameters.Add(new Parameter(DecodeLayer(args), typeof(Layer)));
                         break;
                 }
             }

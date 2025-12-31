@@ -1,4 +1,4 @@
-using Engine.Helpers;
+using Engine.Debugging;
 using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
 
@@ -25,7 +25,8 @@ public class Texture : IDisposable
         }
         catch (Exception e)
         {
-            Debug.LogError("Error loading image:", path, "|", e.Message, '\n', e);
+            Debug.LogErr("Error Loading Image.");
+            Debug.LogErr(e);
             Dispose();
         }
 
@@ -85,7 +86,7 @@ public class Texture : IDisposable
     {
         if (_isDisposed) return;
         
-        Debug.LogMemLeak("Texture");
+        Debug.LogMemLeak(GetType().Name);
         Dispose(false);
     }
 }

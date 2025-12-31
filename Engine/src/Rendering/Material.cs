@@ -1,7 +1,6 @@
 using System.Drawing;
 using Engine.Components;
-using Engine.Helpers;
-using OpenTK.Mathematics;
+using Matrix4 = OpenTK.Mathematics.Matrix4;
 
 namespace Engine.Rendering;
 

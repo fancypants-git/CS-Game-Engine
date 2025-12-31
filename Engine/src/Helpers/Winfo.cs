@@ -1,9 +1,9 @@
-﻿using OpenTK.Mathematics;
+﻿using Engine.Maths;
 
 namespace Engine.Helpers;
 
 public static class Winfo
 {
-    public static Vector2i WindowSize { get; internal set; }
-    public static float AspectRatio => (float)WindowSize.X / WindowSize.Y;
+    public static Vector2 WindowSize { get; internal set; }
+    public static float AspectRatio => WindowSize.X / WindowSize.Y;
 }

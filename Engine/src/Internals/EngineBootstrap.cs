@@ -1,7 +1,7 @@
 using System.Reflection;
 using Engine.Windowing;
 using Engine.Attributes;
-using Engine.Helpers;
+using Engine.Debugging;
 
 namespace Engine.Internals;
 
@@ -21,7 +21,7 @@ public static class EngineBootstrap
         if (instance == null)
         {
             Debug.LogFatal("No GameEntry Attribute instance was found. Make sure to add this to your main class!");
-            Debug.LogPrefixed(LogType.Exit, "Exiting Bootstrap attempt early.");
+            Debug.Log(LogType.Exit, "Exiting Bootstrap attempt early.");
             return;
         }
         instance.Run();

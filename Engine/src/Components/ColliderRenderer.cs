@@ -1,0 +1,57 @@
+using Engine.Attributes;
+using Engine.Debugging;
+using Engine.Maths;
+using JoltPhysicsSharp;
+using Mat4 = System.Numerics.Matrix4x4;
+
+namespace Engine.Components;
+
+[ComponentMeta("ColliderRenderer")]
+[DisallowMultiple]
+public class ColliderRenderer : Component
+{
+    public ColliderRenderer(Entity e, Vector3 color, bool wireframe) : base(e)
+    {
+        Color = new(color, 255);
+        Wireframe = wireframe;
+    }
+
+    public JoltColor Color;
+    public bool Wireframe;
+    private readonly JoltDebugRenderer Renderer = new();
+
+    public override void Update()
+    {
+        if (!Entity.GetComponent(out PhysicsObject? po, true)) return;
+
+        var entityTranslation = Mat4.CreateTranslation(po!.Body.CenterOfMassPosition);
+        var entityRotation = Mat4.CreateFromQuaternion(po!.Body.Rotation);
+
+        var entityMatrix = entityRotation * entityTranslation;
+
+        foreach (var c in Entity.GetComponents<Collider>())
+        {
+            var colliderOffset = Mat4.CreateTranslation(c.Offset);
+            var colliderRotation = Mat4.CreateFromQuaternion(c.RotationQuat);
+
+            var colliderMatrix = colliderRotation * colliderOffset;
+
+            var worldMatrix = entityMatrix * colliderMatrix;
+
+            c.Shape.Draw(
+                Renderer,
+                worldMatrix,
+                Vector3.One,
+                Color,
+                false,
+                Wireframe
+            );
+        }
+
+        const float length = 10f;
+        Debug.DrawLine(Transform.Position, Transform.Position + (Transform.Forwards * length), System.Drawing.Color.Cyan);
+        Debug.DrawLine(Transform.Position, Transform.Position + (Transform.Right * length), System.Drawing.Color.Magenta);
+        Debug.DrawLine(Transform.Position, Transform.Position + (Transform.Up * length), System.Drawing.Color.Yellow);
+    }
+
+}

@@ -2,7 +2,8 @@ using System.Drawing;
 using System.Text.RegularExpressions;
 using Engine.Helpers;
 using Engine.Rendering;
-using OpenTK.Mathematics;
+using Engine.Maths;
+using Engine.Debugging;
 
 namespace Engine.Internals;
 
@@ -17,7 +18,7 @@ internal static class MeshLoader
             return ReadObjIntoMesh(filename, out materials);
 
 
-        Debug.LogError("File extension is not supported yet:", extension);
+        Debug.LogErr("File extension is not supported yet: ", extension);
         return new Mesh();
     }
 
@@ -52,7 +53,7 @@ internal static class MeshLoader
             var match = Regex.Match(l, pattern, RegexOptions.IgnorePatternWhitespace);
             if (!match.Success)
             {
-                Debug.LogWarn("Failed to decode line");
+                Debug.LogWarn("Failed to decode line ", l);
                 continue;
             }
 
@@ -245,7 +246,7 @@ internal static class MeshLoader
                     break;
                     
                 default:
-                    Debug.LogWarn("Unsupported mtl attribute:", command);
+                    Debug.LogWarn("Unsupported mtl attribute: ", command);
                     break;
             }
         }

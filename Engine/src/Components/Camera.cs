@@ -1,8 +1,10 @@
 using Engine.Attributes;
-using Engine.Helpers;
+using Engine.Debugging;
 using Engine.Interfaces;
-using Engine.Scene;
-using OpenTK.Mathematics;
+using Engine.Maths;
+using Matrix4 = OpenTK.Mathematics.Matrix4;
+using MathHelper = OpenTK.Mathematics.MathHelper;
+using Engine.Helpers;
 
 namespace Engine.Components;
 
@@ -18,7 +20,7 @@ public class Camera : Component
     }
 
     public CameraType Type;
-    
+
     // Perspective Camera Variables
     private float _fovy;
     public float Fovy
@@ -32,27 +34,27 @@ public class Camera : Component
             _fovy = Math.Clamp(value, 1f, 179f);
         }
     }
-    
+
     private int _viewportWidth;
     private int _viewportHeight;
     private float _aspectRatio;
-    
+
     // Orthographic Camera Variables
     public Vector2 Size;
-    
+
     // Global Camera Variables
     public float MaxDepth;
     public float MinDepth;
 
     public Matrix4 Projection { get; private set; }
     public Matrix4 View { get; private set; }
-    
+
     public Camera(Entity entity) : base(entity)
     {
         Type = CameraType.Perspective;
         Fovy = 90.0f;
         MaxDepth = 100f;
-        MinDepth = 1f;
+        MinDepth = 0.1f;
     }
 
     public Camera(Entity entity, CameraType cameraType, float minDepth, float maxDepth, float fovy = 90.0f, Vector2? size = null)
@@ -74,18 +76,22 @@ public class Camera : Component
         Size = size;
     }
 
+    public override void Load()
+    {
+        SetViewportSize((int)Winfo.WindowSize.X, (int)Winfo.WindowSize.Y);
+    }
+
     public override void Update()
     {
-        base.Update();
-
         if (_aspectRatio <= 0)
         {
-            Debug.LogError("Aspect ratio must be positive; Not updating Camera component of", Entity.Id);
+            Debug.LogErr("Aspect ratio must be positive; Not updating Camera component of ", Entity.Id);
             return;
         }
-        
+
         View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
-        Projection = Type switch {
+        Projection = Type switch
+        {
             CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, _aspectRatio, MinDepth, MaxDepth),
             CameraType.Orthographic => Matrix4.CreateOrthographic(Size.X, Size.Y, MinDepth, MaxDepth),
             _ => throw new ArgumentOutOfRangeException()
