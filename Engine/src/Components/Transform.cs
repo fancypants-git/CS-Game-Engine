@@ -13,7 +13,7 @@ public class Transform : Component
     {
         Parent = parent;
         LocalPosition = Vector3.Zero;
-        // LocalRotation = Vector3.Zero;
+        LocalRotation = Quaternion.Identity;
         LocalSize = Vector3.One;
     }
     public Transform(Entity e, Vector3 position, Vector3 rotation, Vector3 size)
@@ -21,7 +21,7 @@ public class Transform : Component
     {
         Parent = null!;
         LocalPosition = position;
-        // LocalRotation = rotation;
+        LocalRotation = Quaternion.FromEulerAngles(rotation);
         LocalSize = size;
     }
     public Transform(Entity e, Transform parent, Vector3 position, Vector3 rotation, Vector3 size)
@@ -29,7 +29,7 @@ public class Transform : Component
     {
         Parent = parent;
         LocalPosition = position;
-        // LocalRotation = rotation;
+        LocalRotation = Quaternion.FromEulerAngles(rotation);
         LocalSize = size;
     }
 
@@ -44,7 +44,13 @@ public class Transform : Component
 
     public Vector3 Position
     {
-        get => _localPosition + (Parent?.Position ?? Vector3.AdditiveIdentity);
+        get
+        {
+            if (Parent == null)
+                return _localPosition;
+            
+            return Parent.Position + (Vector3)(Parent.Rotation * _localPosition);
+        }
         set => InternalUpdatePosition(value, Space.World);
     }
 
@@ -169,7 +175,7 @@ public class Transform : Component
 
     protected void InternalUpdateModelMatrix()
     {
-        ModelMatrix = SizeMatrix * TranslationMatrix;
+        ModelMatrix = SizeMatrix * RotationMatrix * TranslationMatrix;
     }
     #endregion
 
@@ -196,21 +202,22 @@ public class Transform : Component
     }
 
 
-    public void Rotate(Quaternion q, Space space = Space.World)
+    public void Rotate(Quaternion delta, Space space = Space.World)
     {
-        if (space == Space.World)
+        if (space == Space.Local)
         {
-            // instead of rotating delta (aka q) by localRotation (aka P):
-            //      R = P( q )
-            // rotate localRotation by delta,
-            // because you literally rotate the rotation of this object by delta:
-            //      R = q( P )
-            InternalUpdateRotation(q * Rotation, Space.World);
+            LocalRotation = Quaternion.Normalize(_localRotation * delta);
+            return;
         }
-        else if (space == Space.Local)
+
+        // World rotation
+        if (Parent != null)
         {
-            InternalUpdateRotation(Rotation * q, Space.World);
+            Quaternion pInv = Quaternion.Conjugate(Parent.Rotation);
+            delta = pInv * delta * Parent.Rotation;
         }
+
+        LocalRotation = Quaternion.Normalize(_localRotation * delta);
     }
 
     public void Rotate(Vector3 axis, float angle, Space space = Space.World)

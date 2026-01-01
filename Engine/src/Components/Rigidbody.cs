@@ -40,6 +40,6 @@ public class Rigidbody : Component
         if (!(Enabled && po!.Enabled)) return;
 
         Transform.Position = PhysicsHandler.BodyInterface.GetPosition(po!.Body.ID);
-        Transform.Rotation = PhysicsHandler.BodyInterface.GetRotation(po!.Body.ID);
+        Transform.Rotation = PhysicsHandler.BodyInterface.GetRotation(po!.Body.ID).ToOpenTK();
     }
 }

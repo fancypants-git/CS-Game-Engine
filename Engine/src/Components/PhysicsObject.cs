@@ -1,6 +1,7 @@
 using Engine.Attributes;
 using Engine.Physics;
 using Engine.Windowing;
+using Engine.Maths;
 using JoltPhysicsSharp;
 
 namespace Engine.Components;
@@ -56,7 +57,7 @@ public class PhysicsObject : Component
             : IsKinematic ? MotionType.Kinematic
             : MotionType.Static;
 
-        var bodySettings = new BodyCreationSettings(compound, Transform.Position, Transform.RotationQuat, motion, Layer)
+        var bodySettings = new BodyCreationSettings(compound, Transform.Position, Transform.Rotation.ToSystem(), motion, Layer)
         {
             Friction = 0.8f,
             Restitution = 0f,
@@ -75,7 +76,7 @@ public class PhysicsObject : Component
         if (Game.GameSettings.PhysicsUpdate == GameSettings.FixedUpdate
             && IsKinematic)
         {
-            PhysicsHandler.BodyInterface.SetPositionAndRotation(Body.ID, Transform.Position, Transform.RotationQuat, Activation.DontActivate);
+            PhysicsHandler.BodyInterface.SetPositionAndRotation(Body.ID, Transform.Position, Transform.Rotation.ToSystem(), Activation.DontActivate);
         }
     }
 }
