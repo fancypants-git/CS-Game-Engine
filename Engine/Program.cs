@@ -20,7 +20,7 @@ internal class Program() : Game(ProgramSettings.Debug, new(GameSettings.Default)
     
     protected override void Start()
     {
-        SceneManager.InitializeScene(Resources.GetPath("Scenes/BodyTest.scene"));
+        SceneManager.InitializeScene(Resources.GetPath("Scenes/PhysicsTest.scene"));
         CursorState = CursorState.Grabbed;
     }
 
@@ -44,5 +44,12 @@ internal class Program() : Game(ProgramSettings.Debug, new(GameSettings.Default)
         Debug.DrawLine(Vector3.Zero, Vector3.UnitX * length, Color.Red);
         Debug.DrawLine(Vector3.Zero, Vector3.UnitY * length, Color.Blue);
         Debug.DrawLine(Vector3.Zero, Vector3.UnitZ * length, Color.Green);
+
+        Debug.Log("FPS: ", Time.DeltaTime.ToString("F4"));
+    }
+
+    protected override void FixedUpdate()
+    {
+        Debug.Log("Fixed FPS: ", Time.FixedDeltaTime.ToString("F4"));
     }
 }

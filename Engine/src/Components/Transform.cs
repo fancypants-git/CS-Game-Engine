@@ -99,11 +99,58 @@ public class Transform : Component
     public Vector3 Right { get; protected set; }
     public Vector3 Up { get; protected set; }
 
+    protected Matrix4 _translationMatrix;
+    public Matrix4 TranslationMatrix
+    {
+        get
+        {
+            if (_translationDirty)
+                InternalUpdateTranslationMatrix();
+            
+            return _translationMatrix;
+        }
+    }
 
-    public Matrix4 TranslationMatrix { get; protected set; }
-    public Matrix4 SizeMatrix { get; protected set; }
-    public Matrix4 RotationMatrix { get; protected set; }
-    public Matrix4 ModelMatrix { get; protected set; }
+    protected Matrix4 _sizeMatrix;
+    public Matrix4 SizeMatrix
+    {
+        get
+        {
+            if (_sizeDirty)
+                InternalUpdateSizeMatrix();
+
+            return _sizeMatrix;
+        }
+    }
+
+    protected Matrix4 _rotationMatrix;
+    public Matrix4 RotationMatrix
+    {
+        get
+        {
+            if (_rotationDirty)
+                InternalUpdateRotationMatrix();
+            
+            return _rotationMatrix;
+        }
+    }
+
+    protected Matrix4 _modelMatrix;
+    public Matrix4 ModelMatrix
+    {
+        get
+        {
+            if (_modelDirty)
+                InternalUpdateModelMatrix();
+
+            return _modelMatrix;
+        }
+    }
+
+    protected bool _translationDirty;
+    protected bool _rotationDirty;
+    protected bool _sizeDirty;
+    protected bool _modelDirty;
     #endregion
 
 
@@ -121,8 +168,8 @@ public class Transform : Component
             _localPosition = invParentRotation * delta;
         }
 
-        TranslationMatrix = Matrix4.CreateTranslation(Position);
-        InternalUpdateModelMatrix();
+        _translationDirty = true;
+        _modelDirty = true;
     }
 
     protected void InternalUpdateSize(Vector3 value, Space space)
@@ -136,8 +183,8 @@ public class Transform : Component
             _localSize = value / Parent.Size;
         }
 
-        SizeMatrix = Matrix4.CreateScale(Size / 2f);
-        InternalUpdateModelMatrix();
+        _sizeDirty = true;
+        _modelDirty = true;
     }
 
     protected void InternalUpdateRotation(Quaternion value, Space space)
@@ -162,20 +209,40 @@ public class Transform : Component
         }
 
         _localRotation.Normalize();
-        RotationMatrix = Matrix4.CreateFromQuaternion(Rotation);
 
         Forwards = Rotation * Vector3.UnitZ;
         Right = Rotation * Vector3.UnitX;
         Up = Rotation * Vector3.UnitY;
 
-        InternalUpdateModelMatrix();
+        _rotationDirty = true;
+        _modelDirty = true;
     }
 
+    protected void InternalUpdateTranslationMatrix()
+    {
+        _translationMatrix = Matrix4.CreateTranslation(Position);
+        _translationDirty = false;
+        _modelDirty = true;
+    }
 
+    protected void InternalUpdateRotationMatrix()
+    {
+        _rotationMatrix = Matrix4.CreateFromQuaternion(Rotation);
+        _rotationDirty = false;
+        _modelDirty = true;
+    }
+
+    protected void InternalUpdateSizeMatrix()
+    {
+        _sizeMatrix = Matrix4.CreateScale(Size / 2f);
+        _sizeDirty = false;
+        _modelDirty = true;
+    }
 
     protected void InternalUpdateModelMatrix()
     {
-        ModelMatrix = SizeMatrix * RotationMatrix * TranslationMatrix;
+        _modelMatrix = SizeMatrix * RotationMatrix * TranslationMatrix;
+        _modelDirty = false;
     }
     #endregion
 
@@ -204,12 +271,6 @@ public class Transform : Component
 
     public void Rotate(Quaternion delta, Space space = Space.World)
     {
-        if (space == Space.Local)
-        {
-            LocalRotation = Quaternion.Normalize(_localRotation * delta);
-            return;
-        }
-
         // World rotation
         if (Parent != null)
         {
@@ -217,7 +278,7 @@ public class Transform : Component
             delta = pInv * delta * Parent.Rotation;
         }
 
-        LocalRotation = Quaternion.Normalize(_localRotation * delta);
+        InternalUpdateRotation(Quaternion.Normalize(_localRotation * delta), Space.Local);
     }
 
     // angle in radians!!!

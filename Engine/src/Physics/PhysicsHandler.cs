@@ -15,6 +15,8 @@ public static class PhysicsHandler
     public static BodyInterface BodyInterface { get; private set; }
     
     private static List<Rigidbody> _rigidbodies = [];
+
+    private const int maxPhysicsSteps = 5;
     
     public static void Initialize(bool doublePrecision)
     {
@@ -75,6 +77,7 @@ public static class PhysicsHandler
     public static void Update(float delta)
     {
         int stepCount = (int)Math.Ceiling(delta / (1/60f));
+        stepCount = stepCount > maxPhysicsSteps ? maxPhysicsSteps : stepCount;
         var error = PhysicsSystem.Update(delta, stepCount, JobSystem);
         Debug.Assert(error == PhysicsUpdateError.None, $"PhysicsUpdate Failed due to {error}");
         

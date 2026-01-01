@@ -53,7 +53,7 @@ public class Camera : Component
     {
         Type = CameraType.Perspective;
         Fovy = 90.0f;
-        MaxDepth = 100f;
+        MaxDepth = 1000f;
         MinDepth = 0.1f;
     }
 

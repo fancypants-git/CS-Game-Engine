@@ -22,31 +22,40 @@ public class ColliderRenderer : Component
 
     public override void Update()
     {
-        if (!Entity.GetComponent(out PhysicsObject? po, true)) return;
+        if (!Entity.GetComponent(out PhysicsObject? po, false)) return;
 
         var entityTranslation = Mat4.CreateTranslation(po!.Body.CenterOfMassPosition);
         var entityRotation = Mat4.CreateFromQuaternion(po!.Body.Rotation);
 
         var entityMatrix = entityRotation * entityTranslation;
 
-        foreach (var c in Entity.GetComponents<Collider>())
-        {
-            var colliderOffset = Mat4.CreateTranslation(c.Offset);
-            var colliderRotation = Mat4.CreateFromQuaternion(c.RotationQuat);
+        // foreach (var c in Entity.GetComponents<Collider>())
+        // {
+        //     var colliderOffset = Mat4.CreateTranslation(c.Offset);
+        //     var colliderRotation = Mat4.CreateFromQuaternion(c.RotationQuat);
 
-            var colliderMatrix = colliderRotation * colliderOffset;
+        //     var colliderMatrix = colliderRotation * colliderOffset;
 
-            var worldMatrix = entityMatrix * colliderMatrix;
+        //     var worldMatrix = entityMatrix * colliderMatrix;
 
-            c.Shape.Draw(
-                Renderer,
-                worldMatrix,
+        //     c.Shape.Draw(
+        //         Renderer,
+        //         worldMatrix,
+        //         Vector3.One,
+        //         Color,
+        //         false,
+        //         Wireframe
+        //     );
+        // }
+
+        po.Body.Shape.Draw(Renderer,
+                entityMatrix,
                 Vector3.One,
                 Color,
                 false,
                 Wireframe
             );
-        }
+
 
         const float length = 10f;
         Debug.DrawLine(Transform.Position, Transform.Position + (Transform.Forwards * length), System.Drawing.Color.Cyan);
