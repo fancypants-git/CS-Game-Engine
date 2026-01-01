@@ -26,6 +26,14 @@ public static class LayerManager
         
         return new(0, 0);
     }
+
+    public static Layer FromName(string name, uint include = uint.MaxValue, uint exclude = 0)
+    {
+        if (DefinedLayers.TryGetValue(name, out DefaultLayer value))
+            return value.WithMask(include, exclude);
+
+        return new(0);
+    }
 }
 
 // the layers used to initialize the Physics System

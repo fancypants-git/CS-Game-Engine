@@ -21,7 +21,7 @@ public class Transform : Component
     {
         Parent = null!;
         LocalPosition = position;
-        LocalRotation = Quaternion.FromEulerAngles(rotation);
+        LocalRotation = Quaternion.FromEulerAngles(rotation * MathHelper.DegToRad);
         LocalSize = size;
     }
     public Transform(Entity e, Transform parent, Vector3 position, Vector3 rotation, Vector3 size)
@@ -29,7 +29,7 @@ public class Transform : Component
     {
         Parent = parent;
         LocalPosition = position;
-        LocalRotation = Quaternion.FromEulerAngles(rotation);
+        LocalRotation = Quaternion.FromEulerAngles(rotation * MathHelper.DegToRad);
         LocalSize = size;
     }
 
@@ -136,7 +136,7 @@ public class Transform : Component
             _localSize = value / Parent.Size;
         }
 
-        SizeMatrix = Matrix4.CreateScale(Size);
+        SizeMatrix = Matrix4.CreateScale(Size / 2f);
         InternalUpdateModelMatrix();
     }
 
@@ -220,10 +220,12 @@ public class Transform : Component
         LocalRotation = Quaternion.Normalize(_localRotation * delta);
     }
 
+    // angle in radians!!!
     public void Rotate(Vector3 axis, float angle, Space space = Space.World)
     {
         Quaternion quat = Quaternion.FromAxisAngle(axis, angle);
         Rotate(quat, space);
     }
+
     #endregion
 }
