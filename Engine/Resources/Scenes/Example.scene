@@ -40,7 +40,7 @@ entity
     
     # add BoxCollider 1. layer(Enemy) true
     add CapsuleCollider 1. 1. layer(Enemy) true
-add Rigidbody 1.
+    add Rigidbody 1.
     add ColliderRenderer vec3(200, 200, 0) true
     
     add PlayerController 3.

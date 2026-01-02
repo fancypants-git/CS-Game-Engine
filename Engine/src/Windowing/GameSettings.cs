@@ -3,12 +3,14 @@ using Engine.Maths;
 
 namespace Engine.Windowing;
 
+// GameSettings determine the game-related settings for the EngineApplication
+
 public class GameSettings
 {
-    public static readonly int Update = 0;
-    public static readonly int FixedUpdate = 1;
+    public const int UPDATE = 0;
+    public const int FIXED_UPDATE = 1;
     
-    public int PhysicsUpdate { get; set; } = FixedUpdate;
+    public int PhysicsUpdate { get; set; } = UPDATE;
     public double FixedUpdateDelta { get; set; } = 0.01;
     public bool DoublePhysicsPrecision { get; set; } = false;
     public Vector3 Gravity { get; set; } = new Vector3(0, -9.81f, 0);

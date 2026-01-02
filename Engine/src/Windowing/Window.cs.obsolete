@@ -1,16 +1,23 @@
-using System.ComponentModel;
 using Engine.Helpers;
 using Engine.Debugging;
 using Engine.Physics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using System.ComponentModel;
 
-namespace Engine.Windowing ;
+namespace Engine.Windowing;
 
-public class Game : GameWindow
+// Window is an instance of a window
+// This window is a part of the EngineApplication
+// The First Window Instance to be created is set as the MainWindow of this Engine Application
+// Only when this window gets closed, another Window can be assigned as the MainWindow
+// Closing the MainWindow does not equal in shutting down the EngineApplication
+// To Shut down this Application, call either EngineApplication.RequestShutdown() or MainWindow.CloseWindowAndApplication()
+
+public class Window : GameWindow
 {
-    protected Game(ProgramSettings settings, GameSettings gameSettings)
+    protected Window(WindowSettings settings, GameSettings gameSettings)
         : base(GameWindowSettings.Default, new NativeWindowSettings {
             API = ContextAPI.OpenGL,
             Profile = ContextProfile.Core,
@@ -25,15 +32,13 @@ public class Game : GameWindow
     {
         Settings = settings;
         Winfo.WindowSize = ClientSize;
-        Debug.LogFilter = settings.LogFilter;
         
         GameSettings = gameSettings;
         LayerManager.Initialize(GameSettings.Layers);
         PhysicsHandler.Initialize(GameSettings.DoublePhysicsPrecision);
     }
     
-    protected ProgramSettings Settings { get; }
-    public static GameSettings GameSettings { get; private set; }
+    protected WindowSet Settings { get; }
     
     private double _fixedUpdateWaitingTime = 0;
 
