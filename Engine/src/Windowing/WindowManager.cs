@@ -2,51 +2,59 @@ namespace Engine.Windowing;
 
 public class WindowManager
 {
-    private Dictionary<WindowID, Window> _windowReferences;
+    private Dictionary<WindowID, Window> _allWindows = [];
 
-    public Window Main { get; set; }
-
-    public Window? LookupWithID(WindowID windowID)
+    public WindowID? MainWindowID { get; private set; }
+    public Window? GetMainWindow()
     {
-        if (_windowReferences.TryGetValue(windowID, out Window? window))
+        if (MainWindowID == null) return null;
+
+        return GetWindow(MainWindowID);
+    }
+
+    public void SetMainWindow(WindowID id)
+    {
+        MainWindowID = id;
+    }
+
+
+    public Window? GetWindow(WindowID id)
+    {
+        if (_allWindows.TryGetValue(id, out Window? window))
             return window;
-        
+
         return null;
     }
 
-    public void AddWindow(Window window)
+    public void CreateWindow(WindowSettings settings)
     {
-        _windowReferences.Add(window.ID, window);
+        Window newWindow = new(settings);
+        _allWindows.Add(newWindow.ID, newWindow);
     }
 
-    public void CreateWindow()
+    public void CloseAllWindows()
     {
-        throw new NotImplementedException();
+        foreach (Window window in _allWindows.Values)
+        {
+            window.Close();
+        }
+
+        Application.RequestShutdown();
     }
 
-
-    // TODO implement window delegation
     public void UpdateAllWindows()
     {
-        foreach (var window in _windowReferences.Values)
+        foreach (Window window in _allWindows.Values)
         {
             window.Update();
         }
     }
 
-    public void FixedUpdateAllWindows()
+    public void DisplayAllWindows()
     {
-        foreach (var window in _windowReferences.Values)
+        foreach (Window window in _allWindows.Values)
         {
-            window.FixedUpdate();
-        }
-    }
-
-    public void RenderAllWindows()
-    {
-        foreach (var window in _windowReferences.Values)
-        {
-            
+            window.Display();
         }
     }
 }

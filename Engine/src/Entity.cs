@@ -1,4 +1,5 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
 using Engine.Attributes;
 using Engine.Components;
 using Engine.Debugging;
@@ -98,7 +99,7 @@ public class Entity : IDisposable
         return null;
     }
     
-    public bool GetComponent<T>(out T? componentOut, bool includeDisabled = false) where T : Component
+    public bool GetComponent<T>([MaybeNullWhen(false)] out T componentOut, bool includeDisabled = false) where T : Component
     {
         foreach (var component in _components)
         {

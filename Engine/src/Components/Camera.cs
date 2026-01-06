@@ -5,14 +5,13 @@ using Engine.Maths;
 using Matrix4 = OpenTK.Mathematics.Matrix4;
 using MathHelper = OpenTK.Mathematics.MathHelper;
 using Engine.Helpers;
+using Engine.Rendering;
 
 namespace Engine.Components;
 
 [ComponentMeta("Camera")]
 public class Camera : Component
 {
-    public static Camera Main => SceneManager.ActiveCamera;
-
     public enum CameraType
     {
         Perspective,
@@ -35,16 +34,14 @@ public class Camera : Component
         }
     }
 
-    private int _viewportWidth;
-    private int _viewportHeight;
-    private float _aspectRatio;
-
     // Orthographic Camera Variables
     public Vector2 Size;
 
     // Global Camera Variables
     public float MaxDepth;
     public float MinDepth;
+
+    private RenderContext _renderContext;
 
     public Matrix4 Projection { get; private set; }
     public Matrix4 View { get; private set; }
@@ -76,29 +73,18 @@ public class Camera : Component
         Size = size;
     }
 
-    public override void Load()
-    {
-        SetViewportSize((int)Winfo.WindowSize.X, (int)Winfo.WindowSize.Y);
-    }
-
     public override void Update()
     {
-        if (_aspectRatio <= 0)
-        {
-            Debug.LogErr("Aspect ratio must be positive; Not updating Camera component of ", Entity.Id);
-            return;
-        }
-
         View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
         Projection = Type switch
         {
-            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, _aspectRatio, MinDepth, MaxDepth),
+            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, _renderContext.AspectRatio, MinDepth, MaxDepth),
             CameraType.Orthographic => Matrix4.CreateOrthographic(Size.X, Size.Y, MinDepth, MaxDepth),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    public void Render(params List<IDrawable> drawables)
+    public void Render(IDrawable[] drawables)
     {
         foreach (var drawable in drawables)
         {
@@ -106,10 +92,8 @@ public class Camera : Component
         }
     }
 
-    public void SetViewportSize(int width, int height)
+    public void SetRenderContext(RenderContext renderContext)
     {
-        _viewportWidth = width;
-        _viewportHeight = height;
-        _aspectRatio = (float)width / height;
+        _renderContext = renderContext;
     }
 }

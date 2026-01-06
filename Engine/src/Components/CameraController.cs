@@ -25,8 +25,13 @@ public class CameraController : Component
 
     public override void Update()
     {
-        _yaw += -Input.MouseDelta.X * sensitivityConstant * Sensitivity;
-        _pitch += (InvertY ? -Input.MouseDelta.Y : Input.MouseDelta.Y)
+        Input? input = Application.WindowManager.GetMainWindow()?.InputHandler;
+
+        if (input == null)
+            return;
+
+        _yaw += -input.MouseDelta.X * sensitivityConstant * Sensitivity;
+        _pitch += (InvertY ? -input.MouseDelta.Y : input.MouseDelta.Y)
             * sensitivityConstant * Sensitivity;
         
         _pitch = Math.Clamp(_pitch, -89, 89);

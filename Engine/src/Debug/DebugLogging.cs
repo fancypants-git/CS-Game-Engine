@@ -91,7 +91,7 @@ public static partial class Debug
     #if DEBUG
         LogInternal(LogType.Fatal, messages);
     #endif
-        EngineApplication.RequestFatalShutdown();
+        Application.RequestShutdown();
     }
     
     public static void LogFatal(Exception e)
@@ -100,7 +100,7 @@ public static partial class Debug
         LogInternal(LogType.Fatal, "Fatal ", e.GetType().Name, " occured in ", e.TargetSite?.ToString(), " | ", e.Message);
         LogInternal(LogType.Stack, e.StackTrace?.TrimStart());
     #endif
-        EngineApplication.RequestFatalShutdown();
+        Application.RequestShutdown();
     }
     
     [Conditional("DEBUG")]

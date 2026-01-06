@@ -1,0 +1,45 @@
+// 
+// Engine Architecture:
+// 
+// Application (static)
+//  L Application State
+//      L IsRunning
+//      L Request Close methods
+//  L Application Loop ( Launch, Update Loop, Close, Dispose, etc. )
+//  L Game
+//  L Window Manager
+//      L All Windows
+//      L Main Window
+//  L Time
+// 
+// Window
+//  L Window Settings
+//  L Input
+//  L OpenGL Context ( Window ID, Size, Position, State, etc. )
+//      L Window Context
+//      L Rendering Context
+//  L Window Execution ( Open, Update, Display, Close, etc. ) ( DIFFERENT FROM GAME EXECUTION )
+//      L Update: Handles Updating this Window
+//      L Display: Manages how the Game Context is Displayed ( if at all )
+// 
+// Game
+//  L Game Settings
+//  L Game Context ( aka Game Scene ) ( Objects, Drawables, Physics, Cameras, etc. )
+//      L Scene Manager
+//          L Active Scene
+//          L Scene Manipulation Methods ( LoadScene, UpdateScene, DisposeScene, etc. )
+//      L PhysicsManager
+//  L Game Loop Execution ( Load, Update, Render, Dispose, etc. )
+// 
+// 
+// Engine Settings Types:
+// 
+//  Game Settings:
+//      Describes how the game should handle certain events (e.g. Physics or Time)
+// 
+//  Window Settings:
+//      Describes a single Window's Context (OpenGL Context, Additional Window Stuff)
+// 
+//  Application Settings:
+//      IDK maybe required so putting it here just in case.
+// 

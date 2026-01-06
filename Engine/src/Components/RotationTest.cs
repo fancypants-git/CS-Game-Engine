@@ -23,8 +23,8 @@ public class RotationTest : Component
 
     public override void Update()
     {
-        if (Input.IsKeyPressed(Keys.Backslash))
-            ShouldRotate = !ShouldRotate;
+        // if (Input.IsKeyPressed(Keys.Backslash))
+        //     ShouldRotate = !ShouldRotate;
 
         if (ShouldRotate)
             Transform.Rotate(rotationAxis, rotationSpeedDeg * MathHelper.DegToRad * Time.DeltaTime, Space.World);

@@ -20,7 +20,7 @@ public class Rigidbody : Component
 
     public override void Load()
     {
-        PhysicsHandler.AddRigidBody(this);
+        Application.Game.PhysicsManager.AddRigidBody(this);
     }
     
     public void SyncFromPhysics()
@@ -31,7 +31,7 @@ public class Rigidbody : Component
          * get the Rotation Vector using QuaternionToAxis
          * set the Translation and Rotation Vector in the Transform component
          */
-        if (!Entity.GetComponent(out PhysicsObject? po, true))
+        if (!Entity.GetComponent(out PhysicsObject po, true))
         {
             Debug.LogWarn("Entity ", Entity.Id.ToString(), " does not contain a PhysicsObject, please consider adding this to the entity for participation in the physics system!");
             return;
@@ -39,7 +39,7 @@ public class Rigidbody : Component
 
         if (!(Enabled && po!.Enabled)) return;
 
-        Transform.Position = PhysicsHandler.BodyInterface.GetPosition(po!.Body.ID);
-        Transform.Rotation = PhysicsHandler.BodyInterface.GetRotation(po!.Body.ID).ToOpenTK();
+        Transform.Position = Application.Game.PhysicsManager.BodyInterface.GetPosition(po!.Body.ID);
+        Transform.Rotation = Application.Game.PhysicsManager.BodyInterface.GetRotation(po!.Body.ID).ToOpenTK();
     }
 }

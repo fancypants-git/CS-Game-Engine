@@ -1,108 +1,119 @@
 ﻿using Engine.Components;
-using Engine.Helpers;
+using Engine.Debugging;
 using Engine.Internals;
 using Engine.Scene;
+using Engine.Windowing;
 
-// ReSharper disable once CheckNamespace
 namespace Engine;
 
-public static class SceneManager
+public class SceneManager : IDisposable
 {
-    public static SceneData CurrentScene { get; private set; }
-    public static Camera ActiveCamera => CurrentScene.ActiveCamera;
-    
-    private static bool _isDisposed = false;
+    public SceneData ActiveScene;
+    public Camera ActiveCamera => ActiveScene.ActiveCamera;
+    public SceneData? RequestedScene;
+
+    public bool IsInitialized;
+    public bool IsDisposed;
+
+    /// <summary>
+    /// Initializes this SceneManager Instance
+    /// </summary>
+    /// <param name="initialScene">The name of the initial Scene</param>
+    public void Initialize(string initialScene)
+    {
+        IsInitialized = true;
+        ActiveScene = SceneLoader.LoadSceneData(initialScene);
+        LoadActiveScene();
+    }
 
 
     /// <summary>
-    /// Loads and sets the current scene from the .scene at PATH
-    /// This overrides the current scene.
+    /// Requests a new Scene to be Loaded in the next frame.
     /// </summary>
-    /// <param name="path">The full path to the .scene file<br/>
-    /// (HINT: use Resources.GetPath() to get the full path from the "Resources" folder)
-    /// </param>
-    public static void InitializeScene(string path)
+    /// <param name="path">The path to the scene (any .scene file) to be loaded</param>
+    public void SetActive(string path)
     {
-        if (_isDisposed) return;
+        RequestedScene = SceneLoader.LoadSceneData(path);
+    }
 
-        var sceneData = SceneLoader.LoadSceneData(path);
-        CurrentScene = sceneData;
+    /// <summary>
+    /// Loads the Active Scene to be usable for the Application
+    /// </summary>
+    public void LoadActiveScene()
+    {
+        if (!IsInitialized) return;
+
+        foreach (Entity e in ActiveScene.Entities)
+        {
+            e.Load();
+        }
+    }
+
+    /// <summary>
+    /// Sets and Loads the Active Scene to be usable for the Application
+    /// if any new Scene was requested.
+    /// </summary>
+    public void LoadRequestedScene()
+    {
+        if (RequestedScene == null) return;
         
-        foreach (var entity in CurrentScene.Entities)
-            entity.Load();
+        ActiveScene = (SceneData)RequestedScene;
+        LoadActiveScene();
+
+        RequestedScene = null;
     }
 
     /// <summary>
-    /// Loads and adds the scene from the .scene at PATH to the current scene.
+    /// Calls Update on every entity in the Active Scene
     /// </summary>
-    /// <param name="path">The full path to the .scene file<br/>
-    /// (HINT: use Resources.GetPath() to get the full path from the "Resources" folder)
-    /// </param>
-    public static void LoadScene(string path)
+    public void UpdateScene()
     {
-        if (_isDisposed) return;
-        
-        var sceneData = SceneLoader.LoadSceneData(path);
-        CurrentScene.AddData(sceneData);
-        
-        foreach (var entity in sceneData.Entities)
-            entity.Load();
-    }
-    
-    /// <summary>
-    /// Resets the currently active scene, does not keep extra scene data added using either LoadScene or CurrentScene.AddScene().
-    /// </summary>
-    public static void ResetCurrentScene()
-    {
-        if (_isDisposed) return;
+        if (!IsInitialized) return;
 
-        InitializeScene(CurrentScene.Meta.Path);
+        foreach (Entity e in ActiveScene.Entities)
+        {
+            e.Update();
+        }
     }
 
     /// <summary>
-    /// Updates every Entity in the Current Scene
+    /// Calls FixedUpdate on every entity in the Active Scene
     /// </summary>
-    public static void UpdateScene()
+    public void FixedUpateScene()
     {
-        if (_isDisposed) return;
+        if (!IsInitialized) return;
 
-        foreach (var entity in CurrentScene.Entities)
-            entity.Update();
+        foreach (Entity e in ActiveScene.Entities)
+        {
+            e.FixedUpdate();
+        }
     }
 
-    /// <summary>
-    /// Updates every Entity in the Current Scene in the FixedUpdate thread.<br>/
-    /// All physics should be handled on this thread
-    /// </summary>
-    public static void FixedUpdateScene()
-    {
-        if (_isDisposed) return;
 
-        foreach (var entity in CurrentScene.Entities)
-            entity.FixedUpdate();
+    private void Dispose(bool disposing)
+    {
+        if (IsDisposed) return;
+
+        if (disposing)
+        {
+            ActiveScene.Dispose();
+            RequestedScene?.Dispose();
+        }
+
+        IsDisposed = true;
     }
 
-    /// <summary>
-    /// Renders the Current Scene from the POV of the Active Camera
-    /// </summary>
-    public static void RenderScene()
+    public void Dispose()
     {
-        if (_isDisposed) return;
-
-        ActiveCamera.Render(CurrentScene.Drawables);
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
-    
-    
-    /// <summary>
-    /// Disposes the SceneManager (not just CurrentScene), should only be called when closing the window!<br/>
-    /// To Dispose the CurrentScene call SceneManager.CurrentScene.Dispose(), but should generally not be called,
-    /// since this does not replace the CurrentScene causing unwanted behaviour and errors
-    /// </summary>
-    public static void Dispose()
+
+    ~SceneManager()
     {
-        if (_isDisposed) return;
-        
-        CurrentScene.Dispose();
-        _isDisposed = true;
+        if (IsDisposed) return;
+
+        Debug.LogMemLeak(GetType().Name);
+        Dispose(false);
     }
 }

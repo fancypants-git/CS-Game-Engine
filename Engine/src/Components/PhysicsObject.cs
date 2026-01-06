@@ -66,17 +66,17 @@ public class PhysicsObject : Component
             AllowSleeping = true,
         };
 
-        Body = PhysicsHandler.BodyInterface.CreateBody(bodySettings);
+        Body = Application.Game.PhysicsManager.BodyInterface.CreateBody(bodySettings);
 
-        PhysicsHandler.BodyInterface.AddBody(Body.ID, Activation.Activate);
+        Application.Game.PhysicsManager.BodyInterface.AddBody(Body.ID, Activation.Activate);
     }
 
     public override void FixedUpdate()
     {
-        if (Game.GameSettings.PhysicsUpdate == GameSettings.FixedUpdate
+        if (Application.Game.Settings.PhysicsUpdate == GameSettings.UpdateType.FixedUpdate
             && IsKinematic)
         {
-            PhysicsHandler.BodyInterface.SetPositionAndRotation(Body.ID, Transform.Position, Transform.Rotation.ToSystem(), Activation.DontActivate);
+            Application.Game.PhysicsManager.BodyInterface.SetPositionAndRotation(Body.ID, Transform.Position, Transform.Rotation.ToSystem(), Activation.DontActivate);
         }
     }
 }
