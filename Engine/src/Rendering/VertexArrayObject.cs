@@ -3,19 +3,31 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Engine.Rendering;
 
-public class VertexArrayObject : IDisposable
+public sealed class VertexArrayObject : IDisposable, IRequireRenderContext
 {
-    public readonly int Handle;
+    private int _handle;
+    public int Handle => _handle;
 
     private bool _isDisposed = false;
 
-    public VertexArrayObject()
+    public bool IsInitialized { get; set; }
+
+    public bool Initialize()
     {
-        Handle = GL.GenVertexArray();
+        if (!IRequireRenderContext.RenderContextExists()) return false;
+
+        if (!IsInitialized)
+        {
+            _handle = GL.GenVertexArray();
+        }
+
+        IsInitialized = true;
+        return true;
     }
 
     public void Use()
     {
+        if (!Initialize()) return;
         GL.BindVertexArray(Handle);
     }
 
@@ -23,6 +35,8 @@ public class VertexArrayObject : IDisposable
     public void VertexAttribPointer(uint location, int size, VertexAttribPointerType type, bool normalized, int stride,
         int offset)
     {
+        if (!Initialize()) return;
+
         Use();
         GL.VertexAttribPointer(location, size, type, normalized, stride, offset);
         GL.EnableVertexAttribArray(location);
@@ -31,7 +45,7 @@ public class VertexArrayObject : IDisposable
 
     private void Dispose(bool dispose)
     {
-        if (_isDisposed) return;
+        if (_isDisposed || !IsInitialized) return;
 
         GL.BindVertexArray(0);
         GL.DeleteVertexArray(Handle);

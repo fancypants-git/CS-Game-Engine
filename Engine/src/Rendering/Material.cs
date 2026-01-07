@@ -24,7 +24,6 @@ public struct Material() : IDisposable
     // Misc Lighting Details //
     public float SpecularPower { get; set; } = 0;
     public float Transparency { get; set; } = 1f; // inverted of how much light does this object let through
-    
 
     private bool _isDisposed = false;
 

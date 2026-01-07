@@ -5,64 +5,79 @@ using Matrix4 = OpenTK.Mathematics.Matrix4;
 
 namespace Engine.Rendering;
 
-public class Shader : IDisposable
+public class Shader : IDisposable, IRequireRenderContext
 {
-    public readonly int Handle;
+    private int _handle;
+    public int Handle => _handle;
+
+    public bool IsInitialized { get; set; }
 
     private bool _isDisposed = false;
 
+    private List<ShaderSource> _shaders = [];
+
+
     public Shader(string vertPath, string fragPath)
     {
-        // read the sources as text
-        var vertSource = File.ReadAllText(vertPath);
-        var fragSource = File.ReadAllText(fragPath);
-
-        // create the shaders from the shader sources
-        var vertShader = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertShader, vertSource);
-        var fragShader = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragShader, fragSource);
-
-        // compile the shaders and report their status
-        GL.CompileShader(vertShader);
-        GL.CompileShader(fragShader);
-
-        if (!ReportShaderCompileStatus(vertShader) ||
-            !ReportShaderCompileStatus(fragShader)) // if any of the two reports fails
-        {
-            Dispose(true);
-        }
-
-        // create and compile the program
-        Handle = GL.CreateProgram();
-
-        GL.AttachShader(Handle, vertShader);
-        GL.AttachShader(Handle, fragShader);
-
-        GL.LinkProgram(Handle);
-
-        GL.DetachShader(Handle, vertShader);
-        GL.DetachShader(Handle, fragShader);
-        GL.DeleteShader(vertShader);
-        GL.DeleteShader(fragShader);
-
-        if (!ReportProgramLinkStatus(Handle))
-        {
-            Dispose(true);
-            Handle = 0;
-        }
+        _shaders.Add(ShaderSource.FromFile(vertPath, ShaderType.VertexShader));
+        _shaders.Add(ShaderSource.FromFile(fragPath, ShaderType.FragmentShader));
     }
 
+    public bool Initialize()
+    {
+        if (!IRequireRenderContext.RenderContextExists()) return false;
+
+        if (IsInitialized) return true;
+
+        List<int> compiledShaders = [];
+
+        foreach (ShaderSource shader in _shaders)
+        {
+            int compiledShader = GL.CreateShader(shader.Type);
+            GL.ShaderSource(compiledShader, shader.Source);
+
+            GL.CompileShader(compiledShader);
+
+            if (!ReportShaderCompileStatus(compiledShader))
+            {
+                Dispose(true);
+                return false;
+            }
+
+            GL.AttachShader(_handle, compiledShader);
+            compiledShaders.Add(compiledShader);
+        }
+
+        GL.LinkProgram(_handle);
+
+        if (!ReportProgramLinkStatus(_handle))
+        {
+            Dispose(true);
+            return false;
+        }
+
+        foreach (int shader in compiledShaders)
+        {
+            GL.DetachShader(_handle, shader);
+            GL.DeleteShader(shader);
+        }
+
+        IsInitialized = true;
+        return true;
+    }
 
     public void Use()
     {
+        if (!Initialize()) return;
         GL.UseProgram(Handle);
     }
 
     public int GetUniformLocation(string name)
     {
+        if (!Initialize()) return -1;
         return GL.GetUniformLocation(Handle, name);
     }
+
     public void Uniform1f(string name, float value) => GL.Uniform1f(GetUniformLocation(name), value);
     public void Uniform2f(string name, float a, float b) => GL.Uniform2f(GetUniformLocation(name), a, b);
     public void Uniform3f(string name, float a, float b, float c) => GL.Uniform3f(GetUniformLocation(name), a, b, c);
@@ -74,7 +89,7 @@ public class Shader : IDisposable
     public void UniformMat4(string name, bool transpose, Matrix4 value) => GL.UniformMatrix4f(GetUniformLocation(name), 1, transpose, ref value);
 
     
-    public bool ReportShaderCompileStatus(int shader)
+    public static bool ReportShaderCompileStatus(int shader)
     {
         GL.GetShaderi(shader, ShaderParameterName.CompileStatus, out var success);
         if (success == 0)
@@ -87,7 +102,7 @@ public class Shader : IDisposable
         return success == 1;
     }
 
-    public bool ReportProgramLinkStatus(int program)
+    public static bool ReportProgramLinkStatus(int program)
     {
         GL.GetProgrami(program, ProgramProperty.LinkStatus, out var success);
         if (success == 0)
@@ -105,7 +120,7 @@ public class Shader : IDisposable
     {
         if (_isDisposed) return;
 
-        if (disposing) GL.DeleteProgram(Handle);
+        if (disposing && IsInitialized) GL.DeleteProgram(Handle);
 
         _isDisposed = true;
     }

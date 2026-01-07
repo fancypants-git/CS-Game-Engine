@@ -1,10 +1,24 @@
+using Engine.Rendering;
+
 namespace Engine.Windowing;
 
 public class WindowManager
 {
     private Dictionary<WindowID, Window> _allWindows = [];
 
+    public RenderContext? RenderContext { get; private set; }
+
     public WindowID? MainWindowID { get; private set; }
+
+    public void SetRenderContext(RenderContext context)
+    {
+        if (!_allWindows.TryGetValue(context.WindowID, out Window? window))
+            return;
+
+        RenderContext = context;
+        window.MakeCurrent();
+    }
+
     public Window? GetMainWindow()
     {
         if (MainWindowID == null) return null;

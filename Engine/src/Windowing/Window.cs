@@ -24,13 +24,23 @@ public class Window : NativeWindow
 
     public readonly WindowID ID;
 
+    public RenderContext RenderContext => new RenderContext()
+    {
+        WindowID = ID,
+        Size = Size,
+        AspectRatio = Size.X / Size.Y
+    };
+
     public Input InputHandler;
 
-
+    public virtual void SetAsCurrentContext()
+    {
+        Application.WindowManager.SetRenderContext(RenderContext);
+    }
 
     public virtual void Initialize()
     {
-        MakeCurrent();
+        SetAsCurrentContext();
 
         GL.ClearColor(0, 0, 0, 1.0f);
 
@@ -43,22 +53,17 @@ public class Window : NativeWindow
 
     public virtual void Update()
     {
-        MakeCurrent();
         ProcessWindowEvents(false); // set waitForEvents to false because we dont want to wait for events to happen
     }
 
     public virtual void Display()
     {
-        MakeCurrent();
+        SetAsCurrentContext();
 
         GL.Viewport(Location.X, Location.Y, Size.X, Size.Y);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        Application.Game.Render(new RenderContext()
-        {
-            Size = Size,
-            AspectRatio = Size.X / Size.Y
-        });
+        Application.Game.Render();
 
         Context.SwapBuffers();
     }

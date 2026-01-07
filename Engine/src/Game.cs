@@ -45,7 +45,7 @@ public class Game
         SceneManager.FixedUpateScene();
     }
 
-    public virtual void Render(RenderContext renderContext)
+    public virtual void Render()
     {
         SceneManager.ActiveCamera.SetRenderContext(renderContext);
         SceneManager.ActiveCamera.Render(SceneManager.ActiveScene.Drawables.ToArray());

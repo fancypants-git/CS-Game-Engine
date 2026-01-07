@@ -10,6 +10,7 @@
 //  L Window Manager
 //      L All Windows
 //      L Main Window
+//      L Active Render Context
 //  L Time
 // 
 // Window
@@ -31,6 +32,15 @@
 //      L PhysicsManager
 //  L Game Loop Execution ( Load, Update, Render, Dispose, etc. )
 // 
+// 
+// OpenGL Context Requiring Classes:
+//  1. Initialize Settings for creation
+//  2. When Used, check for Initialization
+//  3. If Not Initialized:
+//      - Check for active context
+//      - If active context exists:
+//          - Initialize
+//  4. Continue with action
 // 
 // Engine Settings Types:
 // 

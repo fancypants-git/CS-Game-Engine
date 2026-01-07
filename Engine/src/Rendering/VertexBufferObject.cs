@@ -4,19 +4,32 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Engine.Rendering;
 
-public class VertexBufferObject : IDisposable
+public class VertexBufferObject : IDisposable, IRequireRenderContext
 {
-    public readonly int Handle;
+    private int _handle;
+    public int Handle => _handle;
 
     private bool _isDisposed = false;
 
-    public VertexBufferObject()
+    public bool IsInitialized { get; set; }
+
+    public bool Initialize()
     {
-        Handle = GL.GenBuffer();
+        if (!IRequireRenderContext.RenderContextExists()) return false;
+
+        if (!IsInitialized)
+        {
+            _handle = GL.GenBuffer();
+        }
+
+        IsInitialized = true;
+        return true;
     }
 
     public void Upload<T>(T[] data, BufferUsage usage) where T : unmanaged
     {
+        if (!Initialize()) return;
+
         Use();
         var size = data.Length * Unsafe.SizeOf<T>();
         GL.BufferData(BufferTarget.ArrayBuffer, size, data, usage);
@@ -24,6 +37,7 @@ public class VertexBufferObject : IDisposable
 
     public void Use()
     {
+        if (!Initialize()) return;
         GL.BindBuffer(BufferTarget.ArrayBuffer, Handle);
     }
 
@@ -32,7 +46,10 @@ public class VertexBufferObject : IDisposable
     {
         if (_isDisposed) return;
 
-        GL.DeleteBuffer(Handle);
+        if (IsInitialized)
+        {
+            GL.DeleteBuffer(Handle);
+        }
 
         _isDisposed = true;
     }

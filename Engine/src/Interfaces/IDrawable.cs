@@ -1,7 +1,7 @@
 ﻿using Engine.Components;
 using Engine.Rendering;
 
-namespace Engine.Interfaces;
+namespace Engine.Rendering;
 
 /// <summary>
 /// Interface for Drawable Components and Classes.<br/><br/>

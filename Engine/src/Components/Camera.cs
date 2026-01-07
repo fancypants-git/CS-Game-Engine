@@ -41,8 +41,6 @@ public class Camera : Component
     public float MaxDepth;
     public float MinDepth;
 
-    private RenderContext _renderContext;
-
     public Matrix4 Projection { get; private set; }
     public Matrix4 View { get; private set; }
 
@@ -73,27 +71,22 @@ public class Camera : Component
         Size = size;
     }
 
-    public override void Update()
+    public void Render(IDrawable[] drawables)
     {
+        if (!Application.WindowManager.RenderContext.HasValue)
+            return;
+
         View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
         Projection = Type switch
         {
-            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, _renderContext.AspectRatio, MinDepth, MaxDepth),
+            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, Application.WindowManager.RenderContext.Value.AspectRatio, MinDepth, MaxDepth),
             CameraType.Orthographic => Matrix4.CreateOrthographic(Size.X, Size.Y, MinDepth, MaxDepth),
             _ => throw new ArgumentOutOfRangeException()
         };
-    }
 
-    public void Render(IDrawable[] drawables)
-    {
         foreach (var drawable in drawables)
         {
             drawable.Draw(this);
         }
-    }
-
-    public void SetRenderContext(RenderContext renderContext)
-    {
-        _renderContext = renderContext;
     }
 }

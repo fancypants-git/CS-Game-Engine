@@ -3,25 +3,39 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Engine.Rendering;
 
-public class ElementBufferObject : IDisposable
+public class ElementBufferObject : IDisposable, IRequireRenderContext
 {
-    public readonly int Handle;
+    private int _handle;
+    public int Handle => _handle;
 
     private bool _isDisposed = false;
 
-    public ElementBufferObject()
+    public bool IsInitialized { get; set; }
+
+    public bool Initialize()
     {
-        Handle = GL.GenBuffer();
+        if (!IRequireRenderContext.RenderContextExists()) return false;
+
+        if (!IsInitialized)
+        {
+            _handle = GL.GenBuffer();
+        }
+
+        IsInitialized = true;
+        return true;
     }
     
     public void Upload(uint[] data, BufferUsage usage)
     {
+        if (!Initialize()) return;
+
         Use();
         GL.BufferData(BufferTarget.ElementArrayBuffer, data.Length * sizeof(uint), data, usage);
     }
 
     public void Use()
     {
+        if (!Initialize()) return;
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handle);
     }
 
@@ -30,7 +44,10 @@ public class ElementBufferObject : IDisposable
     {
         if (_isDisposed) return;
 
-        GL.DeleteBuffer(Handle);
+        if (IsInitialized)
+        {
+            GL.DeleteBuffer(Handle);
+        }
 
         _isDisposed = true;
     }

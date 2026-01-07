@@ -4,46 +4,37 @@ using StbImageSharp;
 
 namespace Engine.Rendering;
 
-public class Texture : IDisposable
+public class Texture : IDisposable, IRequireRenderContext
 {
-    public readonly int Handle;
+    private int _handle;
+    public int Handle => _handle;
     
-    public int Width { get; private set; }
-    public int Height { get; private set; }
+    private ImageSource _source;
+    private bool _useMipmaps;
 
+    public bool IsInitialized { get; set; }
     private bool _isDisposed = false;
 
     public Texture(string path, bool generateMipmaps)
     {
-        ImageResult image = null;
-        
-        try
-        {
-            StbImage.stbi_set_flip_vertically_on_load(1);
+        _source = ImageSource.FromFile(path, ColorComponents.RedGreenBlueAlpha);
+        _useMipmaps = generateMipmaps;
+    }
 
-            image = ImageResult.FromStream(File.OpenRead(path), ColorComponents.RedGreenBlueAlpha);
-        }
-        catch (Exception e)
-        {
-            Debug.LogErr("Error Loading Image.");
-            Debug.LogErr(e);
-            Dispose();
-        }
+    public bool Initialize()
+    {
+        if (!IRequireRenderContext.RenderContextExists()) return false;
+        if (IsInitialized) return true;
 
-        if (image == null) return;
-
-        Width = image.Width;
-        Height = image.Height;
-
-        Handle = GL.GenTexture();
+        _handle = GL.GenTexture();
         Use();
-        
-        GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
-        
-        if (generateMipmaps)
+
+        GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, _source.Width, _source.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _source.Data);
+
+        if (_useMipmaps)
         {
             GL.GenerateMipmap(TextureTarget.Texture2d);
-            
+
             GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
         }
@@ -53,21 +44,23 @@ public class Texture : IDisposable
             GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
         }
         GL.BindTexture(TextureTarget.Texture2d, 0);
+
+        IsInitialized = true;
+        return true;
     }
 
     public void Use(uint textureUnit = 0)
     {
+        if (!Initialize()) return;
         GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
         GL.BindTexture(TextureTarget.Texture2d, Handle);
     }
-
-    
 
     private void Dispose(bool disposing)
     {
         if (_isDisposed) return;
 
-        if (disposing)
+        if (disposing && IsInitialized)
         {
             GL.BindTexture(TextureTarget.Texture2d, 0);
             GL.DeleteTexture(Handle);
