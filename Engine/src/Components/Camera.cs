@@ -1,6 +1,5 @@
 using Engine.Attributes;
 using Engine.Debugging;
-using Engine.Interfaces;
 using Engine.Maths;
 using Matrix4 = OpenTK.Mathematics.Matrix4;
 using MathHelper = OpenTK.Mathematics.MathHelper;
@@ -73,15 +72,16 @@ public class Camera : Component
 
     public void Render(IDrawable[] drawables)
     {
-        if (!Application.WindowManager.RenderContext.HasValue)
-            return;
+        if (!IRequireRenderContext.RenderContextExists()) return;
+
+        Debug.Log("Aspect Ratio: ", Application.WindowManager.RenderContext!.Value.AspectRatio.ToString());
 
         View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
         Projection = Type switch
         {
-            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, Application.WindowManager.RenderContext.Value.AspectRatio, MinDepth, MaxDepth),
+            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, Application.WindowManager.RenderContext!.Value.AspectRatio, MinDepth, MaxDepth),
             CameraType.Orthographic => Matrix4.CreateOrthographic(Size.X, Size.Y, MinDepth, MaxDepth),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new Exception()
         };
 
         foreach (var drawable in drawables)

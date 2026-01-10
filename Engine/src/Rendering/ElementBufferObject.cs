@@ -29,7 +29,7 @@ public class ElementBufferObject : IDisposable, IRequireRenderContext
     {
         if (!Initialize()) return;
 
-        Use();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handle); // Use() without another Initialize check
         GL.BufferData(BufferTarget.ElementArrayBuffer, data.Length * sizeof(uint), data, usage);
     }
 

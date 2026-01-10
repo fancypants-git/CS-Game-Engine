@@ -20,9 +20,9 @@ public struct GameSettings
         FixedUpdate
     }
 
-    public int FixedUpdateInterval { get; set; } = 100;
-    public UpdateType PhysicsUpdate { get; set; } = UpdateType.FixedUpdate;
-    public string InitialScene { get; set; } = Resources.GetPath("Scenes/Example.scene");
+    public int FixedUpdateInterval = 100;
+    public UpdateType PhysicsUpdate = UpdateType.FixedUpdate;
+    public string InitialScene = Resources.GetPath("Scenes/Example.scene");
 
     public static GameSettings Default => new();
 }

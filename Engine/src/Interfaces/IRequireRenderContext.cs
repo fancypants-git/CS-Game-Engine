@@ -1,3 +1,5 @@
+using Engine.Debugging;
+
 namespace Engine;
 
 public interface IRequireRenderContext

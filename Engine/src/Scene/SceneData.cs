@@ -1,5 +1,5 @@
 using Engine.Components;
-using Engine.Interfaces;
+using Engine.Rendering;
 
 namespace Engine.Scene;
 

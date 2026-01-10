@@ -27,7 +27,7 @@ public struct Material() : IDisposable
 
     private bool _isDisposed = false;
 
-    public void Use()
+    public readonly void Use()
     {
         Shader.Use();
         
@@ -74,7 +74,7 @@ public struct Material() : IDisposable
         Shader.Uniform1f("material.transparency", Transparency);
     }
 
-    public void Use(Camera camera, Matrix4 model)
+    public readonly void Use(Camera camera, Matrix4 model)
     {
         Use();
         

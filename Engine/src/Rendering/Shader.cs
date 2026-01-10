@@ -31,6 +31,8 @@ public class Shader : IDisposable, IRequireRenderContext
 
         List<int> compiledShaders = [];
 
+        _handle = GL.CreateProgram();
+
         foreach (ShaderSource shader in _shaders)
         {
             int compiledShader = GL.CreateShader(shader.Type);

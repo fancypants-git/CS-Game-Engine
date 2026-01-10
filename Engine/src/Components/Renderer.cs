@@ -1,7 +1,6 @@
 using System.Drawing;
 using Engine.Attributes;
 using Engine.Helpers;
-using Engine.Interfaces;
 using Engine.Rendering;
 using OpenTK.Graphics.OpenGL;
 using Engine.Maths;

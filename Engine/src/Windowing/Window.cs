@@ -3,6 +3,8 @@ using Engine.Rendering;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.Common;
+using System.ComponentModel;
 
 namespace Engine.Windowing;
 
@@ -28,7 +30,7 @@ public class Window : NativeWindow
     {
         WindowID = ID,
         Size = Size,
-        AspectRatio = Size.X / Size.Y
+        AspectRatio = (float)Size.X / Size.Y
     };
 
     public Input InputHandler;
@@ -40,6 +42,8 @@ public class Window : NativeWindow
 
     public virtual void Initialize()
     {
+        Application.WindowManager.SetMainWindowIfNone(ID);
+
         SetAsCurrentContext();
 
         GL.ClearColor(0, 0, 0, 1.0f);
@@ -60,11 +64,17 @@ public class Window : NativeWindow
     {
         SetAsCurrentContext();
 
-        GL.Viewport(Location.X, Location.Y, Size.X, Size.Y);
+        GL.Viewport(0, 0, Size.X, Size.Y);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         Application.Game.Render();
 
         Context.SwapBuffers();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        Application.WindowManager.MarkForClose(ID);
     }
 }

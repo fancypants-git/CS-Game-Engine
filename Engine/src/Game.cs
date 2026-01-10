@@ -26,6 +26,7 @@ public class Game
 
     public virtual void Load()
     {
+        PhysicsManager.Initialize(false);
         SceneManager.Initialize(Settings.InitialScene);
     }
 
@@ -47,7 +48,6 @@ public class Game
 
     public virtual void Render()
     {
-        SceneManager.ActiveCamera.SetRenderContext(renderContext);
         SceneManager.ActiveCamera.Render(SceneManager.ActiveScene.Drawables.ToArray());
     }
 

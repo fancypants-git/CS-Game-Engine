@@ -8,7 +8,8 @@ public class Program
     public static void Main(string[] args)
     {
         Application.WindowManager.CreateWindow(WindowSettings.Default);
-        Application.Game.Settings.InitialScene = Resources.GetPath("Scenes/PhysicsTest.scene");
+        Application.WindowManager.CreateWindow(WindowSettings.Default);
+        Application.Game.Settings.InitialScene = Resources.GetPath("Scenes/Example.scene");
         Application.Run();
     }
 }

@@ -5,10 +5,11 @@ namespace Engine.Windowing;
 public class WindowManager
 {
     private Dictionary<WindowID, Window> _allWindows = [];
+    private HashSet<WindowID> _requestedForClosing = [];
+
+    public int Count => _allWindows.Count;
 
     public RenderContext? RenderContext { get; private set; }
-
-    public WindowID? MainWindowID { get; private set; }
 
     public void SetRenderContext(RenderContext context)
     {
@@ -17,18 +18,6 @@ public class WindowManager
 
         RenderContext = context;
         window.MakeCurrent();
-    }
-
-    public Window? GetMainWindow()
-    {
-        if (MainWindowID == null) return null;
-
-        return GetWindow(MainWindowID);
-    }
-
-    public void SetMainWindow(WindowID id)
-    {
-        MainWindowID = id;
     }
 
 
@@ -44,6 +33,16 @@ public class WindowManager
     {
         Window newWindow = new(settings);
         _allWindows.Add(newWindow.ID, newWindow);
+    }
+
+    public void MarkForClose(WindowID id)
+    {
+        _requestedForClosing.Add(id);
+    }
+
+    public void CloseWindow(WindowID id)
+    {
+        GetWindow(id)?.Close();
     }
 
     public void CloseAllWindows()
@@ -62,6 +61,14 @@ public class WindowManager
         {
             window.Update();
         }
+
+        foreach (WindowID id in _requestedForClosing)
+        {
+            GetWindow(id)?.Dispose();
+            _allWindows.Remove(id);
+        }
+
+        _requestedForClosing.Clear();
     }
 
     public void DisplayAllWindows()

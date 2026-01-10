@@ -27,7 +27,9 @@ public class Texture : IDisposable, IRequireRenderContext
         if (IsInitialized) return true;
 
         _handle = GL.GenTexture();
-        Use();
+        
+        GL.ActiveTexture(TextureUnit.Texture0);
+        GL.BindTexture(TextureTarget.Texture2d, _handle);
 
         GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, _source.Width, _source.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _source.Data);
 

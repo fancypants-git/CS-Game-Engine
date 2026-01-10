@@ -10,8 +10,9 @@ public static class Application
 {
     public static bool IsRunning { get; private set; } = false;
 
-    public static Game Game { get; private set; } = new();
-    public static WindowManager WindowManager { get; private set; } = new();
+    public static Game Game= new();
+    public static WindowManager WindowManager = new();
+    public static ApplicationSettings Settings;
 
     private static Stopwatch _stopwatch = new();
 
@@ -80,7 +81,7 @@ public static class Application
 
             WindowManager.DisplayAllWindows();
 
-            if (WindowManager.GetMainWindow()?.IsExiting ?? false)
+            if (WindowManager.Count == 0 && !)
                 RequestShutdown();
         }
 
