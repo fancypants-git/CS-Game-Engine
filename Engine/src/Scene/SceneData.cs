@@ -5,12 +5,12 @@ namespace Engine.Scene;
 
 public struct SceneData() : IDisposable
 {
-    public SceneMeta Meta { get; set; }
+    public SceneMeta Meta;
     
-    public List<Entity> Entities { get; set; }
-    public List<IDrawable> Drawables { get; set; }
+    private List<Entity> _entities;
+    private List<IDrawable> _drawables;
     
-    public Camera ActiveCamera { get; set; }
+    public Camera ActiveCamera;
     
     private bool _isDisposed = false;
     
@@ -22,28 +22,42 @@ public struct SceneData() : IDisposable
     /// <param name="data">The data of the scene to add</param>
     public void AddData(SceneData data)
     {
-        Entities.AddRange(data.Entities);
-        Drawables.AddRange(data.Drawables);
+        _entities.AddRange(data._entities);
+        _drawables.AddRange(data._drawables);
     }
 
-
-    private void Dispose(bool disposing)
+    public void AddEntity(Entity e)
     {
-        
+        _entities.Add(e);
+    }
+
+    public readonly Entity[] GetEntities()
+    {
+        return _entities.ToArray();
+    }
+
+    public void AddDrawable(IDrawable drawable)
+    {
+        _drawables.Add(drawable);
+    }
+
+    public readonly IDrawable[] GetDrawables()
+    {
+        return _drawables.ToArray();
     }
     
     public void Dispose()
     {
         if (_isDisposed) return;
 
-        foreach (var entity in Entities)
+        foreach (var entity in _entities)
             entity.Dispose();
         
-        foreach (var drawable in Drawables)
+        foreach (var drawable in _drawables)
             drawable.Dispose();
         
-        Entities.Clear();
-        Drawables.Clear();
+        _entities.Clear();
+        _drawables.Clear();
 
         _isDisposed = true;
     }
