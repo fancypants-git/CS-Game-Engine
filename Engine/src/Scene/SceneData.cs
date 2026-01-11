@@ -3,12 +3,12 @@ using Engine.Rendering;
 
 namespace Engine.Scene;
 
-public struct SceneData() : IDisposable
+public struct SceneData(SceneMeta meta) : IDisposable
 {
-    public SceneMeta Meta;
+    public SceneMeta Meta { get; } = meta;
     
-    private List<Entity> _entities;
-    private List<IDrawable> _drawables;
+    private List<Entity> _entities = [];
+    private List<IDrawable> _drawables = [];
     
     public Camera ActiveCamera;
     
@@ -23,10 +23,10 @@ public struct SceneData() : IDisposable
     public void AddData(SceneData data)
     {
         _entities.AddRange(data._entities);
-        _drawables.AddRange(data._drawables);
+        AddDrawables(data.GetDrawables());
     }
 
-    public void AddEntity(Entity e)
+    public readonly void AddEntity(Entity e)
     {
         _entities.Add(e);
     }
@@ -36,9 +36,14 @@ public struct SceneData() : IDisposable
         return _entities.ToArray();
     }
 
-    public void AddDrawable(IDrawable drawable)
+    public readonly void AddDrawable(IDrawable drawable)
     {
         _drawables.Add(drawable);
+    }
+
+    public readonly void AddDrawables(IDrawable[] drawables)
+    {
+        _drawables.AddRange(drawables);
     }
 
     public readonly IDrawable[] GetDrawables()

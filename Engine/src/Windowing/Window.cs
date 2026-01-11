@@ -42,8 +42,6 @@ public class Window : NativeWindow
 
     public virtual void Initialize()
     {
-        Application.WindowManager.SetMainWindowIfNone(ID);
-
         SetAsCurrentContext();
 
         GL.ClearColor(0, 0, 0, 1.0f);

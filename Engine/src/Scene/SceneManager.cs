@@ -43,7 +43,7 @@ public class SceneManager : IDisposable
     {
         if (!IsInitialized) return;
 
-        foreach (Entity e in ActiveScene.Entities)
+        foreach (Entity e in ActiveScene.GetEntities())
         {
             e.Load();
         }
@@ -70,7 +70,7 @@ public class SceneManager : IDisposable
     {
         if (!IsInitialized) return;
 
-        foreach (Entity e in ActiveScene.Entities)
+        foreach (Entity e in ActiveScene.GetEntities())
         {
             e.Update();
         }
@@ -83,7 +83,7 @@ public class SceneManager : IDisposable
     {
         if (!IsInitialized) return;
 
-        foreach (Entity e in ActiveScene.Entities)
+        foreach (Entity e in ActiveScene.GetEntities())
         {
             e.FixedUpdate();
         }

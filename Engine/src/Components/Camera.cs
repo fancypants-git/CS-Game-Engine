@@ -74,8 +74,6 @@ public class Camera : Component
     {
         if (!IRequireRenderContext.RenderContextExists()) return;
 
-        Debug.Log("Aspect Ratio: ", Application.WindowManager.RenderContext!.Value.AspectRatio.ToString());
-
         View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
         Projection = Type switch
         {

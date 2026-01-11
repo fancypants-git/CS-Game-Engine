@@ -83,33 +83,28 @@ public static class SceneLoader
 
         
         // Actually parse the blocks into Entities
-        var meta = new SceneMeta
+        SceneMeta meta = new SceneMeta
         {
             Path = path,
             Version = version
         };
-        var data = new SceneData
-        {
-            Meta = meta,
-            Entities = [],
-            Drawables = []
-        };
+        SceneData data = new SceneData(meta);
 
 
         string activeCameraId = "";
         
-        foreach (var block in blockDatas)
+        foreach (BlockData block in blockDatas)
         {
             if (block.IsSceneMetaBlock)
             {
-                foreach (var line in block.Block)
-                    switch (line.command)
+                foreach ((string command, string[] args) in block.Block)
+                    switch (command)
                     {
                         case "name":
-                            meta.Name = DecodeString(line.args[0]);
+                            meta.Name = DecodeString(args[0]);
                             break;
                         case "camera":
-                            activeCameraId = DecodeString(line.args[0]);
+                            activeCameraId = DecodeString(args[0]);
                             break;
                     }
 
@@ -119,13 +114,13 @@ public static class SceneLoader
             switch (block.Command)
             {
                 case "entity":
-                    var entity = ParseEntityFromBlockData(block, out var drawables);
+                    var entity = ParseEntityFromBlockData(block, out List<IDrawable> drawables);
                     if (entity.Id == activeCameraId)
                         data.ActiveCamera = entity.GetComponent<Camera>(false);
                     if (drawables.Count > 0)
-                        data.Drawables.AddRange(drawables);
+                        data.AddDrawables(drawables.ToArray());
                     
-                    data.Entities.Add(entity);
+                    data.AddEntity(entity);
                     break;
                 default:
                     Debug.LogWarn("Block type ", block.Command, " is not recognised.");

@@ -2,6 +2,7 @@
 using Engine.Debugging;
 using Engine.Helpers;
 using Engine.Maths;
+using Engine.Windowing;
 using Quaternion = OpenTK.Mathematics.Quaternion;
 
 namespace Engine.Components;
@@ -25,18 +26,18 @@ public class CameraController : Component
 
     public override void Update()
     {
-        Input? input = Application.WindowManager.GetMainWindow()?.InputHandler;
+        // Input? input = Application.WindowManager.GetWindow();
 
-        if (input == null)
-            return;
+        // if (input == null)
+        //     return;
 
-        _yaw += -input.MouseDelta.X * sensitivityConstant * Sensitivity;
-        _pitch += (InvertY ? -input.MouseDelta.Y : input.MouseDelta.Y)
-            * sensitivityConstant * Sensitivity;
+        // _yaw += -input.MouseDelta.X * sensitivityConstant * Sensitivity;
+        // _pitch += (InvertY ? -input.MouseDelta.Y : input.MouseDelta.Y)
+        //     * sensitivityConstant * Sensitivity;
         
-        _pitch = Math.Clamp(_pitch, -89, 89);
+        // _pitch = Math.Clamp(_pitch, -89, 89);
 
-        Transform.Rotation = Quaternion.FromEulerAngles(0f, _yaw * MathHelper.DegToRad, 0f)
-            * Quaternion.FromEulerAngles(_pitch * MathHelper.DegToRad, 0f, 0f);
+        // Transform.Rotation = Quaternion.FromEulerAngles(0f, _yaw * MathHelper.DegToRad, 0f)
+        //     * Quaternion.FromEulerAngles(_pitch * MathHelper.DegToRad, 0f, 0f);
     }
 }

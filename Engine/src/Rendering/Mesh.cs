@@ -25,6 +25,7 @@ public struct Mesh : IDisposable, IRequireRenderContext
             VertexBufferObject.Upload(_vertices, BufferUsage.StaticDraw);
         }
     }
+
     private uint[]? _indices;
     public uint[]? Indices
     {
@@ -89,6 +90,7 @@ public struct Mesh : IDisposable, IRequireRenderContext
         VertexArrayObject.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
         VertexArrayObject.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, stride, 6 * sizeof(float));
 
+        // if any of the required (VAO, buffers) initializations failed, this mesh should not be seen as initialized, thus return false
         if (!VertexArrayObject.IsInitialized || !VertexBufferObject.IsInitialized ||
             !(ElementBufferObject.IsInitialized || _indices == null)) return false;
 
@@ -98,6 +100,7 @@ public struct Mesh : IDisposable, IRequireRenderContext
 
     public void Use()
     {
+        if (!Initialize()) return;
         VertexArrayObject.Use();
     }
 

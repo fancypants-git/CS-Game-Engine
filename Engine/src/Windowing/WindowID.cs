@@ -1,6 +1,8 @@
+using System.Collections;
+
 namespace Engine.Windowing;
 
-public class WindowID
+public class WindowID : IEquatable<WindowID>
 {
     WindowID(uint value)
     {
@@ -12,4 +14,9 @@ public class WindowID
     private static uint _maxValue = 0;
 
     public static WindowID New() => new WindowID(_maxValue++);
+
+    public bool Equals(WindowID? other)
+    {
+        return other != null && other.Value == Value;
+    }
 }

@@ -22,22 +22,22 @@ public class PlayerController : Component
         
         float toMove = Speed * Time.DeltaTime;
 
-        Input? input = Application.WindowManager.GetMainWindow()?.InputHandler;
+        // Input? input = Application.WindowManager.GetMainWindow()?.InputHandler;
 
-        if (input == null)
-            return;
+        // if (input == null)
+        //     return;
 
-        if (input.IsKeyDown(Keys.W))
-            Transform.Translate(Vector3.UnitZ, toMove, Space.Local);
-        if (input.IsKeyDown(Keys.S))
-            Transform.Translate(-Vector3.UnitZ, toMove, Space.Local);
-        if (input.IsKeyDown(Keys.D))
-            Transform.Translate(-Vector3.UnitX, toMove, Space.Local);
-        if (input.IsKeyDown(Keys.A))
-            Transform.Translate(Vector3.UnitX, toMove, Space.Local);
-        if (input.IsKeyDown(Keys.Space))
-            Transform.Translate(Vector3.UnitY, toMove, Space.World);
-        if (input.IsKeyDown(Keys.LeftShift))
-            Transform.Translate(-Vector3.UnitY, toMove, Space.World);
+        // if (input.IsKeyDown(Keys.W))
+        //     Transform.Translate(Vector3.UnitZ, toMove, Space.Local);
+        // if (input.IsKeyDown(Keys.S))
+        //     Transform.Translate(-Vector3.UnitZ, toMove, Space.Local);
+        // if (input.IsKeyDown(Keys.D))
+        //     Transform.Translate(-Vector3.UnitX, toMove, Space.Local);
+        // if (input.IsKeyDown(Keys.A))
+        //     Transform.Translate(Vector3.UnitX, toMove, Space.Local);
+        // if (input.IsKeyDown(Keys.Space))
+        //     Transform.Translate(Vector3.UnitY, toMove, Space.World);
+        // if (input.IsKeyDown(Keys.LeftShift))
+        //     Transform.Translate(-Vector3.UnitY, toMove, Space.World);
     }
 }

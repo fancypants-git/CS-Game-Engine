@@ -66,6 +66,8 @@ public class WindowManager
         {
             GetWindow(id)?.Dispose();
             _allWindows.Remove(id);
+            if (RenderContext.HasValue && RenderContext.Value.WindowID.Equals(id))
+                RenderContext = null;
         }
 
         _requestedForClosing.Clear();
@@ -75,7 +77,9 @@ public class WindowManager
     {
         foreach (Window window in _allWindows.Values)
         {
-            window.Display();
+            // if the window is hidden, there is no reason to render it
+            if (window.WindowState != OpenTK.Windowing.Common.WindowState.Minimized)
+                window.Display();
         }
     }
 }

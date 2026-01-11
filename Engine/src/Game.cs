@@ -48,7 +48,7 @@ public class Game
 
     public virtual void Render()
     {
-        SceneManager.ActiveCamera.Render(SceneManager.ActiveScene.Drawables.ToArray());
+        SceneManager.ActiveCamera.Render(SceneManager.ActiveScene.GetDrawables());
     }
 
     public virtual void Close()

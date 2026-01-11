@@ -3,6 +3,7 @@ using Engine.Helpers;
 using Engine.Debugging;
 using Engine.Windowing;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Runtime.InteropServices;
 
 namespace Engine;
 
@@ -57,6 +58,7 @@ public static class Application
         _stopwatch.Start();
         long frameStart = 0L, fixedFrameStart = 0L;
 
+
         while (IsRunning)
         {
             Time.DeltaTimeMilliseconds = (int)((_stopwatch.ElapsedMilliseconds - frameStart) * Time.TimeScale);
@@ -75,14 +77,17 @@ public static class Application
 
                 Game.FixedUpdate();
             }
-
-            WindowManager.UpdateAllWindows();
-            Game.Update();
+                WindowManager.UpdateAllWindows();
+                Game.Update();
 
             WindowManager.DisplayAllWindows();
 
-            if (WindowManager.Count == 0 && !)
+            // request a shutdown if headless mode is not allowed and no windows are opened
+            if (WindowManager.Count == 0 && !Settings.AllowHeadless)
+            {
                 RequestShutdown();
+                break;
+            }
         }
 
         Shutdown();

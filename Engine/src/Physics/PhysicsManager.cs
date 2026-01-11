@@ -97,6 +97,7 @@ public sealed class PhysicsManager : IDisposable
         if (disposing)
         {
             PhysicsSystem.Dispose();
+            JobSystem.Dispose();
         }
 
         _rigidbodies.Clear();
