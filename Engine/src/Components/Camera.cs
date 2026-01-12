@@ -1,6 +1,6 @@
 using Engine.Attributes;
 using Engine.Debugging;
-using Engine.Interfaces;
+using Engine.Rendering;
 using Engine.Maths;
 using Matrix4 = OpenTK.Mathematics.Matrix4;
 using MathHelper = OpenTK.Mathematics.MathHelper;
@@ -11,7 +11,7 @@ namespace Engine.Components;
 [ComponentMeta("Camera")]
 public class Camera : Component
 {
-    public static Camera Main => SceneManager.ActiveCamera;
+    public static Camera Main => Application.Game.ActiveCamera;
 
     public enum CameraType
     {
@@ -34,10 +34,6 @@ public class Camera : Component
             _fovy = Math.Clamp(value, 1f, 179f);
         }
     }
-
-    private int _viewportWidth;
-    private int _viewportHeight;
-    private float _aspectRatio;
 
     // Orthographic Camera Variables
     public Vector2 Size;
@@ -76,40 +72,27 @@ public class Camera : Component
         Size = size;
     }
 
-    public override void Load()
+    public void Render(params IDrawable[] drawables)
     {
-        SetViewportSize((int)Winfo.WindowSize.X, (int)Winfo.WindowSize.Y);
-    }
+        float aspect = (float)Application.Window!.ClientSize.X / Application.Window!.ClientSize.Y;
 
-    public override void Update()
-    {
-        if (_aspectRatio <= 0)
+        if (aspect <= float.Epsilon)
         {
-            Debug.LogErr("Aspect ratio must be positive; Not updating Camera component of ", Entity.Id);
+            Debug.LogErr("Aspect Ratio can not be 0 or less, something very weird mustve happened to achieve this result...\nAnyway, canceling rendering camera of ", Entity.ID.ToString());
             return;
         }
 
         View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
         Projection = Type switch
         {
-            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, _aspectRatio, MinDepth, MaxDepth),
+            CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, aspect, MinDepth, MaxDepth),
             CameraType.Orthographic => Matrix4.CreateOrthographic(Size.X, Size.Y, MinDepth, MaxDepth),
             _ => throw new ArgumentOutOfRangeException()
         };
-    }
 
-    public void Render(params List<IDrawable> drawables)
-    {
         foreach (var drawable in drawables)
         {
             drawable.Draw(this);
         }
-    }
-
-    public void SetViewportSize(int width, int height)
-    {
-        _viewportWidth = width;
-        _viewportHeight = height;
-        _aspectRatio = (float)width / height;
     }
 }

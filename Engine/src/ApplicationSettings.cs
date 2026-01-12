@@ -11,9 +11,11 @@ public struct ApplicationSettings
         LogFilter = _base.LogFilter;
     }
 
-
     public bool RunHeadless = false;
     public WindowSettings WindowSettings = WindowSettings.Default;
 
     public uint LogFilter = uint.MaxValue;
+    
+
+    public static readonly ApplicationSettings Default = new();
 }

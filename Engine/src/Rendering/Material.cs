@@ -1,5 +1,8 @@
 using System.Drawing;
+using System.Runtime.InteropServices;
 using Engine.Components;
+using Engine.Debugging;
+using OpenTK.Platform;
 using Matrix4 = OpenTK.Mathematics.Matrix4;
 
 namespace Engine.Rendering;
@@ -97,10 +100,19 @@ public struct Material() : IDisposable
         }
         catch (NullReferenceException) {}
         
-        Texture?.Dispose();
-        DiffuseMap?.Dispose();
-        SpecularMap?.Dispose();
-        SpecularPowerMap?.Dispose();
+        try
+        {
+            Texture?.Dispose();
+            DiffuseMap?.Dispose();
+            SpecularMap?.Dispose();
+            SpecularPowerMap?.Dispose();
+        }
+        catch (SEHException e)
+        {
+            Debug.LogErr("PalException caught when disposing Material!");
+            Debug.LogErr(e);
+            Debug.LogInfo("TODO: Fix stuff that needs OpenGL Context");
+        }
         
         _isDisposed = true;
     }

@@ -1,8 +1,9 @@
 using Stopwatch = System.Diagnostics.Stopwatch;
 using Engine.Helpers;
 using Engine.Debugging;
+using Engine.Windowing;
 
-namespace Engine.Windowing;
+namespace Engine;
 
 // Application: (static)
 //  Contains Program loop
@@ -28,33 +29,26 @@ public static class Application
 {
     public static bool IsRunning { get; private set; }
 
-    private static ApplicationSettings Settings;
+    private static ApplicationSettings _settings = ApplicationSettings.Default;
+    public static ApplicationSettings Settings => _settings;
 
     private static Game? _requestedGameOverride = null;
     private static Game _game = new();
+    public static Game Game => _game;
 
     private static WindowSettings? _requestedWindowOverride = null;
     private static Window? _window = null;
     public static Window? Window => _window;
+    private static bool _shouldCloseWindow;
 
     private static readonly Stopwatch _stopwatch = new();
-
-    public static ApplicationSettings GetSettings()
-    {
-        return Settings;
-    }
 
     public static void SetSettings(ApplicationSettings newSettings)
     {
         if (!IsRunning)
         {
-            Settings = newSettings;
+            _settings = newSettings;
         }
-    }
-
-    public static Game GetGameInstance()
-    {
-        return _game;
     }
 
     public static void RequestOverrideGameInstance(Game newGame)
@@ -79,7 +73,7 @@ public static class Application
             _requestedWindowOverride = settings;
     }
 
-    private static void ApplyOverrideRequests()
+    private static void ApplyRequests()
     {
         if (_requestedGameOverride != null)
         {
@@ -89,7 +83,6 @@ public static class Application
 
             if (IsRunning)
                 _game.Start();
-
         }
 
         if (_requestedWindowOverride != null)
@@ -99,6 +92,19 @@ public static class Application
             _window = new(_requestedWindowOverride);
             _requestedWindowOverride = null;
         }
+
+        if (_shouldCloseWindow)
+        {
+            _window?.Dispose();
+            _window = null;
+            RequestShutdown();
+            Debug.Log("Closed window and requested shutdown");
+        }
+    }
+
+    public static void RequestCloseWindow()
+    {
+        _shouldCloseWindow = true;
     }
 
     public static void RequestShutdown()
@@ -116,26 +122,30 @@ public static class Application
         _stopwatch.Stop();
         _window?.Close();
         _window?.Dispose();
+
         _game.Close();
+        Debug.Log(LogType.Exit, "This is the Shutdown test");
+
+        Debug.Log(LogType.Exit, "Fully shut application down");
     }
 
     public static void Run()
     {
-        Debug.LogFilter = Settings.LogFilter;
-        if (!Settings.RunHeadless)
-            RequestOverrideWindowInstance(new(Settings.WindowSettings));
+        Debug.LogFilter = _settings.LogFilter;
+        if (!_settings.RunHeadless)
+            RequestOverrideWindowInstance(new(_settings.WindowSettings));
         MainLoop();
     }
 
     private static void MainLoop()
     {
         IsRunning = true;
-        _game.Start();
 
         long lastFrameStart = 0L;
         long lastFixedFrameStart = 0L;
 
         _stopwatch.Start();
+        _game.Start();
         while (IsRunning)
         {
             long measuredTime = _stopwatch.ElapsedMilliseconds;
@@ -157,7 +167,11 @@ public static class Application
             _game.Update();
 
             _window?.Display();
+
+            ApplyRequests();
         }
+
+        Debug.Log("shutting down application");
 
         Shutdown();
     }

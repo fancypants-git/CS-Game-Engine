@@ -1,5 +1,8 @@
+using System.ComponentModel;
+using Engine.Debugging;
 using Engine.Helpers;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
 namespace Engine.Windowing;
@@ -36,16 +39,27 @@ public class Window : NativeWindow
     public void Display()
     {
         // no use of displaying if the window is not visible, just wastes precious resources
-        if (WindowState == OpenTK.Windowing.Common.WindowState.Minimized) return;
+        if (WindowState == WindowState.Minimized) return;
 
         MakeCurrent();
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        Application.GetGameInstance().Render();
+        Application.Game.Render();
 
         Context.SwapBuffers();
     }
 
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        Application.RequestCloseWindow();
+        Debug.Log("Requested to close window");
+    }
 
+    protected override void OnResize(ResizeEventArgs e)
+    {
+        base.OnResize(e);
+        GL.Viewport(0, 0, e.Width, e.Height);
+    }
 }

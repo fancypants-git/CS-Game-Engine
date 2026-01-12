@@ -1,4 +1,7 @@
+using System.Runtime.InteropServices;
+using Engine.Debugging;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Platform;
 
 namespace Engine.Rendering;
 
@@ -103,10 +106,19 @@ public struct Mesh : IDisposable
     {
         if (_isDisposed) return;
 
-        ElementBufferObject?.Dispose();
-        VertexArrayObject.Dispose();
-        VertexBufferObject.Dispose();
-        
+        try
+        {
+            ElementBufferObject?.Dispose();
+            VertexArrayObject.Dispose();
+            VertexBufferObject.Dispose();
+        }
+        catch (SEHException e)
+        {
+            Debug.LogErr("PalException caught when disposing Material!");
+            Debug.LogErr(e);
+            Debug.LogInfo("TODO: Fix stuff that needs OpenGL Context");
+        }
+
         _isDisposed = true;
     }
 }

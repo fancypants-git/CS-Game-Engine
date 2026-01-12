@@ -36,32 +36,32 @@ public static partial class Debug
     private static List<DebugVertex> _debugDrawTriangleVertices = [];
     private static List<uint> _debugDrawTriangleIndices = [];
     
-    private readonly static VertexArrayObject _debugDrawLineVAO = new();
-    private readonly static VertexBufferObject _debugDrawLineVBO = new();
-    private readonly static ElementBufferObject _debugDrawLineEBO = new();
+    // private readonly static VertexArrayObject _debugDrawLineVAO = new();
+    // private readonly static VertexBufferObject _debugDrawLineVBO = new();
+    // private readonly static ElementBufferObject _debugDrawLineEBO = new();
     
-    private readonly static VertexArrayObject _debugDrawTriangleVAO = new();
-    private readonly static VertexBufferObject _debugDrawTriangleVBO = new();
-    private readonly static ElementBufferObject _debugDrawTriangleEBO = new();
+    // private readonly static VertexArrayObject _debugDrawTriangleVAO = new();
+    // private readonly static VertexBufferObject _debugDrawTriangleVBO = new();
+    // private readonly static ElementBufferObject _debugDrawTriangleEBO = new();
 
-    private readonly static Shader _debugDrawShader = Resources.GetShader("debug");
+    // private readonly static Shader _debugDrawShader = Resources.GetShader("debug");
     
     static Debug()
     {
     #if DEBUG
-        int stride = 6 * sizeof(float);
-        _debugDrawLineVAO.Use();
-        _debugDrawLineVBO.Use();
-        _debugDrawLineEBO.Use();
-        _debugDrawLineVAO.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-        _debugDrawLineVAO.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
-        GL.LineWidth(1.0f);
+        // int stride = 6 * sizeof(float);
+        // _debugDrawLineVAO.Use();
+        // _debugDrawLineVBO.Use();
+        // _debugDrawLineEBO.Use();
+        // _debugDrawLineVAO.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
+        // _debugDrawLineVAO.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
+        // GL.LineWidth(1.0f);
         
-        _debugDrawTriangleVAO.Use();
-        _debugDrawTriangleVBO.Use();
-        _debugDrawTriangleEBO.Use();
-        _debugDrawTriangleVAO.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-        _debugDrawTriangleVAO.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
+        // _debugDrawTriangleVAO.Use();
+        // _debugDrawTriangleVBO.Use();
+        // _debugDrawTriangleEBO.Use();
+        // _debugDrawTriangleVAO.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
+        // _debugDrawTriangleVAO.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
     #endif
     }
     
@@ -70,35 +70,35 @@ public static partial class Debug
     [Conditional("DEBUG")]
     public static void Render(Camera camera)
     {
-        if (IsDrawingDisposed) return;
+        // if (IsDrawingDisposed) return;
             
-        _debugDrawShader.Use();
-        _debugDrawShader.UniformMat4("view", false, camera.View);
-        _debugDrawShader.UniformMat4("projection", false, camera.Projection);
+        // _debugDrawShader.Use();
+        // _debugDrawShader.UniformMat4("view", false, camera.View);
+        // _debugDrawShader.UniformMat4("projection", false, camera.Projection);
         
-        if (_debugDrawLineIndices.Count > 0)
-        {
-            _debugDrawLineVAO.Use();
-            _debugDrawLineVBO.Upload(_debugDrawLineVertices.ToArray(), BufferUsage.DynamicDraw);
-            _debugDrawLineEBO.Upload(_debugDrawLineIndices.ToArray(), BufferUsage.DynamicDraw);
+        // if (_debugDrawLineIndices.Count > 0)
+        // {
+        //     _debugDrawLineVAO.Use();
+        //     _debugDrawLineVBO.Upload(_debugDrawLineVertices.ToArray(), BufferUsage.DynamicDraw);
+        //     _debugDrawLineEBO.Upload(_debugDrawLineIndices.ToArray(), BufferUsage.DynamicDraw);
             
-            GL.DrawElements(PrimitiveType.Lines, _debugDrawLineIndices.Count, DrawElementsType.UnsignedInt, 0);
+        //     GL.DrawElements(PrimitiveType.Lines, _debugDrawLineIndices.Count, DrawElementsType.UnsignedInt, 0);
             
-            _debugDrawLineIndices.Clear();
-            _debugDrawLineVertices.Clear();
-        }
+        //     _debugDrawLineIndices.Clear();
+        //     _debugDrawLineVertices.Clear();
+        // }
         
-        if (_debugDrawTriangleIndices.Count > 0)
-        {
-            _debugDrawTriangleVAO.Use();
-            _debugDrawTriangleVBO.Upload(_debugDrawTriangleVertices.ToArray(), BufferUsage.DynamicDraw);
-            _debugDrawTriangleEBO.Upload(_debugDrawTriangleIndices.ToArray(), BufferUsage.DynamicDraw);
+        // if (_debugDrawTriangleIndices.Count > 0)
+        // {
+        //     _debugDrawTriangleVAO.Use();
+        //     _debugDrawTriangleVBO.Upload(_debugDrawTriangleVertices.ToArray(), BufferUsage.DynamicDraw);
+        //     _debugDrawTriangleEBO.Upload(_debugDrawTriangleIndices.ToArray(), BufferUsage.DynamicDraw);
             
-            GL.DrawElements(PrimitiveType.Triangles, _debugDrawTriangleIndices.Count, DrawElementsType.UnsignedInt, 0);
+        //     GL.DrawElements(PrimitiveType.Triangles, _debugDrawTriangleIndices.Count, DrawElementsType.UnsignedInt, 0);
             
-            _debugDrawTriangleVertices.Clear();
-            _debugDrawLineIndices.Clear();
-        }
+        //     _debugDrawTriangleVertices.Clear();
+        //     _debugDrawLineIndices.Clear();
+        // }
     }
     
     [Conditional("DEBUG")]
@@ -136,17 +136,17 @@ public static partial class Debug
         
         _debugDrawLineIndices.Clear();
         _debugDrawLineVertices.Clear();
-        _debugDrawLineVAO.Dispose();
-        _debugDrawLineVBO.Dispose();
-        _debugDrawLineEBO.Dispose();
+        // _debugDrawLineVAO.Dispose();
+        // _debugDrawLineVBO.Dispose();
+        // _debugDrawLineEBO.Dispose();
         
         _debugDrawTriangleIndices.Clear();
         _debugDrawTriangleVertices.Clear();
-        _debugDrawTriangleVAO.Dispose();
-        _debugDrawTriangleVBO.Dispose();
-        _debugDrawTriangleEBO.Dispose();
+        // _debugDrawTriangleVAO.Dispose();
+        // _debugDrawTriangleVBO.Dispose();
+        // _debugDrawTriangleEBO.Dispose();
         
-        _debugDrawShader.Dispose();
+        // _debugDrawShader.Dispose();
         
         IsDrawingDisposed = true;
     }

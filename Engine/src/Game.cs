@@ -1,29 +1,36 @@
+using Engine.Components;
+
 namespace Engine;
 
 public class Game
 {
-    
-    // public SceneManager SceneManager;
+    public SceneManager SceneManager = new();
+    public Camera ActiveCamera => SceneManager.ActiveScene.ActiveCamera;
 
-    public GameSettings Settings;
+    public GameSettings Settings = GameSettings.Default;
 
-    public void Start()
+    public virtual void Start()
     {
-        throw new NotImplementedException();
+        SceneManager.Initialize(Settings.InitialScene);
     }
 
-    public void Update()
+    public virtual void Update()
     {
-        throw new NotImplementedException();
+        SceneManager.Update();
     }
 
-    public void FixedUpdate()
+    public virtual void FixedUpdate()
     {
-        throw new NotImplementedException();
+        SceneManager.FixedUpdate();
     }
 
-    public void Close()
+    public virtual void Render()
     {
-        throw new NotImplementedException();
+        SceneManager.Render();
+    }
+
+    public virtual void Close()
+    {
+        SceneManager.Dispose();
     }
 }

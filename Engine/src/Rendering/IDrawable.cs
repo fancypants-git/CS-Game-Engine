@@ -1,7 +1,7 @@
 ﻿using Engine.Components;
 using Engine.Rendering;
 
-namespace Engine.Interfaces;
+namespace Engine.Rendering;
 
 /// <summary>
 /// Interface for Drawable Components and Classes.<br/><br/>
@@ -12,6 +12,6 @@ namespace Engine.Interfaces;
 public interface IDrawable : IDisposable
 {
     public Material[] Materials { get; set; }
-    
+
     public void Draw(Camera camera);
 }

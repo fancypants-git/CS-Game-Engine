@@ -9,7 +9,7 @@ public class Entity : IDisposable
 {
     public bool IsActive = true;
 
-    public readonly string Id;
+    public readonly string ID;
 
     public Transform Transform;
 
@@ -19,7 +19,7 @@ public class Entity : IDisposable
 
     public Entity(string id)
     {
-        Id = id;
+        ID = id;
     }
 
 
@@ -31,7 +31,7 @@ public class Entity : IDisposable
             {
                 c.Load();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogErr(e);
             }
@@ -41,14 +41,14 @@ public class Entity : IDisposable
     public virtual void Update()
     {
         if (!IsActive) return;
-        
+
         foreach (var c in _components)
         {
             try
             {
                 c.Update();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogErr(e);
             }
@@ -58,20 +58,20 @@ public class Entity : IDisposable
     public virtual void FixedUpdate()
     {
         if (!IsActive) return;
-        
+
         foreach (var c in _components)
         {
             try
             {
                 c.FixedUpdate();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogErr(e);
             }
         }
     }
-    
+
 
     public T AddComponent<T>(T component) where T : Component
     {
@@ -81,7 +81,7 @@ public class Entity : IDisposable
         {
             RemoveComponent(component.GetType());
         }
-        
+
         _components.Add(component);
 
         return component;
@@ -97,7 +97,7 @@ public class Entity : IDisposable
 
         return null;
     }
-    
+
     public bool GetComponent<T>(out T? componentOut, bool includeDisabled = false) where T : Component
     {
         foreach (var component in _components)
@@ -117,15 +117,15 @@ public class Entity : IDisposable
     {
         if (includeDisabled)
             return _components.ToArray();
-        
+
         return _components.Where(component => component.Enabled).ToArray();
     }
-    
+
     public T[] GetComponents<T>(bool includeDisabled = false) where T : Component
     {
         if (includeDisabled)
             return _components.OfType<T>().ToArray();
-            
+
         return _components.OfType<T>().Where(c => c.Enabled).ToArray();
     }
 
@@ -138,7 +138,7 @@ public class Entity : IDisposable
     {
         for (int i = 0; i < _components.Count; i++)
         {
-            var c =_components[i];
+            var c = _components[i];
             if (c.GetType() == type)
             {
                 RemoveComponent(c);
@@ -156,9 +156,9 @@ public class Entity : IDisposable
         {
             foreach (var c in _components) c.Dispose();
         }
-        
+
         _components.Clear();
-        
+
         _isDisposed = true;
     }
 
@@ -171,7 +171,7 @@ public class Entity : IDisposable
     ~Entity()
     {
         if (_isDisposed) return;
-        
+
         Debug.LogMemLeak(GetType().Name);
         Dispose(false);
     }

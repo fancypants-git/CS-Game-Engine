@@ -73,10 +73,17 @@ public class PhysicsObject : Component
 
     public override void FixedUpdate()
     {
-        if (Game.GameSettings.PhysicsUpdate == GameSettings.FixedUpdate
+        if (Application.Game.Settings.PhysicsUpdate == GameSettings.UpdateType.FixedUpdate
             && IsKinematic)
         {
             PhysicsHandler.BodyInterface.SetPositionAndRotation(Body.ID, Transform.Position, Transform.Rotation.ToSystem(), Activation.DontActivate);
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        PhysicsHandler.BodyInterface.RemoveAndDestroyBody(Body.ID);
     }
 }

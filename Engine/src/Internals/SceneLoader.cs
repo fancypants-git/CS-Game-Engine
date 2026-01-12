@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Engine.Components;
 using Engine.Helpers;
-using Engine.Interfaces;
+using Engine.Rendering;
 using Engine.Rendering;
 using Engine.Scene;
 using Newtonsoft.Json;
@@ -15,7 +15,7 @@ public struct BlockData
     public string Command { get; set; }
     public List<(string command, string[] args)> Block { get; set; }
     public bool IsSceneMetaBlock { get; set; }
-    
+
     public readonly string[][] GetArgs(string command) => Block.Where(p => p.command == command).Select(p => p.args).ToArray();
 }
 
@@ -82,23 +82,18 @@ public static class SceneLoader
             IsSceneMetaBlock = m.Groups["name"].Value == "meta"
         }).ToArray();
 
-        
+
         // Actually parse the blocks into Entities
-        var meta = new SceneMeta
+        SceneMeta meta = new()
         {
             Path = path,
             Version = version
         };
-        var data = new SceneData
-        {
-            Meta = meta,
-            Entities = [],
-            Drawables = []
-        };
+        SceneData data = new(meta);
 
 
         string activeCameraId = "";
-        
+
         foreach (var block in blockDatas)
         {
             if (block.IsSceneMetaBlock)
@@ -121,23 +116,23 @@ public static class SceneLoader
             {
                 case "entity":
                     var entity = ParseEntityFromBlockData(block, out var drawables);
-                    if (entity.Id == activeCameraId)
+                    if (entity.ID == activeCameraId)
                         data.ActiveCamera = entity.GetComponent<Camera>(false);
                     if (drawables.Count > 0)
-                        data.Drawables.AddRange(drawables);
-                    
-                    data.Entities.Add(entity);
+                        data.AddDrawables(drawables.ToArray());
+
+                    data.AddEntity(entity);
                     break;
                 default:
                     Debug.LogWarn("Block type ", block.Command, " is not recognised.");
                     break;
             }
         }
-        
+
         return data;
     }
-    
-    
+
+
     // --------------------------
     // Block Data decoders
     // --------------------------
@@ -146,7 +141,7 @@ public static class SceneLoader
         var lines = Regex.Split(source, @"\n");
 
         List<(string command, string[] args)> commands = [];
-        
+
         foreach (var line in lines)
         {
             var l = line.Trim();
@@ -169,10 +164,10 @@ public static class SceneLoader
     private static Entity ParseEntityFromBlockData(BlockData block, out List<IDrawable> drawables)
     {
         drawables = [];
-        
+
         var idArray = block.GetArgs("id");
         string entityId = idArray.Length != 0 ? idArray[0][0] : Guid.NewGuid().ToString();
-        
+
         var entity = new Entity(entityId);
 
         foreach (var line in block.Block)
@@ -197,15 +192,15 @@ public static class SceneLoader
                     entity.AddComponent(component!);
                     if (typeof(IDrawable).IsAssignableFrom(type))
                         drawables.Add((IDrawable)component!);
-                        
+
                     else if (typeof(Transform).IsAssignableFrom(type))
                         entity.Transform = (Transform)component!;
                     break;
             }
         }
-        
-        
-        
+
+
+
         return entity;
     }
 
@@ -277,7 +272,7 @@ public static class SceneLoader
             _ => throw new ArgumentException($"vec3 must have 1 or 2 values: {arg}")
         };
     }
-    
+
     private static Layer DecodeLayer(params string[] args)
     {
         var layerName = DecodeString(args[0]);
@@ -287,7 +282,7 @@ public static class SceneLoader
             uint.TryParse(args[1], out include);
         if (args.Length > 2)
             uint.TryParse(args[2], out exclude);
-        
+
         return LayerManager.FromName(layerName).WithMask(include, exclude);
     }
 
