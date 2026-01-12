@@ -4,7 +4,7 @@ using OpenTK.Windowing.Common;
 
 namespace Engine;
 
-public class ProgramSettings
+public class WindowSettings
 {
     public ContextFlags Flags { get; set; } = ContextFlags.Default;
     public VSyncMode VSync { get; set; } = VSyncMode.Off;
@@ -13,11 +13,9 @@ public class ProgramSettings
     public string Title { get; set; } = "OpenGL Engine GameWindow";
     public WindowState WindowState { get; set; } = WindowState.Normal;
     public WindowBorder WindowBorder { get; set; } = WindowBorder.Resizable;
-    
-    public uint LogFilter { get; set; } = uint.MaxValue;
 
     
-    public ProgramSettings(ProgramSettings from)
+    public WindowSettings(WindowSettings from)
     {
         Flags = from.Flags;
         VSync = from.VSync;
@@ -25,28 +23,25 @@ public class ProgramSettings
         Title = from.Title;
         WindowState = from.WindowState;
         WindowBorder = from.WindowBorder;
-        LogFilter = from.LogFilter;
     }
-    public ProgramSettings() {}
+    public WindowSettings() {}
 
 
-    public static readonly ProgramSettings Default = new();
+    public static readonly WindowSettings Default = new();
     
-    public static readonly ProgramSettings Debug = new() {
+    public static readonly WindowSettings Debug = new() {
         Flags = ContextFlags.Debug,
         WindowSize = new(800, 600),
         Title = "[ DEBUG ] OpenGL Engine GameWindow",
         WindowState = WindowState.Normal,
         WindowBorder = WindowBorder.Resizable,
-        LogFilter = (uint)(LogType.Info | LogType.Debug | LogType.Warning | LogType.Error | LogType.Fatal | LogType.Stack),
     };
 
-    public static readonly ProgramSettings Release = new()
+    public static readonly WindowSettings Release = new()
     {
         WindowSize = new(800, 600),
         Title = "[ RELEASE ] OpenGL Engine GameWindow",
         WindowState = WindowState.Maximized,
         WindowBorder = WindowBorder.Resizable,
-        LogFilter = 0
     };
 }
