@@ -96,10 +96,6 @@ public class Renderer : Component, IDrawable
 		];
 
 		Mesh = new Mesh(cubeVertices, cubeIndices);
-		var stride = 8 * sizeof(float);
-		Mesh.VertexArrayObject.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
-		Mesh.VertexArrayObject.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
-		Mesh.VertexArrayObject.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, 5 * sizeof(float));
 	}
 
 	public Renderer(Entity entity, Mesh mesh, Material[] materials) : base(entity)

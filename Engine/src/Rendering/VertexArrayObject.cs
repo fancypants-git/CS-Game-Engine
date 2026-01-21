@@ -3,53 +3,87 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Engine.Rendering;
 
-public class VertexArrayObject : IDisposable
+public class VertexArrayObject : IGpuResource
 {
-    public readonly int Handle;
-
-    private bool _isDisposed = false;
-
-    public VertexArrayObject()
+    VertexArrayObject()
     {
-        Handle = GL.GenVertexArray();
+        GpuResourceManager.Register(this);
     }
+
+    private int _handle;
+    public int Handle => _handle;
+
+    private List<VertexAttribPointer> _unsetPointers = [];
 
     public void Use()
     {
-        GL.BindVertexArray(Handle);
+        if (!IsInitialized) return;
+        GL.BindVertexArray(_handle);
     }
 
 
-    public void VertexAttribPointer(uint location, int size, VertexAttribPointerType type, bool normalized, int stride,
+    public void AttribPointer(uint location, int size, VertexAttribPointerType type, bool normalized, int stride,
         int offset)
     {
-        Use();
-        GL.VertexAttribPointer(location, size, type, normalized, stride, offset);
-        GL.EnableVertexAttribArray(location);
+        AttribPointer(new VertexAttribPointer(location, size, type, normalized, stride, offset));
+    }
+    public void AttribPointer(VertexAttribPointer p)
+    {
+        _unsetPointers.Add(p);
+        SetAttribPointers();
+    }
+    private void SetAttribPointers()
+    {
+        if (!IsInitialized) return;
+
+        foreach (VertexAttribPointer p in _unsetPointers)
+        {
+            Use();
+            GL.VertexAttribPointer(p.Location, p.Size, p.Type, p.Normalized, p.Stride, p.Offset);
+            GL.EnableVertexAttribArray(p.Location);
+        }
+
+        _unsetPointers.Clear();
     }
 
 
-    private void Dispose(bool dispose)
+
+
+    public static VertexArrayObject Create()
     {
-        if (_isDisposed) return;
+        return new VertexArrayObject();
+    }
 
-        GL.BindVertexArray(0);
-        GL.DeleteVertexArray(Handle);
+    public bool IsInitialized { get; private set; }
+    public bool IsDisposed { get; private set; }
+    private RenderContext _context;
+    public RenderContext Context => _context;
 
-        _isDisposed = true;
+    public bool Initialize(RenderContext context)
+    {
+        if (IsInitialized) return true;
+
+        _context = context;
+        _handle = GL.GenVertexArray();
+        context.Register(this);
+        
+        IsInitialized = true;
+        SetAttribPointers();
+        return true;
     }
 
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+        if (IsDisposed || !IsInitialized || !_context.IsAlive) return;
 
+        GL.DeleteVertexArray(_handle);
+        GpuResourceManager.UnRegister(this);
+
+        IsDisposed = true;
+    }
     ~VertexArrayObject()
     {
-        if (_isDisposed) return;
-
-        Debug.LogMemLeak(GetType().Name);
-        Dispose(false);
+        if (!IsDisposed && IsInitialized)
+            Debug.LogMemLeak(GetType().Name);
     }
 }

@@ -4,6 +4,7 @@ using Engine.Helpers;
 using Engine.Rendering;
 using Engine.Maths;
 using Engine.Debugging;
+using System.Globalization;
 
 namespace Engine.Internals;
 
@@ -85,15 +86,15 @@ internal static class MeshLoader
                 case "v":
                     string[] nums1 = match.Groups["rest"].Value.Split(' ');
                     vertexPositions.Add(
-                        new Vector3(float.Parse(nums1[0]), float.Parse(nums1[1]), float.Parse(nums1[2])));
+                        new Vector3(float.Parse(nums1[0], CultureInfo.InvariantCulture), float.Parse(nums1[1], CultureInfo.InvariantCulture), float.Parse(nums1[2], CultureInfo.InvariantCulture)));
                     break;
                 case "vn":
                     string[] nums2 = match.Groups["rest"].Value.Split(' ');
-                    vertexNormals.Add(new Vector3(float.Parse(nums2[0]), float.Parse(nums2[1]), float.Parse(nums2[2])));
+                    vertexNormals.Add(new Vector3(float.Parse(nums2[0], CultureInfo.InvariantCulture), float.Parse(nums2[1], CultureInfo.InvariantCulture), float.Parse(nums2[2], CultureInfo.InvariantCulture)));
                     break;
                 case "vt":
                     string[] nums3 = match.Groups["rest"].Value.Split(' ');
-                    textureCoordinates.Add(new Vector2(float.Parse(nums3[0]), float.Parse(nums3[1])));
+                    textureCoordinates.Add(new Vector2(float.Parse(nums3[0], CultureInfo.InvariantCulture), float.Parse(nums3[1], CultureInfo.InvariantCulture)));
                     break;
 
                 // face command
@@ -201,48 +202,48 @@ internal static class MeshLoader
 
                 // Color
                 case "Ka":
-                    float[] ambientColor = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
+                    float[] ambientColor = match.Groups["rest"].Value.Split(' ').Select(s => float.Parse(s, CultureInfo.InvariantCulture)).ToArray();
                     material.Color = Color.FromArgb(255, (int)(ambientColor[0] * 255), (int)(ambientColor[1] * 255),
                         (int)(ambientColor[2] * 255));
                     break;
                 case "Kd":
-                    float[] diffuseColor = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
+                    float[] diffuseColor = match.Groups["rest"].Value.Split(' ').Select(s => float.Parse(s, CultureInfo.InvariantCulture)).ToArray();
                     material.DiffuseColor = Color.FromArgb(255, (int)(diffuseColor[0] * 255), (int)(diffuseColor[1] * 255),
                         (int)(diffuseColor[2] * 255));
                     break;
                 case "Ks":
-                    float[] specularColor = match.Groups["rest"].Value.Split(' ').Select(float.Parse).ToArray();
+                    float[] specularColor = match.Groups["rest"].Value.Split(' ').Select(s => float.Parse(s, CultureInfo.InvariantCulture)).ToArray();
                     material.SpecularColor = Color.FromArgb(255, (int)(specularColor[0] * 255), (int)(specularColor[1] * 255),
                         (int)(specularColor[2] * 255));
                     break;
                 
                 // Texture Maps
                 case "map_Ka":
-                    material.Texture = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                    material.Texture = Texture.Create(Resources.GetPath(match.Groups["rest"].Value),
                         true);
                     break;
                 case "map_Kd":
-                    material.DiffuseMap = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                    material.DiffuseMap = Texture.Create(Resources.GetPath(match.Groups["rest"].Value),
                         true);
                     break;
                 case "map_Ks":
-                    material.SpecularMap = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                    material.SpecularMap = Texture.Create(Resources.GetPath(match.Groups["rest"].Value),
                         false);
                     break;
                 case "map_Ns":
-                    material.SpecularPowerMap = new Texture(Resources.GetPath(match.Groups["rest"].Value),
+                    material.SpecularPowerMap = Texture.Create(Resources.GetPath(match.Groups["rest"].Value),
                         false);
                     break;
                 
                 // Misc Lighting Details
                 case "Ns":
-                    material.SpecularPower = float.Parse(match.Groups["rest"].Value);
+                    material.SpecularPower = float.Parse(match.Groups["rest"].Value, CultureInfo.InvariantCulture);
                     break;
                 case "Tr":
-                    material.Transparency = 1 - float.Parse(match.Groups["rest"].Value);
+                    material.Transparency = 1 - float.Parse(match.Groups["rest"].Value, CultureInfo.InvariantCulture);
                     break;
                 case "d":
-                    material.Transparency = float.Parse(match.Groups["rest"].Value);
+                    material.Transparency = float.Parse(match.Groups["rest"].Value, CultureInfo.InvariantCulture);
                     break;
                     
                 default:

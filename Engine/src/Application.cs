@@ -36,7 +36,7 @@ public static class Application
     private static Game _game = new();
     public static Game Game => _game;
 
-    private static WindowSettings? _requestedWindowOverride = null;
+    private static Window? _requestedWindowOverride = null;
     private static Window? _window = null;
     public static Window? Window => _window;
     private static bool _shouldCloseWindow;
@@ -62,15 +62,15 @@ public static class Application
             _requestedGameOverride = newGame;
     }
 
-    public static void RequestOverrideWindowInstance(WindowSettings? settings)
+    public static void RequestOverrideWindowInstance(Window? newWindow)
     {
-        if (!IsRunning && settings != null)
+        if (!IsRunning && newWindow != null)
         {
-            _window = new(settings);
+            _window = newWindow;
             _requestedWindowOverride = null;
         }
         else
-            _requestedWindowOverride = settings;
+            _requestedWindowOverride = newWindow;
     }
 
     private static void ApplyRequests()
@@ -89,7 +89,7 @@ public static class Application
         {
             _window?.Close();
             _window?.Dispose();
-            _window = new(_requestedWindowOverride);
+            _window = _requestedWindowOverride;
             _requestedWindowOverride = null;
         }
 
@@ -98,7 +98,6 @@ public static class Application
             _window?.Dispose();
             _window = null;
             RequestShutdown();
-            Debug.Log("Closed window and requested shutdown");
         }
     }
 
@@ -124,15 +123,13 @@ public static class Application
         _window?.Dispose();
 
         _game.Close();
-        Debug.Log(LogType.Exit, "This is the Shutdown test");
-
         Debug.Log(LogType.Exit, "Fully shut application down");
     }
 
     public static void Run()
     {
         Debug.LogFilter = _settings.LogFilter;
-        if (!_settings.RunHeadless)
+        if (!_settings.RunHeadless && _window == null)
             RequestOverrideWindowInstance(new(_settings.WindowSettings));
         MainLoop();
     }
@@ -170,8 +167,6 @@ public static class Application
 
             ApplyRequests();
         }
-
-        Debug.Log("shutting down application");
 
         Shutdown();
     }

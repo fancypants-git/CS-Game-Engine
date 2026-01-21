@@ -1,14 +1,12 @@
 namespace Engine.Rendering;
 
 /// <summary>
-/// Submesh contains index data of a part of a Mesh<br/>
-/// this includes:<br/>
-/// ElementBufferObject, indices
+/// Contains the offset and amount of indices to form a range of indices
 /// </summary>
 public struct Submesh
 {
-    public int IndexStart { get; set; }
-    public int IndexCount { get; set; }
+    public int IndexStart;
+    public int IndexCount;
 
     public Submesh(int indexStart, int indexCount)
     {

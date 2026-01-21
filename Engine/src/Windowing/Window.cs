@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Engine.Debugging;
 using Engine.Helpers;
+using Engine.Rendering;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -29,24 +30,30 @@ public class Window : NativeWindow
         GL.DepthFunc(DepthFunction.Less);
         GL.Enable(EnableCap.Blend);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+        RenderContext = new();
+        GpuResourceManager.InitializeResources(RenderContext);
     }
 
-    public void Update()
+    public readonly RenderContext RenderContext;
+
+    public virtual void Update()
     {
+        NewInputFrame();
         ProcessWindowEvents(false);
     }
 
-    public void Display()
+    public virtual void Display()
     {
         // no use of displaying if the window is not visible, just wastes precious resources
         if (WindowState == WindowState.Minimized) return;
 
         MakeCurrent();
 
+        GpuResourceManager.InitializeResources(RenderContext);
+
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
         Application.Game.Render();
-
         Context.SwapBuffers();
     }
 
@@ -54,12 +61,18 @@ public class Window : NativeWindow
     {
         base.OnClosing(e);
         Application.RequestCloseWindow();
-        Debug.Log("Requested to close window");
     }
 
     protected override void OnResize(ResizeEventArgs e)
     {
         base.OnResize(e);
         GL.Viewport(0, 0, e.Width, e.Height);
+    }
+
+    public override void Dispose()
+    {
+        RenderContext.Dispose();
+        base.Dispose();
+        RenderContext.IsAlive = false;
     }
 }

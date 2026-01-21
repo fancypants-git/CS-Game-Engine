@@ -59,8 +59,6 @@ public struct SceneData(SceneMeta meta) : IDisposable
         foreach (var entity in _entities)
             entity.Dispose();
 
-        Debug.Log("This is another test");
-
         _entities.Clear();
         _drawables.Clear();
 

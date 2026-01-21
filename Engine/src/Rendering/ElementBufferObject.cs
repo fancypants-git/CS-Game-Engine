@@ -3,49 +3,65 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Engine.Rendering;
 
-public class ElementBufferObject : IDisposable
+public class ElementBufferObject : IGpuResource
 {
-    public readonly int Handle;
-
-    private bool _isDisposed = false;
-
-    public ElementBufferObject()
+    protected ElementBufferObject()
     {
-        Handle = GL.GenBuffer();
+        GpuResourceManager.Register(this);
     }
-    
+
+    private int _handle;
+    public int Handle => _handle;
+
+    public void Use()
+    {
+        if (!IsInitialized) return;
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handle);
+    }
+
     public void Upload(uint[] data, BufferUsage usage)
     {
+        if (!IsInitialized) return;
         Use();
         GL.BufferData(BufferTarget.ElementArrayBuffer, data.Length * sizeof(uint), data, usage);
     }
 
-    public void Use()
+
+
+
+    public static ElementBufferObject Create()
     {
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, Handle);
+        return new ElementBufferObject();
     }
 
+    public bool IsInitialized { get; private set; }
+    public bool IsDisposed { get; private set; }
+    private RenderContext _context;
+    public RenderContext Context => _context;
 
-    private void Dispose(bool disposing)
+    public bool Initialize(RenderContext context)
     {
-        if (_isDisposed) return;
+        if (IsInitialized) return true;
 
-        GL.DeleteBuffer(Handle);
+        _context = context;
+        _handle = GL.GenBuffer();
+        context.Register(this);
 
-        _isDisposed = true;
+        IsInitialized = true;
+        return true;
     }
-    
+
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+        if (IsDisposed || !IsInitialized || !_context.IsAlive) return;
 
+        GL.DeleteBuffer(_handle);
+
+        IsDisposed = true;
+    }
     ~ElementBufferObject()
     {
-        if (_isDisposed) return;
-        
-        Debug.LogMemLeak(GetType().Name);
-        Dispose(false);
+        if (!IsDisposed && IsInitialized)
+            Debug.LogMemLeak(GetType().Name);
     }
 }

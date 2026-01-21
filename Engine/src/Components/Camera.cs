@@ -4,7 +4,6 @@ using Engine.Rendering;
 using Engine.Maths;
 using Matrix4 = OpenTK.Mathematics.Matrix4;
 using MathHelper = OpenTK.Mathematics.MathHelper;
-using Engine.Helpers;
 
 namespace Engine.Components;
 
@@ -42,8 +41,8 @@ public class Camera : Component
     public float MaxDepth;
     public float MinDepth;
 
-    public Matrix4 Projection { get; private set; }
-    public Matrix4 View { get; private set; }
+    public Matrix4 StashedView { get; private set; }
+    public Matrix4 StashedProjection { get; private set; }
 
     public Camera(Entity entity) : base(entity)
     {
@@ -72,23 +71,33 @@ public class Camera : Component
         Size = size;
     }
 
-    public void Render(params IDrawable[] drawables)
+    public virtual Matrix4 GetView()
+    {
+        Matrix4 view = Matrix4.LookAt(Transform.Position, Transform.Position - Transform.Forwards, Vector3.UnitY);
+        return view;
+    }
+    public virtual Matrix4 GetProjection()
     {
         float aspect = (float)Application.Window!.ClientSize.X / Application.Window!.ClientSize.Y;
 
         if (aspect <= float.Epsilon)
         {
             Debug.LogErr("Aspect Ratio can not be 0 or less, something very weird mustve happened to achieve this result...\nAnyway, canceling rendering camera of ", Entity.ID.ToString());
-            return;
+            return Matrix4.MultiplicativeIdentity;
         }
 
-        View = Matrix4.LookAt(Transform.Position, Transform.Position + Transform.Forwards, Vector3.UnitY);
-        Projection = Type switch
+        return Type switch
         {
             CameraType.Perspective => Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegToRad * Fovy, aspect, MinDepth, MaxDepth),
             CameraType.Orthographic => Matrix4.CreateOrthographic(Size.X, Size.Y, MinDepth, MaxDepth),
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    public void Render(params IDrawable[] drawables)
+    {
+        StashedView = GetView();
+        StashedProjection = GetProjection();
 
         foreach (var drawable in drawables)
         {

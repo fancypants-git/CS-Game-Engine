@@ -39,6 +39,6 @@ public static class Resources
         var vertPath = GetPath("Shaders", name + ".vert");
         var fragPath = GetPath("Shaders", name + ".frag");
         
-        return new Shader(vertPath, fragPath);
+        return Shader.Create(vertPath, fragPath);
     }
 }

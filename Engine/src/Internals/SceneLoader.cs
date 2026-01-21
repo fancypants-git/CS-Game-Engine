@@ -7,6 +7,7 @@ using Engine.Scene;
 using Newtonsoft.Json;
 using Engine.Maths;
 using Engine.Debugging;
+using System.Globalization;
 
 namespace Engine.Internals;
 
@@ -222,13 +223,13 @@ public static class SceneLoader
     {
         string path = Resources.GetPath(DecodeString(args[0]));
         bool enabled = args.Length <= 1 || !bool.TryParse(args[1], out bool b) || b;
-        return new Texture(path, enabled);
+        return Texture.Create(path, true);
     }
 
     private static Shader DecodeShader(params string[] args)
     {
         if (args.Length == 2 && !string.IsNullOrEmpty(args[1]))
-            return new Shader(DecodeString(args[0]), DecodeString(args[1]));
+            return Shader.Create(DecodeString(args[0]), DecodeString(args[1]));
 
         return Resources.GetShader(DecodeString(args[0]));
     }
@@ -242,7 +243,7 @@ public static class SceneLoader
 
         var parts = match.Groups[1].Value
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(p => float.Parse(p.Trim()))
+            .Select(p => float.Parse(p.Trim(), CultureInfo.InvariantCulture))
             .ToArray();
 
         return parts.Length switch
@@ -262,7 +263,7 @@ public static class SceneLoader
 
         var parts = match.Groups[1].Value
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(p => float.Parse(p.Trim()))
+            .Select(p => float.Parse(p.Trim(), CultureInfo.InvariantCulture))
             .ToArray();
 
         return parts.Length switch

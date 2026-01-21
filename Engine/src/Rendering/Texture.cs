@@ -4,89 +4,84 @@ using StbImageSharp;
 
 namespace Engine.Rendering;
 
-public class Texture : IDisposable
+public class Texture : IGpuResource
 {
-    public readonly int Handle;
-    
-    public int Width { get; private set; }
-    public int Height { get; private set; }
-
-    private bool _isDisposed = false;
-
-    public Texture(string path, bool generateMipmaps)
+    protected Texture(ImageSource source, bool useMipmaps)
     {
-        ImageResult image = null;
-        
-        try
-        {
-            StbImage.stbi_set_flip_vertically_on_load(1);
-
-            image = ImageResult.FromStream(File.OpenRead(path), ColorComponents.RedGreenBlueAlpha);
-        }
-        catch (Exception e)
-        {
-            Debug.LogErr("Error Loading Image.");
-            Debug.LogErr(e);
-            Dispose();
-        }
-
-        if (image == null) return;
-
-        Width = image.Width;
-        Height = image.Height;
-
-        Handle = GL.GenTexture();
-        Use();
-        
-        GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
-        
-        if (generateMipmaps)
-        {
-            GL.GenerateMipmap(TextureTarget.Texture2d);
-            
-            GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        }
-        else
-        {
-            GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        }
-        GL.BindTexture(TextureTarget.Texture2d, 0);
+        _source = source;
+        _useMipmaps = useMipmaps;
+        GpuResourceManager.Register(this);
     }
+
+    private int _handle;
+    public int Handle => _handle;
+
+    private ImageSource _source;
+    private bool _useMipmaps;
 
     public void Use(uint textureUnit = 0)
     {
+        if (!IsInitialized) return;
         GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
-        GL.BindTexture(TextureTarget.Texture2d, Handle);
+        GL.BindTexture(TextureTarget.Texture2d, _handle);
     }
 
-    
 
-    private void Dispose(bool disposing)
+
+
+    public static Texture Create(string path, bool useMipmaps)
     {
-        if (_isDisposed) return;
+        ImageSource source = ImageSource.FromFile(path, ColorComponents.RedGreenBlueAlpha);
+        return new Texture(source, useMipmaps);
+    }
 
-        if (disposing)
+    public bool IsInitialized { get; private set; }
+    public bool IsDisposed { get; private set; }
+    private RenderContext _context;
+    public RenderContext Context => _context;
+
+    public bool Initialize(RenderContext context)
+    {
+        if (IsInitialized) return true;
+        if (!_source.Usable) return false;
+
+        _context = context;
+
+        _handle = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2d, _handle);
+
+        GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba,
+            _source.Width, _source.Height, 
+            0, PixelFormat.Rgba, PixelType.UnsignedByte, _source.Data);
+
+        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+
+        if (_useMipmaps)
         {
-            GL.BindTexture(TextureTarget.Texture2d, 0);
-            GL.DeleteTexture(Handle);
+            GL.GenerateTextureMipmap(_handle);
+            GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
         }
 
-        _isDisposed = true;
+        context.Register(this);
+        IsInitialized = true;
+        return true;
     }
-    
+
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        if (IsDisposed || !IsInitialized || !_context.IsAlive) return;
+
+        GL.DeleteTexture(_handle);
+        GpuResourceManager.UnRegister(this);
+
+        IsDisposed = true;
     }
-    
     ~Texture()
     {
-        if (_isDisposed) return;
-        
-        Debug.LogMemLeak(GetType().Name);
-        Dispose(false);
+        if (!IsDisposed && IsInitialized)
+            Debug.LogMemLeak(GetType().Name);
     }
 }

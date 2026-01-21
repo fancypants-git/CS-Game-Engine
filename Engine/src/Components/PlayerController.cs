@@ -23,13 +23,13 @@ public class PlayerController : Component
         float toMove = Speed * Time.DeltaTime;
 
         if (Input.IsKeyDown(Keys.W))
-            Transform.Translate(Vector3.UnitZ, toMove, Space.Local);
-        if (Input.IsKeyDown(Keys.S))
             Transform.Translate(-Vector3.UnitZ, toMove, Space.Local);
+        if (Input.IsKeyDown(Keys.S))
+            Transform.Translate(Vector3.UnitZ, toMove, Space.Local);
         if (Input.IsKeyDown(Keys.D))
-            Transform.Translate(-Vector3.UnitX, toMove, Space.Local);
-        if (Input.IsKeyDown(Keys.A))
             Transform.Translate(Vector3.UnitX, toMove, Space.Local);
+        if (Input.IsKeyDown(Keys.A))
+            Transform.Translate(-Vector3.UnitX, toMove, Space.Local);
         if (Input.IsKeyDown(Keys.Space))
             Transform.Translate(Vector3.UnitY, toMove, Space.World);
         if (Input.IsKeyDown(Keys.LeftShift))
