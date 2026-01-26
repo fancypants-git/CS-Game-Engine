@@ -6,17 +6,33 @@ using Mat4 = System.Numerics.Matrix4x4;
 
 namespace Engine.Components;
 
+/// <summary>
+/// Renders the vertices and axes of a <see cref="PhysicsObject"/>
+/// </summary>
 [ComponentMeta("ColliderRenderer")]
 [DisallowMultiple]
 public class ColliderRenderer : Component
 {
+    /// <summary>
+    /// Creates a new ColliderRenderer
+    /// </summary>
+    /// <param name="e">The parent entity</param>
+    /// <param name="color">The color to draw the vertices in</param>
+    /// <param name="wireframe">True if the collider should be rendered in wireframe (reccommended)</param>
     public ColliderRenderer(Entity e, Vector3 color, bool wireframe) : base(e)
     {
         Color = new(color, 255);
         Wireframe = wireframe;
     }
 
+    /// <summary>
+    /// The color to render the vertices of the collider in
+    /// </summary>
     public JoltColor Color;
+
+    /// <summary>
+    /// Whether the collider should be rendered as a wireframe
+    /// </summary>
     public bool Wireframe;
     private readonly JoltDebugRenderer Renderer = new();
 
