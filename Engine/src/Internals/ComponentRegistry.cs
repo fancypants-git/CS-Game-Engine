@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Engine.Attributes;
 using Engine.Components;
@@ -31,7 +32,7 @@ internal static class ComponentRegistry
         }
     }
     
-    public static bool GetComponentType(string componentName, out Type? type)
+    public static bool GetComponentType(string componentName, [MaybeNullWhen(false)] out Type type)
         => components.TryGetValue(componentName, out type);
 
     public static bool Create(Type type, List<Parameter> arguments, out Component? component)

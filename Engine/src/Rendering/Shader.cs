@@ -45,7 +45,7 @@ public class Shader : IGpuResource
         if (success == 0)
         {
             GL.GetShaderInfoLog(shader, out var log);
-            Debug.LogErr("Failed to Compile Shader: ", shader.ToString());
+            Debug.LogErr($"Failed to Compile Shader: {shader}");
             Debug.LogErr(log);
         }
 
@@ -58,7 +58,7 @@ public class Shader : IGpuResource
         if (success == 0)
         {
             GL.GetProgramInfoLog(program, out var log);
-            Debug.LogErr("Failed to Link Program:", program.ToString());
+            Debug.LogErr($"Failed to Link Program: {program}");
             Debug.LogErr(log);
         }
 

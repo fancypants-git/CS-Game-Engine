@@ -19,7 +19,7 @@ internal static class MeshLoader
             return ReadObjIntoMesh(filename, out materials);
 
 
-        Debug.LogErr("File extension is not supported yet: ", extension);
+        Debug.LogErr($"File extension is not supported yet: {extension}");
         return new Mesh();
     }
 
@@ -54,7 +54,7 @@ internal static class MeshLoader
             var match = Regex.Match(l, pattern, RegexOptions.IgnorePatternWhitespace);
             if (!match.Success)
             {
-                Debug.LogWarn("Failed to decode line ", l);
+                Debug.LogWarn($"Failed to decode line {l}");
                 continue;
             }
 
@@ -247,7 +247,7 @@ internal static class MeshLoader
                     break;
                     
                 default:
-                    Debug.LogWarn("Unsupported mtl attribute: ", command);
+                    Debug.LogWarn($"Unsupported mtl attribute: {command}");
                     break;
             }
         }

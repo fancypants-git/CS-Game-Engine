@@ -7,9 +7,15 @@ namespace Engine;
 
 public class Entity : IDisposable
 {
+    public Entity() {}
+    public Entity(string name)
+    {
+        Name = name;
+    }
+
     public bool IsActive = true;
 
-    public readonly string ID;
+    public string Name;
 
     public Transform Transform;
 
@@ -17,9 +23,17 @@ public class Entity : IDisposable
 
     protected bool _isDisposed = false;
 
-    public Entity(string id)
+
+    public static Entity Create()
     {
-        ID = id;
+        return Create(Guid.NewGuid().ToString());
+    }
+
+    public static Entity Create(string name)
+    {
+        Entity e = new Entity(name);
+        // TODO: register the entity to the Scene
+        return e;
     }
 
 

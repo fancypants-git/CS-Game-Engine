@@ -33,7 +33,7 @@ public class Rigidbody : Component
          */
         if (!Entity.GetComponent(out PhysicsObject? po, true))
         {
-            Debug.LogWarn("Entity ", Entity.ID.ToString(), " does not contain a PhysicsObject, please consider adding this to the entity for participation in the physics system!");
+            Debug.LogWarn($"Entity {Entity.Name} does not contain a PhysicsObject, please consider adding this to the entity for participation in the physics system!");
             return;
         }
 

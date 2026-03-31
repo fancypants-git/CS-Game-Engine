@@ -1,23 +1,15 @@
-meta
-{
-    version 0.0.1
+meta {
     name "Example Scene"
-    camera MainCamera
 }
 
-entity
-{
-    id MainCamera
-    add Transform vec3(0, 0, 5) vec3(0) vec3(0)
-    add Camera
-
-    add PlayerController 3.
-    add CameraController 10. false
-}
-
-entity
-{
-    id Floor
-    add Transform vec3(1, 0, 0) vec3(0) vec3(1)
+entity "Game Object" {
+    add Transform vec3(0, 0, 0) vec3(1) vec3(0, 45, 90)
     add Renderer mesh(Objects/cube.obj) shader(unlit)
+}
+
+entity Player {
+    add Transform vec3(10, 1230, 0342) vec3(1) vec3(0, 45, 90)
+    add BoxCollider vec3(1) layer(Player)
+
+    tag Player
 }

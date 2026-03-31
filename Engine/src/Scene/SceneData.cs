@@ -4,6 +4,12 @@ using Engine.Rendering;
 
 namespace Engine.Scene;
 
+public struct SceneMeta
+{
+    public string Name { get; set; }
+    public string Path { get; set; }
+}
+
 public struct SceneData(SceneMeta meta) : IDisposable
 {
     public SceneMeta Meta { get; } = meta;

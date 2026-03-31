@@ -37,7 +37,7 @@ public static partial class Debug
     };
     
     [Conditional("DEBUG")]
-    private static void LogInternal(LogType type, params string?[] messages)
+    private static void LogInternal(LogType type, string? msg)
     {
         if ((LogFilter & (uint)type) == 0)
             return;
@@ -50,46 +50,44 @@ public static partial class Debug
             
         string timeString = DateTime.Now.ToString("HH:mm:ss");
         Console.Write($"[ {typeString} ]".PadRight(12) + $"[ {timeString} ]  >> ");
-        foreach (var msg in messages) Console.Write(msg);
-        Console.WriteLine();
+        Console.WriteLine(msg);
     }
     
     [Conditional("DEBUG")]
-    public static void Log(LogType type, params string?[] messages)
+    public static void Log(LogType type, string? msg)
     {
-        LogInternal(type, messages);
+        LogInternal(type, msg);
     }
     
     [Conditional("DEBUG")]
-    public static void LogInfo(params string?[] messages)
+    public static void LogInfo(string? msg)
     {
-        
-        LogInternal(LogType.Info, messages);
+        LogInternal(LogType.Info, msg);
     }
     
     [Conditional("DEBUG")]
-    public static void LogWarn(params string?[] messages)
+    public static void LogWarn(string? msg)
     {
-        LogInternal(LogType.Warning, messages);
+        LogInternal(LogType.Warning, msg);
     }
     
     [Conditional("DEBUG")]
-    public static void LogErr(params string?[] messages)
+    public static void LogErr(string? msg)
     {
-        LogInternal(LogType.Error, messages);
+        LogInternal(LogType.Error, msg);
     }
     
     [Conditional("DEBUG")]
     public static void LogErr(Exception e)
     {
-        LogInternal(LogType.Error, e.GetType().Name, " occured in ", e.TargetSite?.ToString(), " | ", e.Message);
+        LogInternal(LogType.Error, $"{e.GetType().Name} occured in {e.TargetSite?.ToString()} | {e.Message}");
         LogInternal(LogType.Stack, e.StackTrace?.TrimStart());
     }
     
-    public static void LogFatal(params string?[] messages)
+    public static void LogFatal(string? msg)
     {
     #if DEBUG
-        LogInternal(LogType.Fatal, messages);
+        LogInternal(LogType.Fatal, msg);
     #endif
         Application.RequestShutdown();
     }
@@ -97,7 +95,7 @@ public static partial class Debug
     public static void LogFatal(Exception e)
     {
     #if DEBUG
-        LogInternal(LogType.Fatal, "Fatal ", e.GetType().Name, " occured in ", e.TargetSite?.ToString(), " | ", e.Message);
+        LogInternal(LogType.Fatal, $"Fatal {e.GetType().Name} occured in {e.TargetSite?.ToString()} | {e.Message}");
         LogInternal(LogType.Stack, e.StackTrace?.TrimStart());
     #endif
         Application.RequestShutdown();
@@ -110,15 +108,15 @@ public static partial class Debug
     }
     
     [Conditional("DEBUG")]
-    public static void Log(params string?[] messages)
+    public static void Log(string? msg)
     {
-        LogInternal(LogType.Debug, messages);
+        LogInternal(LogType.Debug, msg);
     }
     
     [Conditional("DEBUG")]
     public static void Assert(bool condition, string? message = null)
     {
         if (!condition)
-            LogFatal("Assertion failed: ", message);
+            LogFatal("Assertion failed: " + message);
     }
 }

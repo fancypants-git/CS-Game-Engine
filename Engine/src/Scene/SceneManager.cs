@@ -1,6 +1,6 @@
 ﻿using Engine.Debugging;
 using Engine.Helpers;
-using Engine.Internals;
+// using Engine.Internals;
 using Engine.Scene;
 
 namespace Engine;
@@ -81,12 +81,12 @@ public class SceneManager : IDisposable
 
     public void LoadScene(string path)
     {
-        SetActive(SceneLoader.LoadSceneData(path));
+        SetActive(SceneLoader.LoadScene(path));
     }
 
     private void ForceLoadScene(string path)
     {
-        ForceSetActive(SceneLoader.LoadSceneData(path));
+        ForceSetActive(SceneLoader.LoadScene(path));
     }
 
 

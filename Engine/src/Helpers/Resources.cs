@@ -13,7 +13,7 @@ public static class Resources
         string fullPath = Path.Combine(ResourcesPath, Path.Combine(relativePath));
 
         if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
-            Debug.LogWarn("Path does not exist: ", fullPath);
+            Debug.LogWarn($"Path does not exist: {fullPath}");
 
         return fullPath;
     }
@@ -27,7 +27,7 @@ public static class Resources
 
         if (!File.Exists(path))
         {
-            Debug.LogErr("Path to Object file does not exist: ", path, "\n\tPath must be a valid path to a .obj file.");
+            Debug.LogErr($"Path to Object file does not exist: {path}\n\tPath must be a valid path to a .obj file.");
             return null;
         }
 

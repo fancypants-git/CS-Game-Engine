@@ -82,7 +82,7 @@ public class Camera : Component
 
         if (aspect <= float.Epsilon)
         {
-            Debug.LogErr("Aspect Ratio can not be 0 or less, something very weird mustve happened to achieve this result...\nAnyway, canceling rendering camera of ", Entity.ID.ToString());
+            Debug.LogErr($"Aspect Ratio can not be 0 or less, something very weird mustve happened to achieve this result...\nAnyway, canceling rendering camera of {Entity.Name}");
             return Matrix4.MultiplicativeIdentity;
         }
 
