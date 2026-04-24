@@ -6,6 +6,7 @@ namespace Engine.Scene;
 
 public static class SceneLoader
 {
+    #region Token Data and Structures
     public struct Token
     {
         public TokenType Type;
@@ -44,44 +45,82 @@ public static class SceneLoader
     private const char CLOSE_PAREN_TOKEN = ')';
     private const char STRING_TOKEN = '"';
     private const char SEPARATOR_TOKEN = ',';
-    private const char LINEBREAK_TOKEN = '\n';
+    private const char COMMENT_TOKEN = '#';
 
     private static readonly char[] ALL_SPECIAL_TOKENS = [
         OPEN_BRACE_TOKEN, CLOSE_BRACE_TOKEN,
         OPEN_PAREN_TOKEN, CLOSE_PAREN_TOKEN,
-        SEPARATOR_TOKEN, LINEBREAK_TOKEN,
+        SEPARATOR_TOKEN, COMMENT_TOKEN,
         STRING_TOKEN
     ];
+    #endregion
 
+    #region Parsers
     static SceneLoader()
     {
         blockParsers.Add("entity", new EntityBlockParser());
 
         commandParsers.Add("default", new DefaultCommandParser());
+        commandParsers.Add("add", new AddCommandParser());
+
+        functionParsers.Add("default", new DefaultFunctionParser());
+        functionParsers.Add("vec3", new Vec3FunctionParser());
     }
 
     private static Dictionary<string, BlockParser> blockParsers = [];
     private static Dictionary<string, CommandParser> commandParsers = [];
+    private static Dictionary<string, FunctionParser> functionParsers = [];
+
 
     public static void AddBlockParser(string tag, BlockParser parser)
     {
+        if (blockParsers.TryGetValue(tag, out BlockParser? value))
+        {
+            Debug.LogWarn($"BlockParser paired to tag {tag} is already registered with {value}");
+            return;
+        }
         blockParsers.Add(tag, parser);
     }
 
     public static void AddCommandParser(string tag, CommandParser parser)
     {
+        if (commandParsers.TryGetValue(tag, out CommandParser? value))
+        {
+            Debug.LogWarn($"CommandParser paired to tag {tag} is already registered with {value}");
+            return;
+        }
         commandParsers.Add(tag, parser);
     }
 
-    public static CommandParser GetCommandParser(string name)
+    public static void AddFunctionParser(string tag, FunctionParser parser)
     {
-        if (commandParsers.TryGetValue(name, out CommandParser? parser))
+        if (functionParsers.TryGetValue(tag, out FunctionParser? value))
+        {
+            Debug.LogWarn($"BlockParser paired to tag {tag} is already registered with {value}");
+            return;
+        }
+        functionParsers.Add(tag, parser);
+    }
+
+
+    public static CommandParser GetCommandParser(string tag)
+    {
+        if (commandParsers.TryGetValue(tag, out CommandParser? parser))
             return parser;
 
         return commandParsers["default"];
     }
 
+    public static FunctionParser GetFunctionParser(string tag)
+    {
+        if (functionParsers.TryGetValue(tag, out FunctionParser? parser))
+            return parser;
+        
+        return functionParsers["default"];
+    }
+    #endregion
 
+    #region Scene Loading
     public static SceneData LoadScene(string path)
     {
         if (!File.Exists(path))
@@ -173,11 +212,17 @@ public static class SceneLoader
             scene.AddEntity(e);
         }
 
+        foreach (Entity e in scene.GetEntities())
+        {
+            Debug.Log("Entity");
+            Debug.Log(e.GetComponents().Length.ToString());
+        }
 
-        return new SceneData();
+        return scene;
     }
+    #endregion
 
-
+    #region Scene Parsing
     private static Token[] TokenizeScene(string content)
     {
         List<Token> tokens = [];
@@ -259,6 +304,14 @@ public static class SceneLoader
                     column = 1;
                     i++; // increment i to compensate for the extra \n character after the \r
                 }
+            }
+
+            else if (c == COMMENT_TOKEN)
+            {
+                string comment_text = ReadUntill(i+1, '\n', false);
+                Debug.Log($"Comment at {line}:{column} '{comment_text}'");
+                i += comment_text.Length;
+                // no need to increment newline as the next iteration will account for that
             }
 
             else if (char.IsLetter(c) || c =='_')
@@ -350,7 +403,15 @@ public static class SceneLoader
 
         bool IsAtEnd()
         {
-            return Peek().Type == TokenType.EOF;
+            try
+            {
+                bool eof = Peek().Type == TokenType.EOF;
+                return eof;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return true;
+            }
         }
 
         BlockNode ParseBlock()
@@ -483,86 +544,4 @@ public static class SceneLoader
         return rootNode;
     }
 }
-
-
-public class SceneNode
-{
-    public BlockNode MetaNode;
-    public List<BlockNode> BlockNodes = new();
-}
-
-public class BlockNode
-{
-    public string Name;
-    public List<ValueNode> Arguments = new();
-    public List<CommandNode> Children = new();
-}
-
-public class CommandNode
-{
-    public string Name;
-    public List<ValueNode> Arguments = new();
-}
-
-public class ValueNode
-{
-    public enum ValueType
-    {
-        Identifier,
-        String,
-        Number,
-        Boolean,
-        Function
-    }
-    public ValueType Type;
-    public required string Value;
-    public List<ValueNode> Arguments = new(); // Only used by Function Values to store the arguments of the function
-
-
-    public int ParseInt()
-    {
-        if (int.TryParse(Value, out int result))
-            return result;
-
-        Debug.LogErr($"Failed to parse {Value} (ValueType: {Type}) as int.");
-        return 0;
-    }
-
-    public float ParseFloat()
-    {
-        if (float.TryParse(Value, out float result))
-            return result;
-        
-        Debug.LogErr($"Failed to parse {Value} (ValueType: {Type}) as float.");
-        return 0;
-    }
-
-    public bool ParseBool()
-    {
-        return Value == "true";
-    }
-
-    public string GetString() => Value;
-
-    public Parameter Parse()
-    {
-
-        if (Type == ValueType.Identifier)
-            return new Parameter(GetString(), typeof(string));
-        if (Type == ValueType.String)
-            return new Parameter(GetString(), typeof(string));
-        if (Type == ValueType.Boolean)
-            return new Parameter(ParseBool(), typeof(bool));
-        if (Type == ValueType.Number)
-        {
-            if (int.TryParse(GetString(), out int i))
-                return new Parameter(i, typeof(int));
-            if (float.TryParse(GetString(), out float f))
-                return new Parameter(f, typeof(float));
-        }
-        if (Type == ValueType.Function)
-        {
-            SceneLoader.
-        }
-    }
-}
+#endregion

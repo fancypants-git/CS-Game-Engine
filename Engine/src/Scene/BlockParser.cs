@@ -4,8 +4,8 @@ public abstract class BlockParser
 {
     public abstract Entity Parse(BlockNode node);
 
-    public static CommandParser GetCommandParser(string name)
-        => SceneLoader.GetCommandParser(name);
+    public static CommandParser GetCommandParser(string tag)
+        => SceneLoader.GetCommandParser(tag);
 }
 
 

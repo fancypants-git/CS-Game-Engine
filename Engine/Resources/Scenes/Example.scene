@@ -2,14 +2,18 @@ meta {
     name "Example Scene"
 }
 
-entity "Game Object" {
-    add Transform vec3(0, 0, 0) vec3(1) vec3(0, 45, 90)
-    add Renderer mesh(Objects/cube.obj) shader(unlit)
+entity Test {
+    add Transform vec3(0, 0, 0) vec3(1) vec3(0, 1, 2)
 }
 
-entity Player {
-    add Transform vec3(10, 1230, 0342) vec3(1) vec3(0, 45, 90)
-    add BoxCollider vec3(1) layer(Player)
-
-    tag Player
-}
+# entity "Game Object" {
+#     add Transform vec3(0, 0, 0) vec3(1) vec3(0, 45, 90)
+#     add Renderer mesh(Objects/cube.obj) shader(unlit)
+# }
+# 
+# entity Player {
+#     add Transform vec3(10, 1230, 0342) vec3(1) vec3(0, 45, 90)
+#     add BoxCollider vec3(1) layer(Player)
+# 
+#     tag Player
+# }
