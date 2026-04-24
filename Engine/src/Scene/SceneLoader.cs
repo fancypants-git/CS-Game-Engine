@@ -108,6 +108,7 @@ public static class SceneLoader
         if (commandParsers.TryGetValue(tag, out CommandParser? parser))
             return parser;
 
+        Debug.LogWarn($"CommandParser associated with {tag} is not registered.");
         return commandParsers["default"];
     }
 
@@ -115,7 +116,8 @@ public static class SceneLoader
     {
         if (functionParsers.TryGetValue(tag, out FunctionParser? parser))
             return parser;
-        
+
+        Debug.LogWarn($"FunctionParser associated with {tag} is not registered.");
         return functionParsers["default"];
     }
     #endregion
