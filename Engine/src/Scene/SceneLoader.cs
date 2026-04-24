@@ -4,6 +4,9 @@ using Engine.Internals;
 
 namespace Engine.Scene;
 
+/// <summary>
+/// Loads and Parses a scene from a .scene file
+/// </summary>
 public static class SceneLoader
 {
     #region Token Data and Structures
@@ -56,6 +59,9 @@ public static class SceneLoader
     #endregion
 
     #region Parsers
+    /// <summary>
+    /// Initializes the SceneLoader
+    /// </summary>
     static SceneLoader()
     {
         blockParsers.Add("entity", new EntityBlockParser());
@@ -71,7 +77,12 @@ public static class SceneLoader
     private static Dictionary<string, CommandParser> commandParsers = [];
     private static Dictionary<string, FunctionParser> functionParsers = [];
 
-
+    /// <summary>
+    /// Registers a <see cref="BlockParser"/> to the given tag.
+    /// If the tag is already registered with any parser this will cancel and log a warning
+    /// </summary>
+    /// <param name="tag">The tag to register</param>
+    /// <param name="parser">The parser to register</param>
     public static void AddBlockParser(string tag, BlockParser parser)
     {
         if (blockParsers.TryGetValue(tag, out BlockParser? value))
@@ -82,6 +93,12 @@ public static class SceneLoader
         blockParsers.Add(tag, parser);
     }
 
+    /// <summary>
+    /// Registers a <see cref="CommandParser"/> to the given tag.
+    /// If the tag is already registered with any parser this will cancel and log a warning
+    /// </summary>
+    /// <param name="tag">The tag to register</param>
+    /// <param name="parser">The parser to register</param>
     public static void AddCommandParser(string tag, CommandParser parser)
     {
         if (commandParsers.TryGetValue(tag, out CommandParser? value))
@@ -92,6 +109,12 @@ public static class SceneLoader
         commandParsers.Add(tag, parser);
     }
 
+    /// <summary>
+    /// Registers a <see cref="FunctionParser"/> to the given tag.
+    /// If the tag is already registered with any parser this will cancel and log a warning
+    /// </summary>
+    /// <param name="tag">The tag to register</param>
+    /// <param name="parser">The parser to register</param>
     public static void AddFunctionParser(string tag, FunctionParser parser)
     {
         if (functionParsers.TryGetValue(tag, out FunctionParser? value))
@@ -102,7 +125,12 @@ public static class SceneLoader
         functionParsers.Add(tag, parser);
     }
 
-
+    /// <summary>
+    /// Gets the <see cref="CommandParser"/> registered with the given tag.
+    /// If the tag is not registered, a warning will be logged and the <see cref="DefaultCommandParser"/> will be returned
+    /// </summary>
+    /// <param name="tag">The tag associated with the parser</param>
+    /// <returns>The parser associated with the tag or the default parser</returns>
     public static CommandParser GetCommandParser(string tag)
     {
         if (commandParsers.TryGetValue(tag, out CommandParser? parser))
@@ -112,6 +140,12 @@ public static class SceneLoader
         return commandParsers["default"];
     }
 
+    /// <summary>
+    /// Gets the <see cref="FunctionParser"/> registered with the given tag.
+    /// If the tag is not registered, a warning will be logged and the <see cref="DefaultFunctionParser"/> will be returned
+    /// </summary>
+    /// <param name="tag">The tag associated with the parser</param>
+    /// <returns>The parser associated with the tag or the default parser</returns>
     public static FunctionParser GetFunctionParser(string tag)
     {
         if (functionParsers.TryGetValue(tag, out FunctionParser? parser))
@@ -123,6 +157,11 @@ public static class SceneLoader
     #endregion
 
     #region Scene Loading
+    /// <summary>
+    /// Parses and Loads a Scene file
+    /// </summary>
+    /// <param name="path">The path of the .scene file</param>
+    /// <returns>The parsed SceneData</returns>
     public static SceneData LoadScene(string path)
     {
         if (!File.Exists(path))
@@ -225,6 +264,11 @@ public static class SceneLoader
     #endregion
 
     #region Scene Parsing
+    /// <summary>
+    /// Goes through the entire content and tokenizes it.
+    /// </summary>
+    /// <param name="content">The content to tokenize</param>
+    /// <returns>The tokenized contents as a Token array</returns>
     private static Token[] TokenizeScene(string content)
     {
         List<Token> tokens = [];
@@ -375,6 +419,12 @@ public static class SceneLoader
         return tokens.ToArray();
     }
 
+    /// <summary>
+    /// Parses the Tokenized Scene into its Hierarchiäl structure of Nodes
+    /// </summary>
+    /// <param name="tokens">The tokenized scene as Token array</param>
+    /// <param name="path">The path of the file, strictly used for debugging purposes</param>
+    /// <returns>The hierarchiäl scene structure</returns>
     private static SceneNode ParseScene(Token[] tokens, string path)
     {
         int position = 0;
@@ -491,7 +541,7 @@ public static class SceneLoader
                 TokenType.String => ValueNode.ValueType.String,
                 TokenType.Number => ValueNode.ValueType.Number,
                 TokenType.Boolean => ValueNode.ValueType.Boolean,
-                _ => throw new Exception()
+                _ => ValueNode.ValueType.Identifier
             };
 
             node.Type = type;

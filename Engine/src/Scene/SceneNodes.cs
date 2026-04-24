@@ -79,7 +79,7 @@ public class ValueNode
         }
         if (Type == ValueType.Function)
         {
-            object funcValue = FunctionParser.GetFunctionParser(Value).Parse(this, out Type? type);
+            object funcValue = SceneLoader.GetFunctionParser(Value).Parse(this, out Type? type);
             if (type != null)
                 return new Parameter(funcValue, type);
         }

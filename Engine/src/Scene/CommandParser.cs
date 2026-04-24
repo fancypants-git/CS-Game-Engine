@@ -4,13 +4,24 @@ using Engine.Internals;
 
 namespace Engine.Scene;
 
+/// <summary>
+/// Provides the base class for a Command Parser
+/// </summary>
 public abstract class CommandParser
 {
+    /// <summary>
+    /// Parses a <see cref="CommandNode"/> and modifies an entity accordingly
+    /// </summary>
+    /// <param name="e">The entity to be modified</param>
+    /// <param name="node">The node to be parsed</param>
     public abstract void Parse(Entity e, CommandNode node);
 }
 
 // DEFAULT PARSERS
 
+/// <summary>
+/// A default fallback parser that does nothing
+/// </summary>
 public class DefaultCommandParser : CommandParser
 {
     public override void Parse(Entity e, CommandNode node)
@@ -18,6 +29,12 @@ public class DefaultCommandParser : CommandParser
     }
 }
 
+/// <summary>
+/// Adds a component to an Entity
+/// <br/>
+/// Syntax:<br/>
+/// add [component] (...constructor arguments)
+/// </summary>
 public class AddCommandParser : CommandParser
 {
     public override void Parse(Entity e, CommandNode node)
