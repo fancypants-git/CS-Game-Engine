@@ -1,0 +1,24 @@
+
+!!! WILL REQUIRE COMPLETE REWORK OF ENTITY, DRAWABLE, CAMERA, RENDERING PIPELINE AND WINDOWING SYSTEM !!!
+
+Scene:
+- contains a list of drawables, camera's, entities etc
+
+    Rendering:
+        renders each camera
+
+Drawables:
+    On Enable:
+        registers itself to the scene as a drawable
+
+    Rendering:
+        renders itself using the rendering pipeline on the GPU
+
+Camera:
+- contains a buffer to render on (e.g. backbuffer, filestream)
+
+    On Enable:
+        registers itself to the scene as a camera
+
+    Rendering:
+        renders all drawables in the Scene to the buffer
