@@ -1,0 +1,48 @@
+### LAYOUT ###
+
+Application
+    L Window Manager
+    L Game Manager
+        L Entities
+    L Render Pipeline Manager
+        L Drawables
+            L Render Data
+        L GPU Resource Manager (handles GPU resources and their lifetime)
+            L GPU Resources
+        L Cameras
+            L Render Target (WindowX || null)
+
+Window (OpenTK.NativeWindow)
+    L Graphics Context
+    L Window Context
+
+WindowManager
+    L Main Window (Window0)
+    L All Windows
+        L Active Window Identifiers
+        L Window Classes paired to Identifiers
+    L Methods to manipulate Windows by Identifiers
+    L Methods to update and draw windows (by Identifiers)
+
+
+### FRAME EVENTS ###
+
+window update
+    L event updates
+game update
+    L entity updates
+    L rendering preparation
+        L if windowtarget is requested but does not exist: create windowtarget
+rendering
+    L camera rendering
+window render
+    L buffer swap
+
+
+### TODO ###
+
+add camera system
+add render pipeline system
+
+camera requests render context before rendering
+if render context does not exist, create it

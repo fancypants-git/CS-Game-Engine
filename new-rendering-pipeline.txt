@@ -22,3 +22,32 @@ Camera:
 
     Rendering:
         renders all drawables in the Scene to the buffer
+
+
+
+Window:
+- Graphics Context -> OpenGL BackBuffer for rendering on the display
+
+
+
+a frame:
+
+game    fixed-update
+window  update
+    window  process-events
+
+!!!
+game    update
+    if camera enabled: register camera for rendering
+    if camera disabled: unregister camera for rendering
+
+    if drawable enabled: register drawable for rendering
+    if drawable disabled: unregister drawable for rendering
+game    render
+    for each camera:
+        check if rendercontext valid
+        enable rendercontext
+        render camera POV
+!!!
+
+window  swap-buffer
