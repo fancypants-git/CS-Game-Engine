@@ -2,7 +2,7 @@ using Engine.Components;
 
 namespace Engine;
 
-public class Game
+public class GameManager
 {
     public SceneManager SceneManager = new();
     public Camera ActiveCamera => SceneManager.ActiveScene.ActiveCamera;
@@ -24,12 +24,7 @@ public class Game
         SceneManager.FixedUpdate();
     }
 
-    public virtual void Render()
-    {
-        SceneManager.Render();
-    }
-
-    public virtual void Close()
+    public virtual void Dispose()
     {
         SceneManager.Dispose();
     }

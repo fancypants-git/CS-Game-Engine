@@ -48,15 +48,16 @@ window render
 
 ### WINDOW CLOSE ###
 
+on NativeWindow.Closing event invoke:
+
 if main window (Window0):
     shut down application
 
 else
-    unregister the window, so every camera with that as a target will be unregistered
-
-    register window as manually closed
-    during frame, every camera rendering to it will be unregistered
-    at end of frame, clear all registered windows
+    unregister the window, so every camera with that as a target will be unregistered:
+        register window as closed
+        during frame, every camera rendering to it will be unregistered
+        at end of frame, clear the register list
 
 
 ### TODO ###

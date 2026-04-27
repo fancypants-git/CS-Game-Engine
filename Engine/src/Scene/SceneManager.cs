@@ -49,13 +49,6 @@ public class SceneManager : IDisposable
         }
     }
 
-    public void Render()
-    {
-        if (!IsInitialized || IsDisposed) return;
-
-        _activeScene.ActiveCamera.Render(_activeScene.GetDrawables());
-    }
-
 
     public void SetActive(SceneData scene)
     {
@@ -92,12 +85,12 @@ public class SceneManager : IDisposable
 
     public static void DefaultSetActive(SceneData scene)
     {
-        Application.Game.SceneManager.SetActive(scene);
+        Application.GameManager.SceneManager.SetActive(scene);
     }
 
     public static void DefaultLoadScene(string path)
     {
-        Application.Game.SceneManager.LoadScene(path);
+        Application.GameManager.SceneManager.LoadScene(path);
     }
 
 

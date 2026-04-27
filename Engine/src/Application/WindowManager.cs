@@ -1,8 +1,7 @@
-using System.ComponentModel;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+using Engine.Debugging;
 
-namespace Windowing;
+namespace Engine;
 
 /// <summary>
 /// Manages and controls windows
@@ -16,7 +15,7 @@ public class WindowManager : IDisposable
         Window2,
         Window3,
         Window4,
-        Main = Window0
+        Main = Window0,
     }
 
     /// <summary>

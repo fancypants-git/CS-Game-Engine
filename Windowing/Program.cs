@@ -6,8 +6,10 @@ public static class Program
     {
         _ = new Camera(WindowManager.WindowIdentifier.Window0);
         _ = new Camera(WindowManager.WindowIdentifier.Window1);
+        _ = new Camera(WindowManager.WindowIdentifier.Window2);
+        _ = new Camera(WindowManager.WindowIdentifier.Window3);
         _ = new Camera(WindowManager.WindowIdentifier.Window4);
-
+        
         Application.Run();
     }
 }
