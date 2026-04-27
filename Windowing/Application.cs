@@ -10,6 +10,7 @@ public static class Application
     private static bool _isRunning = false;
     private static Stopwatch _timer = new();
     private static WindowManager _windowManager = new();
+    private static RenderPipelineManager _renderPipelineManager = new();
 
     /// <summary>
     /// Whether the Application is running
@@ -33,6 +34,14 @@ public static class Application
     public static WindowManager WindowManager
     {
         get => _windowManager;
+    }
+
+    /// <summary>
+    /// The RenderPipelineManager of this application
+    /// </summary>
+    public static RenderPipelineManager RenderPipelineManager
+    {
+        get => _renderPipelineManager;
     }
 
     /// <summary>
@@ -64,7 +73,10 @@ public static class Application
             _windowManager.UpdateAllWindows();
             // fixed game update
             // game update
-            // game render
+            
+
+
+            _renderPipelineManager.RenderCameras();
             _windowManager.RenderAllWindows();
         }
 

@@ -24,6 +24,13 @@ WindowManager
     L Methods to manipulate Windows by Identifiers
     L Methods to update and draw windows (by Identifiers)
 
+RenderPipelineManager
+    L Camera requests
+        L Cameras
+        L Methods to register/unregister cameras
+    L Logic for rendering requests to cameras
+    L Logic for requesting a new render context (window)
+
 
 ### FRAME EVENTS ###
 
@@ -37,6 +44,19 @@ rendering
     L camera rendering
 window render
     L buffer swap
+
+
+### WINDOW CLOSE ###
+
+if main window (Window0):
+    shut down application
+
+else
+    unregister the window, so every camera with that as a target will be unregistered
+
+    register window as manually closed
+    during frame, every camera rendering to it will be unregistered
+    at end of frame, clear all registered windows
 
 
 ### TODO ###

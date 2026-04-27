@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -22,6 +23,10 @@ public class WindowManager : IDisposable
     /// </summary>
     private Dictionary<WindowIdentifier, NativeWindow> _activeWindows = new();
 
+    private List<WindowIdentifier> _windowDrawRequests = new();
+
+    private HashSet<WindowIdentifier> _closedWindows = new(); // all windows that were closed this frame
+
     private bool _isDisposed = false;
 
     /// <summary>
@@ -30,6 +35,14 @@ public class WindowManager : IDisposable
     public bool IsDisposed
     {
         get => _isDisposed;
+    }
+
+    /// <summary>
+    /// All WindowIdentifiers that were closed this frame
+    /// </summary>
+    public HashSet<WindowIdentifier> ClosedWindows
+    {
+        get => _closedWindows;
     }
 
     /// <summary>
@@ -42,11 +55,15 @@ public class WindowManager : IDisposable
         return _activeWindows.ContainsKey(identifier);
     }
 
+    /// <summary>
+    /// Checks if a WindowIdentifier is active and exists (thus meaning it is valid)
+    /// </summary>
+    /// <param name="identifier">The WindowIdentifier that has to be validated</param>
+    /// <returns>Whether the identifier is valid</returns>
     public bool IsValidTarget(WindowIdentifier identifier)
     {
         NativeWindow? window = GetWindow(identifier);
-        if (window == null) return false;
-        return window.Exists;
+        return window != null && window.Exists;
     }
 
     /// <summary>
@@ -76,15 +93,50 @@ public class WindowManager : IDisposable
     /// <param name="settings">The settings for the new NativeWindow</param>
     public void CreateWindow(WindowIdentifier identifier, NativeWindowSettings settings)
     {
+        if (_isDisposed) return;
+
         if (IsActiveWindow(identifier))
         {
             Debug.LogWarn($"Window with identifier {identifier} is already active.");
             return;
         }
-
+        
+        settings.Title = identifier.ToString();
         NativeWindow window = new(settings);
 
+        if (identifier == WindowIdentifier.Window0)
+        {
+            window.Closing += (CancelEventArgs) => Application.RequestShutdown();
+        }
+        else
+        {
+            window.Closing += (CancelEventArgs) => RegisterWindowClosed(identifier);
+        }
+
         _activeWindows.Add(identifier, window);
+    }
+
+    /// <summary>
+    /// Registers a draw request for a window if it has not already been registered yet
+    /// </summary>
+    /// <param name="identifier">The WindowIdentifier to register a request for</param>
+    /// <returns>True if the draw request is permitted to continue, false if it should be aborted</returns>
+    public bool RegisterWindowDrawRequest(WindowIdentifier identifier)
+    {
+        if (_windowDrawRequests.Contains(identifier) || _isDisposed)
+            return false; // signal that the draw request should be canceled because it has already been registered (or this window manager has been disposed)
+
+        _windowDrawRequests.Add(identifier);
+        return true;
+    }
+
+    /// <summary>
+    /// Registers a window to be closed
+    /// </summary>
+    /// <param name="identifier">The WindowIdentifier that is closed</param>
+    public void RegisterWindowClosed(WindowIdentifier identifier)
+    {
+        _closedWindows.Add(identifier);
     }
 
     /// <summary>
@@ -92,6 +144,8 @@ public class WindowManager : IDisposable
     /// </summary>
     public void UpdateAllWindows()
     {
+        if (_isDisposed) return;
+
         foreach ((_, NativeWindow window) in _activeWindows)
         {
             window.NewInputFrame();
@@ -105,10 +159,22 @@ public class WindowManager : IDisposable
     /// </summary>
     public void RenderAllWindows()
     {
-        foreach ((_, NativeWindow window) in _activeWindows)
+        if (_isDisposed) return;
+
+        foreach ((WindowIdentifier identifier, NativeWindow window) in _activeWindows)
         {
-            window.Context.SwapBuffers();
+            if (_windowDrawRequests.Contains(identifier))
+                window.Context.SwapBuffers();
+            else
+            {
+                window.Close();
+                window.Dispose();
+                _activeWindows.Remove(identifier);
+            }
         }
+
+        _windowDrawRequests.Clear();
+        _closedWindows.Clear();
     }
 
 
