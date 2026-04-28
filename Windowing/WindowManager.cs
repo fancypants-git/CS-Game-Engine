@@ -1,6 +1,4 @@
-using System.ComponentModel;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Windowing;
 
@@ -165,7 +163,10 @@ public class WindowManager : IDisposable
         foreach ((WindowIdentifier identifier, NativeWindow window) in _activeWindows)
         {
             if (_windowDrawRequests.Contains(identifier))
+            {
+                window.MakeCurrent();q
                 window.Context.SwapBuffers();
+            }
             else
             {
                 window.Close();
