@@ -3,7 +3,8 @@
 Application
     L Window Manager
     L Game Manager
-        L Entities
+        L Scene Manager
+            L Entities
     L Render Pipeline Manager
         L Drawables
             L Render Data

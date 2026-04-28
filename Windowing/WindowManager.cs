@@ -164,7 +164,7 @@ public class WindowManager : IDisposable
         {
             if (_windowDrawRequests.Contains(identifier))
             {
-                window.MakeCurrent();q
+                window.MakeCurrent();
                 window.Context.SwapBuffers();
             }
             else
